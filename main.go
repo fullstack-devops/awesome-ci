@@ -37,8 +37,7 @@ func isFlagPassed(name string) bool {
 
 func main() {
 
-	// fmt.Println(gitcontroller.GetLatestReleaseVersion())
-	flag.String("cienv", "", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
+	cienv := flag.String("cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
 
 	flag.Parse()
 
@@ -74,7 +73,11 @@ func main() {
 			fmt.Printf("Old version: %s\n", gitVersion)
 			fmt.Printf("New version: %s\n", semver.IncreaseSemVer(patchLevel, gitVersion))
 		} else {
-			gitcontroller.CreateNextGitHubRelease(semver.IncreaseSemVer(patchLevel, gitVersion))
+			fmt.Println("create Release")
+			fmt.Printf("Old version: %s\n", gitVersion)
+			newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
+			fmt.Printf("New version: %s\n", newVersion)
+			gitcontroller.CreateNextGitHubRelease(*cienv, newVersion)
 		}
 
 	}
