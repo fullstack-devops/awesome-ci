@@ -1,23 +1,13 @@
 package main
 
 import (
+	"awesom-ci-semver/gitcontroller"
 	"awesom-ci-semver/semver"
 	"flag"
 	"fmt"
 	"os"
 	"os/exec"
 )
-
-/*
-func semver(version string, mmb string) string {
-	var newVersion string
-
-	switch mmb {
-	case "major":
-		newVersion = version
-	}
-	return newVersion
-} //git describe --tags `git rev-list --tags --max-count=1` */
 
 func runcmd(cmd string, shell bool) string {
 	if shell {
@@ -35,9 +25,27 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
+func isFlagPassed(name string) bool {
+	found := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
+}
+
 func main() {
-	getVersion := flag.NewFlagSet("getver", flag.ExitOnError)
-	// overrideVersion := getVersion.String("oldVersion", "", "predefine version to Update")
+
+	// fmt.Println(gitcontroller.GetLatestReleaseVersion())
+	flag.String("cienv", "", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
+
+	flag.Parse()
+
+	getVersion := flag.NewFlagSet("versioning", flag.ExitOnError)
+	overrideVersion := getVersion.String("version", "", "override version to Update")
+	getVersionIncrease := getVersion.String("level", "", "predefine version to Update")
+	isDryRun := getVersion.Bool("dry-run", false, "Make dry-run before writing version to Git")
 
 	if len(os.Args) < 2 {
 		fmt.Println("expected 'foo' or 'bar' subcommands")
@@ -45,18 +53,29 @@ func main() {
 	}
 
 	switch os.Args[1] {
-	case "getver":
+	case "versioning":
 		getVersion.Parse(os.Args[2:])
 
-		gitVersion := runcmd("git describe --tags $(git rev-list --tags --max-count=1)", true)
+		var gitVersion string
+		if *overrideVersion != "" {
+			gitVersion = *overrideVersion
+		} else {
+			gitVersion = gitcontroller.GetLatestReleaseVersion("Github")
+		}
 
-		fmt.Printf("%s", semver.Major(gitVersion))
+		var patchLevel string
+		if *getVersionIncrease != "" {
+			patchLevel = *getVersionIncrease
+		} else {
+			patchLevel = "bugfix"
+		}
+
+		if *isDryRun {
+			fmt.Printf("Old version: %s\n", gitVersion)
+			fmt.Printf("New version: %s\n", semver.IncreaseSemVer(patchLevel, gitVersion))
+		} else {
+			gitcontroller.CreateNextGitHubRelease(semver.IncreaseSemVer(patchLevel, gitVersion))
+		}
+
 	}
-	/*
-		textPtr := flag.String("getver", "", "Gives you the next version with semver")
-		metricPtr := flag.String("metric", "chars", "Metric {chars|words|lines};.")
-		uniquePtr := flag.Bool("unique", false, "Measure unique values of a metric.")
-		flag.Parse() */
-
-	// fmt.Printf("textPtr: %s, metricPtr: %s, uniquePtr: %t\n", *textPtr, *metricPtr, *uniquePtr)
 }
