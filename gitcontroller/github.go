@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -26,26 +27,36 @@ type NewRelease struct {
 }
 
 func newGetRequest(endpoint string, token string) map[string]interface{} {
-	client := &http.Client{}
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
 
-	req, _ := http.NewRequest(http.MethodGet, endpoint, nil)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req.Header.Add("Accept", "application/vnd.github.v3+json")
 	req.Header.Add("Authorization", "token "+token)
+	if err != nil {
+		fmt.Println("(newGetRequest) Error at building request: ", err)
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("(newGetRequest) Error form response:", err, resp)
 	}
 	defer resp.Body.Close()
 
 	var result map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&result)
 
+	if result["message"] == "Bad credentials" {
+		fmt.Println("Please provide the right credentials and make sure you have the right access rights!")
+		os.Exit(1)
+	}
+
 	return result
 }
 
 func newPostRequest(endpoint string, token string, requestBody []byte) map[string]interface{} {
-
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
@@ -54,16 +65,17 @@ func newPostRequest(endpoint string, token string, requestBody []byte) map[strin
 	request, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(requestBody))
 	request.Header.Set("Accept", "application/vnd.github.v3+json")
 	request.Header.Set("Authorization", "token "+token)
-
-	if err == nil {
-		fmt.Println(err)
+	if err != nil {
+		fmt.Println("(newPostRequest) Error at building request: ", err)
 	}
 
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("(newPostRequest) Error form response:", err, resp)
 	}
 	defer resp.Body.Close()
+
+	fmt.Println("%n", resp)
 
 	var result map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&result)
@@ -75,7 +87,15 @@ func github_getLatestReleaseVersion(conf GitConfiguration) string {
 	url := fmt.Sprintf("%s/api/%s/repos/%s/releases/latest", conf.Hostname, conf.ApiVersion, conf.Repository)
 	result := newGetRequest(url, conf.AccessToken)
 
-	return fmt.Sprintf("%s", result["tag_name"])
+	var version string
+	if result["message"] == "Not Found" {
+		fmt.Println("There is no release! Making initial release 0.0.0")
+		version = "0.0.0"
+	} else {
+		version = fmt.Sprintf("%s", result["tag_name"])
+	}
+
+	return version
 }
 
 func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion string) {
@@ -88,11 +108,11 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 		Draft:           false,
 		PreRelease:      false,
 	})
-	if err == nil {
-		fmt.Println(err)
+	if err != nil {
+		fmt.Println("(github_createNextGitHubRelease) Error building requestBody", err)
 	}
 
 	url := fmt.Sprintf("%s/api/%s/repos/%s/releases", conf.Hostname, conf.ApiVersion, conf.Repository)
 	result := newPostRequest(url, conf.AccessToken, requestBody)
-	fmt.Println(result)
+	fmt.Println("Debug response after creating release: ", result)
 }
