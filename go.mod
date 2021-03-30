@@ -1,3 +1,3 @@
-module awesom-ci-semver
+module awesome-ci-semver
 
 go 1.15
