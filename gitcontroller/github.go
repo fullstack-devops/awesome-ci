@@ -75,8 +75,6 @@ func newPostRequest(endpoint string, token string, requestBody []byte) map[strin
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("%n", resp)
-
 	var result map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&result)
 
@@ -114,5 +112,10 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 
 	url := fmt.Sprintf("%s/api/%s/repos/%s/releases", conf.Hostname, conf.ApiVersion, conf.Repository)
 	result := newPostRequest(url, conf.AccessToken, requestBody)
-	fmt.Println("Debug response after creating release: ", result)
+
+	if result["name"] == "Release "+newReleaseVersion {
+		fmt.Println("Release" + newReleaseVersion + " sucsessfully created")
+	} else {
+		fmt.Println("Somethin went worng at creating release!")
+	}
 }

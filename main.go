@@ -1,8 +1,8 @@
 package main
 
 import (
-	"awesom-ci-semver/gitcontroller"
-	"awesom-ci-semver/semver"
+	"awesome-ci-semver/gitcontroller"
+	"awesome-ci-semver/semver"
 	"flag"
 	"fmt"
 	"os"
@@ -73,7 +73,6 @@ func main() {
 			fmt.Printf("Old version: %s\n", gitVersion)
 			fmt.Printf("New version: %s\n", semver.IncreaseSemVer(patchLevel, gitVersion))
 		} else {
-			fmt.Println("create Release")
 			fmt.Printf("Old version: %s\n", gitVersion)
 			newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
 			fmt.Printf("New version: %s\n", newVersion)
