@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 )
 
 func runcmd(cmd string, shell bool) string {
@@ -55,17 +56,31 @@ func main() {
 	case "versioning":
 		getVersion.Parse(os.Args[2:])
 
+		environment := "Github"
+
 		var gitVersion string
 		if *overrideVersion != "" {
 			gitVersion = *overrideVersion
 		} else {
-			gitVersion = gitcontroller.GetLatestReleaseVersion("Github")
+			gitVersion = gitcontroller.GetLatestReleaseVersion(environment)
 		}
 
 		var patchLevel string
 		if *getVersionIncrease != "" {
 			patchLevel = *getVersionIncrease
 		} else {
+			if environment == "Github" {
+				r := regexp.MustCompile(`[a-zA-z ]+#([0-9]+) from ([0-9a-zA-Z-\/]+)`)
+				fmt.Printf("%#v\n", r.FindStringSubmatch(`Merge pull request #3 from ITC-TO-MT/bugfix/test-1`))
+
+				// prAndBranch := r.FindStringSubmatch(`Merge pull request #3 from ITC-TO-MT/bugfix/test-1`)
+				// fmt.Printf("%#v\n", r.SubexpNames())
+				/* matched, err := regexp.MustCompile("Merge pull request (#[0-9]+) from ([0-9a-zA-Z-\/]+)", "Merge pull request #3 from ITC-TO-MT/bugfix/test-1")
+				if err != nil {
+					fmt.Println(err)
+				} */
+				// fmt.Println(matched)
+			}
 			patchLevel = "bugfix"
 		}
 
