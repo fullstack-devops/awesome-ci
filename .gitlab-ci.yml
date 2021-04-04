@@ -1,0 +1,36 @@
+image: golang:1.15.8
+
+variables:
+  REPO: gitlab.com
+  GROUP: eksrvb
+  PROJECT: awesome-ci-semver
+
+include:
+  - project: 'e-netsupport/gitlab-shared-libary'
+    ref: master
+    file:
+      - 'go-standart-steps.yml'
+      - 'oci-build.yml'
+
+cache:
+  paths:
+    - /apt-cache
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+
+stages:
+  - test
+  - build
+
+build:
+  stage: build
+  variables:
+    CGO_ENABLED: 0
+  script:
+    - make build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - out/
