@@ -10,7 +10,6 @@ include:
     ref: master
     file:
       - 'go-standart-steps.yml'
-      - 'oci-build.yml'
 
 cache:
   paths:
