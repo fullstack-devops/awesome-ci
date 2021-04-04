@@ -36,63 +36,68 @@ func isFlagPassed(name string) bool {
 	return found
 }
 
+func funcCreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool) {
+	var gitVersion string
+	if *overrideVersion != "" {
+		gitVersion = *overrideVersion
+	} else {
+		gitVersion = gitcontroller.GetLatestReleaseVersion(*cienv)
+	}
+
+	var patchLevel string
+	if *getVersionIncrease != "" {
+		patchLevel = *getVersionIncrease
+	} else {
+		if *cienv == "Github" {
+			// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
+			regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/((feature|bugfix|fix)/(.+)))`
+			r := regexp.MustCompile(regex)
+
+			// mergeMessage := r.FindStringSubmatch(`Merge pull request #3 from ITC-TO-MT/feature/test-1`)
+			mergeMessage := r.FindStringSubmatch(runcmd(`git log -1 --pretty=format:"%s"`, true))
+			if len(mergeMessage) > 0 {
+				fmt.Printf("PR-Number: %s\n", mergeMessage[1])
+				fmt.Printf("Merged branch is a %s\n", mergeMessage[5])
+				patchLevel = mergeMessage[5]
+			} else {
+				fmt.Println("No merge message found pls make shure this regex matches: ", regex)
+				fmt.Print("Example: Merge pull request #3 from some-orga/feature/awesome-feature\n\n")
+				fmt.Print("If you like to set your patch level manually by flag: -level (feautre|bugfix)\n\n")
+				os.Exit(1)
+			}
+		}
+	}
+
+	newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
+	if *isDryRun {
+		fmt.Printf("Old version: %s\n", gitVersion)
+		fmt.Printf("Would writing new release: %s\n", newVersion)
+	} else {
+		fmt.Printf("Old version: %s\n", gitVersion)
+		fmt.Printf("Writing new release: %s\n", newVersion)
+		gitcontroller.CreateNextGitHubRelease(*cienv, newVersion)
+	}
+}
+
 func main() {
 
 	cienv := flag.String("cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
 
+	createRelease := flag.NewFlagSet("createRelease", flag.ExitOnError)
+	overrideVersion := createRelease.String("version", "", "override version to Update")
+	getVersionIncrease := createRelease.String("level", "", "predefine version to Update")
+	isDryRun := createRelease.Bool("dry-run", false, "Make dry-run before writing version to Git")
+
 	flag.Parse()
 
-	getVersion := flag.NewFlagSet("versioning", flag.ExitOnError)
-	overrideVersion := getVersion.String("version", "", "override version to Update")
-	getVersionIncrease := getVersion.String("level", "", "predefine version to Update")
-	isDryRun := getVersion.Bool("dry-run", false, "Make dry-run before writing version to Git")
-
-	if len(os.Args) < 2 {
-		fmt.Println("expected 'foo' or 'bar' subcommands")
+	if os.Args[1] != "createRelease" {
+		fmt.Println("expected 'createRelease', '...' or 'bar' subcommands")
 		os.Exit(1)
 	}
 
 	switch os.Args[1] {
-	case "versioning":
-		getVersion.Parse(os.Args[2:])
-
-		environment := "Github"
-
-		var gitVersion string
-		if *overrideVersion != "" {
-			gitVersion = *overrideVersion
-		} else {
-			gitVersion = gitcontroller.GetLatestReleaseVersion(environment)
-		}
-
-		var patchLevel string
-		if *getVersionIncrease != "" {
-			patchLevel = *getVersionIncrease
-		} else {
-			if environment == "Github" {
-				r := regexp.MustCompile(`[a-zA-z ]+#([0-9]+) from ([0-9a-zA-Z-\/]+)`)
-				fmt.Printf("%#v\n", r.FindStringSubmatch(`Merge pull request #3 from ITC-TO-MT/bugfix/test-1`))
-
-				// prAndBranch := r.FindStringSubmatch(`Merge pull request #3 from ITC-TO-MT/bugfix/test-1`)
-				// fmt.Printf("%#v\n", r.SubexpNames())
-				/* matched, err := regexp.MustCompile("Merge pull request (#[0-9]+) from ([0-9a-zA-Z-\/]+)", "Merge pull request #3 from ITC-TO-MT/bugfix/test-1")
-				if err != nil {
-					fmt.Println(err)
-				} */
-				// fmt.Println(matched)
-			}
-			patchLevel = "bugfix"
-		}
-
-		if *isDryRun {
-			fmt.Printf("Old version: %s\n", gitVersion)
-			fmt.Printf("New version: %s\n", semver.IncreaseSemVer(patchLevel, gitVersion))
-		} else {
-			fmt.Printf("Old version: %s\n", gitVersion)
-			newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
-			fmt.Printf("New version: %s\n", newVersion)
-			gitcontroller.CreateNextGitHubRelease(*cienv, newVersion)
-		}
-
+	case "createRelease":
+		createRelease.Parse(os.Args[2:])
+		funcCreateRelease(cienv, overrideVersion, getVersionIncrease, isDryRun)
 	}
 }
