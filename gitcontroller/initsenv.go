@@ -21,11 +21,9 @@ func determanEnvironment(environment string) GitConfiguration {
 	switch environment {
 	case "Github":
 		return GitConfiguration{
-			Hostname:    os.Getenv("GITHUB_SERVER_URL"),
-			ApiVersion:  getEnv("GIT_API_VERSION", "v3", false),
-			Actor:       os.Getenv("GITHUB_ACTOR"),
+			ApiUrl:      os.Getenv("GITHUB_API_URL"),
 			Repository:  os.Getenv("GITHUB_REPOSITORY"),
-			AccessToken: os.Getenv("GIT_ACCESS_TOKEN"),
+			AccessToken: os.Getenv("GITHUB_TOKEN"),
 		}
 
 	case "Custom":

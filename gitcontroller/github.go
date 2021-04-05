@@ -10,9 +10,7 @@ import (
 )
 
 type GitConfiguration struct {
-	Hostname    string
-	ApiVersion  string
-	Actor       string
+	ApiUrl      string
 	Repository  string
 	AccessToken string
 }
@@ -82,7 +80,7 @@ func newPostRequest(endpoint string, token string, requestBody []byte) map[strin
 }
 
 func github_getLatestReleaseVersion(conf GitConfiguration) string {
-	url := fmt.Sprintf("%s/api/%s/repos/%s/releases/latest", conf.Hostname, conf.ApiVersion, conf.Repository)
+	url := fmt.Sprintf("%s/repos/%s/releases/latest", conf.ApiUrl, conf.Repository)
 	result := newGetRequest(url, conf.AccessToken)
 
 	var version string
@@ -110,11 +108,11 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 		fmt.Println("(github_createNextGitHubRelease) Error building requestBody", err)
 	}
 
-	url := fmt.Sprintf("%s/api/%s/repos/%s/releases", conf.Hostname, conf.ApiVersion, conf.Repository)
+	url := fmt.Sprintf("%s/repos/%s/releases", conf.ApiUrl, conf.Repository)
 	result := newPostRequest(url, conf.AccessToken, requestBody)
 
 	if result["name"] == "Release "+newReleaseVersion {
-		fmt.Println("Release" + newReleaseVersion + " sucsessfully created")
+		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
 	} else {
 		fmt.Println("Somethin went worng at creating release!")
 	}
