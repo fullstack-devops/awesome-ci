@@ -40,7 +40,6 @@ func determanEnvironment(environment string) GitConfiguration {
 
 // GetLatestReleaseVersion
 func GetLatestReleaseVersion(environment string) string {
-
 	switch environment {
 	case "Github":
 		conf := determanEnvironment(environment)
@@ -50,11 +49,10 @@ func GetLatestReleaseVersion(environment string) string {
 }
 
 // GetLatestReleaseVersion
-func CreateNextGitHubRelease(environment string, newReleaseVersion string) {
-
+func CreateNextGitHubRelease(environment string, newReleaseVersion string, uploadArtifacts string) {
 	switch environment {
 	case "Github":
 		conf := determanEnvironment(environment)
-		github_createNextGitHubRelease(conf, newReleaseVersion)
+		github_createNextGitHubRelease(conf, newReleaseVersion, uploadArtifacts)
 	}
 }
