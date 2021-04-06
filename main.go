@@ -13,11 +13,12 @@ var (
 )
 
 type CreateReleaseSet struct {
-	fs         *flag.FlagSet
-	version    string
-	patchLevel string
-	publishNpm string
-	dryRun     bool
+	fs              *flag.FlagSet
+	version         string
+	patchLevel      string
+	publishNpm      string
+	uploadArtifacts string
+	dryRun          bool
 }
 
 type getBuildInfosSet struct {
@@ -35,6 +36,7 @@ func init() {
 	createRelease.fs.StringVar(&createRelease.version, "version", "", "override version to Update")
 	createRelease.fs.StringVar(&createRelease.patchLevel, "patchLevel", "bugfix", "predefine version to Update")
 	createRelease.fs.StringVar(&createRelease.publishNpm, "publishNpm", "", "runs npm publish --tag <createdTag> with custom directory")
+	createRelease.fs.StringVar(&createRelease.uploadArtifacts, "uploadArtifacts", "", "uploads atifacts to release (file)")
 	createRelease.fs.BoolVar(&createRelease.dryRun, "dry-run", false, "make dry-run before writing version to Git")
 
 	// getNewReleaseVersion
@@ -54,7 +56,7 @@ func main() {
 	switch os.Args[1] {
 	case "createRelease":
 		createRelease.fs.Parse(os.Args[2:])
-		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm)
+		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm, &createRelease.uploadArtifacts)
 	case "getBuildInfos":
 		getBuildInfos.fs.Parse(os.Args[2:])
 		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.output)

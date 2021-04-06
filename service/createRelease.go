@@ -28,7 +28,7 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string) {
+func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
 	var gitVersion string
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
@@ -67,7 +67,7 @@ func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *s
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitcontroller.CreateNextGitHubRelease(*cienv, newVersion)
+		gitcontroller.CreateNextGitHubRelease(*cienv, newVersion, *uploadArtifacts)
 	}
 
 	if *publishNpm != "" {
