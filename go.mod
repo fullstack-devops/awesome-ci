@@ -1,4 +1,4 @@
-module awesome-ci-semver
+module awesome-ci
 
 go 1.15
 
