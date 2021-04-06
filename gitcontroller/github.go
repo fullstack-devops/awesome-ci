@@ -4,15 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 type GitConfiguration struct {
-	ApiUrl      string
-	Repository  string
-	AccessToken string
+	ApiUrl            string
+	Repository        string
+	AccessToken       string
+	DefaultBranchName string
 }
 
 type NewRelease struct {
@@ -54,18 +58,22 @@ func newGetRequest(endpoint string, token string) map[string]interface{} {
 	return result
 }
 
-func newPostRequest(endpoint string, token string, requestBody []byte) map[string]interface{} {
+func newPostRequest(endpoint string, token string, isFile bool, requestBody []byte) map[string]interface{} {
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
 
 	request, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(requestBody))
-	request.Header.Set("Accept", "application/vnd.github.v3+json")
-	request.Header.Set("Authorization", "token "+token)
 	if err != nil {
 		fmt.Println("(newPostRequest) Error at building request: ", err)
 	}
+	if isFile {
+		request.Header.Set("Content-Type", "application/octet-stream")
+	} else {
+		request.Header.Set("Accept", "application/vnd.github.v3+json")
+	}
+	request.Header.Set("Authorization", "token "+token)
 
 	resp, err := client.Do(request)
 	if err != nil {
@@ -94,11 +102,11 @@ func github_getLatestReleaseVersion(conf GitConfiguration) string {
 	return version
 }
 
-func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion string) {
+func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion string, uploadArtifacts string) {
 
 	requestBody, err := json.Marshal(NewRelease{
 		TagName:         newReleaseVersion,
-		TargetCommitish: "master",
+		TargetCommitish: conf.DefaultBranchName,
 		Name:            "Release " + newReleaseVersion,
 		Body:            "",
 		Draft:           false,
@@ -109,11 +117,32 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 	}
 
 	url := fmt.Sprintf("%s/repos/%s/releases", conf.ApiUrl, conf.Repository)
-	result := newPostRequest(url, conf.AccessToken, requestBody)
+	result := newPostRequest(url, conf.AccessToken, false, requestBody)
 
 	if result["name"] == "Release "+newReleaseVersion {
 		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
 	} else {
 		fmt.Println("Somethin went worng at creating release!")
+	}
+
+	if uploadArtifacts != "" {
+		log.Printf("Uploading artifacts from: %s\n", uploadArtifacts)
+
+		file, err := ioutil.ReadFile(uploadArtifacts)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		releaseFileName := uploadArtifacts[strings.LastIndex(uploadArtifacts, "/")+1:]
+
+		uploadUrl := fmt.Sprintf("%s", result["upload_url"])
+		newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
+		resultTwo := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
+
+		if resultTwo["name"] == releaseFileName {
+			fmt.Println(releaseFileName + " sucsessfully uploaded")
+		} else {
+			fmt.Println("Somethin went worng at uploading release!")
+		}
 	}
 }
