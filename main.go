@@ -3,6 +3,8 @@ package main
 import (
 	"awesome-ci/service"
 	"flag"
+	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -49,7 +51,7 @@ func init() {
 func main() {
 
 	// disable logging
-	//log.SetOutput(ioutil.Discard)
+	log.SetOutput(ioutil.Discard)
 
 	flag.Parse()
 
