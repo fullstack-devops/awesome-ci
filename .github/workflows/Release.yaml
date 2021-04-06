@@ -24,6 +24,6 @@ jobs:
       with:
         path: awesome-ci
     - name: Create Release
-      run: ./assets/awesome-ci-semver createRelease
+      run: ./awesome-ci createRelease
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
