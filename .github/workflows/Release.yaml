@@ -1,10 +1,11 @@
-name: Build PR
+name: Publish Release
 
 on:
-  pull_request:
+  push:
+    branches:    
+    - 'master'
     paths-ignore:
       - 'README.md'
-    types: [assigned, opened, synchronize, reopened, edited]
 
 jobs:
   setup:
@@ -26,3 +27,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.2
       with:
         path: awesome-ci
+    - name: Create Release
+      run: ./assets/awesome-ci-semver createRelease
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
