@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Build
-      run: go build -v -o "./out/awesome-ci" ./...
+      run: go build -o "./out/awesome-ci" -v ./...
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
       with:
