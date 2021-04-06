@@ -18,19 +18,19 @@ jobs:
       with:
         go-version: 1.15
 
-  test:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-    - name: Test
-      run: go test -v ./...
+#  test:
+#    needs: setup
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Test
+#      run: go test -v ./...
 
   build:
     needs: setup
     runs-on: ubuntu-latest
     steps:
     - name: Build
-      run: go build -v ./...
+      run: make build
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
       with:
