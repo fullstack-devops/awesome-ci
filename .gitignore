@@ -15,4 +15,3 @@
 # vendor/
 out
 *.env
-go.sum
