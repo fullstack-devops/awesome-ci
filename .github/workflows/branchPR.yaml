@@ -1,0 +1,27 @@
+name: Build PR
+
+on:
+  push:
+   branches-ignore:
+     - "master"
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+    types: [assigned, opened, synchronize, reopened, edited]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+    - name: Build
+      run: go build -v
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        path: awesome-ci

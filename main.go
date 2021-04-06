@@ -1,7 +1,7 @@
 package main
 
 import (
-	"awesome-ci-semver/service"
+	"awesome-ci/service"
 	"flag"
 	"os"
 )
