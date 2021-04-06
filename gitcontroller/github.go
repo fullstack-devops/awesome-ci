@@ -13,9 +13,10 @@ import (
 )
 
 type GitConfiguration struct {
-	ApiUrl      string
-	Repository  string
-	AccessToken string
+	ApiUrl            string
+	Repository        string
+	AccessToken       string
+	DefaultBranchName string
 }
 
 type NewRelease struct {
@@ -105,7 +106,7 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 
 	requestBody, err := json.Marshal(NewRelease{
 		TagName:         newReleaseVersion,
-		TargetCommitish: "master",
+		TargetCommitish: conf.DefaultBranchName,
 		Name:            "Release " + newReleaseVersion,
 		Body:            "",
 		Draft:           false,
@@ -125,21 +126,23 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 	}
 
 	if uploadArtifacts != "" {
-		fmt.Printf("Uploading artifacts from: %s\n", uploadArtifacts)
+		log.Printf("Uploading artifacts from: %s\n", uploadArtifacts)
 
 		file, err := ioutil.ReadFile(uploadArtifacts)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println("Can read file")
-		fmt.Println(result["id"])
 		releaseFileName := uploadArtifacts[strings.LastIndex(uploadArtifacts, "/")+1:]
 
-		url := fmt.Sprintf("https://uploads.github.com/repos/%s/releases/%v/assets?name=%s", conf.Repository, result["id"], releaseFileName)
-		fmt.Println(url)
-		resultTwo := newPostRequest(url, conf.AccessToken, true, file)
+		uploadUrl := fmt.Sprintf("%s", result["upload_url"])
+		newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
+		resultTwo := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
 
-		fmt.Println(resultTwo)
+		if resultTwo["name"] == releaseFileName {
+			fmt.Println(releaseFileName + " sucsessfully uploaded")
+		} else {
+			fmt.Println("Somethin went worng at uploading release!")
+		}
 	}
 }
