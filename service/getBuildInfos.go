@@ -1,8 +1,8 @@
 package service
 
 import (
-	"awesome-ci-semver/gitcontroller"
-	"awesome-ci-semver/semver"
+	"awesome-ci/gitcontroller"
+	"awesome-ci/semver"
 	"log"
 	"os"
 	"regexp"
