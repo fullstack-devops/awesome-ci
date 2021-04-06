@@ -29,8 +29,10 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+    - run: ls -l
+    - run: ls -l ../
     - name: Build
-      run: go build -o "out/"
+      run: go build -o "out/" ../
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
       with:
