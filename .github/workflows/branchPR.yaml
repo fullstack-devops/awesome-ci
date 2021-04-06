@@ -25,3 +25,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.2
       with:
         path: awesome-ci
+    - name: Dryrun dummy Release
+      run: ./awesome-ci createRelease -patchLevel bugfix -dry-run
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
