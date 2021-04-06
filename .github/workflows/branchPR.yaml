@@ -1,41 +1,22 @@
-name: Build PR
+name: Go
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-    types: [assigned, opened, synchronize, reopened, edited]
+  push:
 
 jobs:
 
-  setup:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
         go-version: 1.15
 
-#  test:
-#    needs: setup
-#    runs-on: ubuntu-latest
-#    steps:
-#    - name: unit test
-#      run: make test
-#    - name: race detector
-#      run: make race
-#    - name: code coverage
-#      run: make coverage
-
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
     - name: Build
-      run: make build
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.2
-      with:
-        path: out/
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
