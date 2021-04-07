@@ -28,19 +28,19 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
+func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
 	var gitVersion string
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
 	} else {
-		gitVersion = gitcontroller.GetLatestReleaseVersion(*cienv)
+		gitVersion = gitcontroller.GetLatestReleaseVersion(cienv)
 	}
 
 	var patchLevel string
 	if *getVersionIncrease != "" {
 		patchLevel = *getVersionIncrease
 	} else {
-		if *cienv == "Github" {
+		if cienv == "Github" {
 			// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
 			regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/((feature|bugfix|fix)/(.+)))`
 			r := regexp.MustCompile(regex)
@@ -67,7 +67,7 @@ func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *s
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitcontroller.CreateNextGitHubRelease(*cienv, newVersion, *uploadArtifacts)
+		gitcontroller.CreateNextGitHubRelease(cienv, newVersion, *uploadArtifacts)
 	}
 
 	if *publishNpm != "" {
