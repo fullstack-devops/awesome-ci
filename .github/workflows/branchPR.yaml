@@ -22,6 +22,6 @@ jobs:
       - name: get files list
         run: ls -l
       - name: Dryrun dummy Release
-        run: ./awesome-ci createRelease -patchLevel bugfix -dry-run
+        run: ./awesome-ci -debug createRelease -patchLevel bugfix -dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
