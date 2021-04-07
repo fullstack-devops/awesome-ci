@@ -20,6 +20,6 @@ jobs:
     - name: Build
       run: go build -v
     - name: Create Release
-      run: ./awesome-ci createRelease -uploadArtifacts awesome-ci
+      run: ./awesome-ci -debug createRelease -uploadArtifacts awesome-ci
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
