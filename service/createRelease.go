@@ -10,20 +10,23 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
+
+var Logger *logrus.Logger
 
 func runcmd(cmd string, shell bool) string {
 	if shell {
 		out, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {
-			fmt.Println(err)
-			panic("some error found")
+			Logger.Error(err)
 		}
 		return string(out)
 	}
 	out, err := exec.Command(cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		Logger.Error(err)
 	}
 	return string(out)
 }
@@ -48,13 +51,13 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 			// mergeMessage := r.FindStringSubmatch(`Merge pull request #3 from ITC-TO-MT/feature/test-1`)
 			mergeMessage := r.FindStringSubmatch(runcmd(`git log -1 --pretty=format:"%s"`, true))
 			if len(mergeMessage) > 0 {
-				fmt.Printf("PR-Number: %s\n", mergeMessage[1])
-				fmt.Printf("Merged branch is a %s\n", mergeMessage[5])
+				Logger.Infoln("PR-Number: %s\n", mergeMessage[1])
+				Logger.Infoln("Merged branch is a %s\n", mergeMessage[5])
 				patchLevel = mergeMessage[5]
 			} else {
-				fmt.Println("No merge message found pls make shure this regex matches: ", regex)
-				fmt.Print("Example: Merge pull request #3 from some-orga/feature/awesome-feature\n\n")
-				fmt.Print("If you like to set your patch level manually by flag: -level (feautre|bugfix)\n\n")
+				Logger.Errorln("No merge message found pls make shure this regex matches: ", regex)
+				Logger.Errorln("Example: Merge pull request #3 from some-orga/feature/awesome-feature")
+				Logger.Errorln("If you like to set your patch level manually by flag: -level (feautre|bugfix)")
 				os.Exit(1)
 			}
 		}
@@ -62,11 +65,11 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 
 	newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
 	if *isDryRun {
-		fmt.Printf("Old version: %s\n", gitVersion)
-		fmt.Printf("Would writing new release: %s\n", newVersion)
+		Logger.Infof("Old version: %s\n", gitVersion)
+		Logger.Infof("Would writing new release: %s\n", newVersion)
 	} else {
-		fmt.Printf("Old version: %s\n", gitVersion)
-		fmt.Printf("Writing new release: %s\n", newVersion)
+		Logger.Infof("Old version: %s\n", gitVersion)
+		Logger.Infof("Writing new release: %s\n", newVersion)
 		gitcontroller.CreateNextGitHubRelease(cienv, newVersion, *uploadArtifacts)
 	}
 
@@ -76,7 +79,7 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 		if !strings.HasSuffix(*publishNpm, "/") {
 			pathToSource = *publishNpm + "/"
 		}
-		fmt.Printf("Puplishing npm packages under path: %s\n", pathToSource)
+		Logger.Infoln("Puplishing npm packages under path: %s\n", pathToSource)
 		npmPublish(pathToSource, newVersion)
 	}
 }
@@ -86,7 +89,7 @@ func npmPublish(pathToSource string, newVersion string) {
 	// opening package.json
 	jsonFile, err := os.Open(pathToSource + "package.json")
 	if err != nil {
-		fmt.Println(err)
+		Logger.Errorln(err)
 		os.Exit(2)
 	}
 	defer jsonFile.Close()
@@ -98,14 +101,14 @@ func npmPublish(pathToSource string, newVersion string) {
 
 	b, err := json.MarshalIndent(result, "", " ")
 	if err != nil {
-		fmt.Println(err)
+		Logger.Errorln(err)
 		os.Exit(2)
 	}
 
 	// writing result to package.json
 	err = ioutil.WriteFile(pathToSource+"package.json", b, 0644)
 	if err != nil {
-		fmt.Println(err)
+		Logger.Errorln(err)
 		os.Exit(2)
 	}
 

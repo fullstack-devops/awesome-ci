@@ -4,9 +4,10 @@ import (
 	"awesome-ci/service"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -52,6 +53,25 @@ func init() {
 }
 
 func main() {
+	// init Logger
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp:          true,
+		DisableLevelTruncation: false,
+	})
+
+	logger.Warnln(debug)
+	if debug {
+		logger.SetLevel(logrus.TraceLevel)
+	} else {
+		logger.SetLevel(logrus.InfoLevel)
+	}
+	// place Logger
+	service.Logger = logger
+	logger.Debugln("Debugging enabled...", log.Lshortfile)
+
+	logger.Warnln("Debugging enabled...")
+
 	flag.Usage = func() {
 		fmt.Println("awesome-ci makes your CI easy.")
 		fmt.Print("\n  Find more information and examples at: https://github.com/eksrvb/awesome-ci\n\n")
@@ -67,12 +87,6 @@ func main() {
 		os.Exit(0)
 	}
 	flag.Parse()
-
-	if debug {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
 
 	if len(os.Args) > 0 {
 		switch os.Args[1] {
