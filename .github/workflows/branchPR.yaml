@@ -24,14 +24,12 @@ jobs:
           chmod +x awesome-ci-latest
       - name: get next Version for project build
         id: version_step
-        run: echo "::set-output name=new_version::1.2.3"
+        run: echo "::set-output name=new_version::$(./awesome-ci-latest getBuildInfos -format version)"
       - name: Build
         run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}"
-      - name: get files list
-        run: ls -l
       - name: Test writed Version
         run: ./awesome-ci -version
-      - name: Dryrun dummy Release
+      - name: Test writing dummy Release
         run: ./awesome-ci createRelease -patchLevel bugfix -dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
