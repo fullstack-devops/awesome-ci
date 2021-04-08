@@ -8,8 +8,12 @@ import (
 func getEnv(key, fallback string, confidential bool) string {
 	if value, ok := os.LookupEnv(key); ok {
 		var newValue = "**********"
-		if len(value) > 10 {
-			newValue = value[0:4] + "******"
+		if confidential {
+			if len(value) > 10 {
+				newValue = value[0:4] + "******"
+			}
+		} else {
+			newValue = value
 		}
 		return newValue
 	}
