@@ -3,6 +3,7 @@ package main
 import (
 	"awesome-ci/service"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,6 +13,9 @@ var (
 	cienv         *string
 	createRelease CreateReleaseSet
 	getBuildInfos getBuildInfosSet
+	version       string
+	versionFlag   bool
+	//debug         bool
 )
 
 type CreateReleaseSet struct {
@@ -32,6 +36,8 @@ type getBuildInfosSet struct {
 
 func init() {
 	cienv = flag.String("cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
+	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
+	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
 	// createReleaseSet
 	createRelease.fs = flag.NewFlagSet("createRelease", flag.ExitOnError)
@@ -54,6 +60,10 @@ func main() {
 	log.SetOutput(ioutil.Discard)
 
 	flag.Parse()
+
+	if versionFlag {
+		fmt.Println(version)
+	}
 
 	switch os.Args[1] {
 	case "createRelease":

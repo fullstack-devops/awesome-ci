@@ -17,10 +17,20 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.15
+      - name: Set up awesome-ci
+        run: |
+          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
+          mv awesome-ci awesome-ci-latest
+          chmod +x awesome-ci-latest
+      - name: get next Version for project build
+        id: version_step
+        run: echo "::set-output name=new_version::1.2.3"
       - name: Build
-        run: go build -v
+        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}"
       - name: get files list
         run: ls -l
+      - name: Test writed Version
+        run: ./awesome-ci -version
       - name: Dryrun dummy Release
         run: ./awesome-ci createRelease -patchLevel bugfix -dry-run
         env:
