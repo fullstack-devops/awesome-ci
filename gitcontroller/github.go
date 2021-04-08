@@ -38,12 +38,12 @@ func newGetRequest(endpoint string, token string) map[string]interface{} {
 	req.Header.Add("Accept", "application/vnd.github.v3+json")
 	req.Header.Add("Authorization", "token "+token)
 	if err != nil {
-		fmt.Println("(newGetRequest) Error at building request: ", err)
+		log.Fatalln("(newGetRequest) Error at building request: ", err)
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("(newGetRequest) Error form response:", err, resp)
+		log.Fatalln("(newGetRequest) Error form response:", err, resp)
 	}
 	defer resp.Body.Close()
 
@@ -51,7 +51,7 @@ func newGetRequest(endpoint string, token string) map[string]interface{} {
 	json.NewDecoder(resp.Body).Decode(&result)
 
 	if result["message"] == "Bad credentials" {
-		fmt.Println("Please provide the right credentials and make sure you have the right access rights!")
+		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
 		os.Exit(1)
 	}
 
@@ -66,7 +66,7 @@ func newPostRequest(endpoint string, token string, isFile bool, requestBody []by
 
 	request, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(requestBody))
 	if err != nil {
-		fmt.Println("(newPostRequest) Error at building request: ", err)
+		log.Fatalln("(newPostRequest) Error at building request: ", err)
 	}
 	if isFile {
 		request.Header.Set("Content-Type", "application/octet-stream")
@@ -77,7 +77,8 @@ func newPostRequest(endpoint string, token string, isFile bool, requestBody []by
 
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Println("(newPostRequest) Error form response:", err, resp)
+		log.Fatalln("(newPostRequest) Error form response:", err, resp)
+		os.Exit(1)
 	}
 	defer resp.Body.Close()
 
@@ -103,7 +104,6 @@ func github_getLatestReleaseVersion(conf GitConfiguration) string {
 }
 
 func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion string, uploadArtifacts string) {
-
 	requestBody, err := json.Marshal(NewRelease{
 		TagName:         newReleaseVersion,
 		TargetCommitish: conf.DefaultBranchName,
@@ -117,12 +117,13 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 	}
 
 	url := fmt.Sprintf("%s/repos/%s/releases", conf.ApiUrl, conf.Repository)
-	result := newPostRequest(url, conf.AccessToken, false, requestBody)
-
-	if result["name"] == "Release "+newReleaseVersion {
+	log.Println("url for creating release:", url)
+	respCreateRelease := newPostRequest(url, conf.AccessToken, false, requestBody)
+	if respCreateRelease["name"] == "Release "+newReleaseVersion {
 		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
 	} else {
-		fmt.Println("Somethin went worng at creating release!")
+		log.Fatalln("Somethin went worng at creating release:\n", githubErrorPrinter(respCreateRelease))
+		os.Exit(1)
 	}
 
 	if uploadArtifacts != "" {
@@ -135,14 +136,34 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 
 		releaseFileName := uploadArtifacts[strings.LastIndex(uploadArtifacts, "/")+1:]
 
-		uploadUrl := fmt.Sprintf("%s", result["upload_url"])
+		uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
 		newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
-		resultTwo := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
-
-		if resultTwo["name"] == releaseFileName {
+		log.Println("url for uploading asset to release:", newUploadUrl)
+		respUploadArtifact := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
+		if respUploadArtifact["name"] == releaseFileName {
 			fmt.Println(releaseFileName + " sucsessfully uploaded")
 		} else {
-			fmt.Println("Somethin went worng at uploading release!")
+			log.Fatalln("Somethin went wrong at uploading asset:", respUploadArtifact["message"])
+			os.Exit(1)
 		}
 	}
+}
+
+func githubErrorPrinter(responseErrors map[string]interface{}) string {
+	var errors []map[string]interface{}
+	outputString := fmt.Sprintln(responseErrors["message"])
+
+	b, err := json.Marshal(responseErrors["errors"])
+	if err != nil {
+		panic(err)
+	}
+	json.Unmarshal(b, &errors)
+	for index := range errors {
+		if errors[index]["code"] == "custom" {
+			outputString = outputString + fmt.Sprintf("code: %s => message: %s\n", errors[index]["code"], errors[index]["message"])
+		} else {
+			outputString = outputString + fmt.Sprintf("code: %s => message: %s\n", errors[index]["code"], errors[index])
+		}
+	}
+	return outputString
 }
