@@ -4,10 +4,7 @@ import (
 	"awesome-ci/service"
 	"flag"
 	"fmt"
-	"log"
 	"os"
-
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -35,7 +32,7 @@ type getBuildInfosSet struct {
 
 func init() {
 	flag.StringVar(&cienv, "cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
-	flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
+	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
 	// createReleaseSet
 	createRelease.fs = flag.NewFlagSet("createRelease", flag.ExitOnError)
@@ -53,25 +50,6 @@ func init() {
 }
 
 func main() {
-	// init Logger
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp:          true,
-		DisableLevelTruncation: false,
-	})
-
-	logger.Warnln(debug)
-	if debug {
-		logger.SetLevel(logrus.TraceLevel)
-	} else {
-		logger.SetLevel(logrus.InfoLevel)
-	}
-	// place Logger
-	service.Logger = logger
-	logger.Debugln("Debugging enabled...", log.Lshortfile)
-
-	logger.Warnln("Debugging enabled...")
-
 	flag.Usage = func() {
 		fmt.Println("awesome-ci makes your CI easy.")
 		fmt.Print("\n  Find more information and examples at: https://github.com/eksrvb/awesome-ci\n\n")
