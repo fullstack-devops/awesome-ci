@@ -62,7 +62,6 @@ func main() {
 		fmt.Print("\nUsage:\n  awesome-ci [subcommand] [options]\n")
 		fmt.Print("\nUse awesome-ci createRelease -patchLevel bugfix -dry-run\n")
 		fmt.Print("CI examples at: https://github.com/eksrvb/awesome-ci\n")
-		os.Exit(0)
 	}
 	flag.Parse()
 
