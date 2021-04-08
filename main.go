@@ -40,7 +40,7 @@ func init() {
 	// createReleaseSet
 	createRelease.fs = flag.NewFlagSet("createRelease", flag.ExitOnError)
 	createRelease.fs.StringVar(&createRelease.version, "version", "", "override version to Update")
-	createRelease.fs.StringVar(&createRelease.patchLevel, "patchLevel", "bugfix", "predefine version to Update")
+	createRelease.fs.StringVar(&createRelease.patchLevel, "patchLevel", "", "predefine version to Update")
 	createRelease.fs.StringVar(&createRelease.publishNpm, "publishNpm", "", "runs npm publish --tag <createdTag> with custom directory")
 	createRelease.fs.StringVar(&createRelease.uploadArtifacts, "uploadArtifacts", "", "uploads atifacts to release (file)")
 	createRelease.fs.BoolVar(&createRelease.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
