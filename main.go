@@ -4,11 +4,6 @@ import (
 	"awesome-ci/service"
 	"flag"
 	"fmt"
-<<<<<<< HEAD
-=======
-	"io/ioutil"
-	"log"
->>>>>>> ec5109b3b8a4649530e5d2d430c0ee44624b9be8
 	"os"
 )
 
@@ -38,11 +33,7 @@ type getBuildInfosSet struct {
 }
 
 func init() {
-<<<<<<< HEAD
 	flag.StringVar(&cienv, "cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
-=======
-	cienv = flag.String("cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
->>>>>>> ec5109b3b8a4649530e5d2d430c0ee44624b9be8
 	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
 	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
