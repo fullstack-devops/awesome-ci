@@ -11,7 +11,9 @@ var (
 	cienv         string
 	createRelease CreateReleaseSet
 	getBuildInfos getBuildInfosSet
-	debug         bool
+	version       string
+	versionFlag   bool
+	//debug         bool
 )
 
 type CreateReleaseSet struct {
@@ -32,6 +34,7 @@ type getBuildInfosSet struct {
 
 func init() {
 	flag.StringVar(&cienv, "cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
+	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
 	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
 	// createReleaseSet
@@ -65,14 +68,16 @@ func main() {
 	}
 	flag.Parse()
 
-	if len(os.Args) > 0 {
-		switch os.Args[1] {
-		case "createRelease":
-			createRelease.fs.Parse(os.Args[2:])
-			service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm, &createRelease.uploadArtifacts)
-		case "getBuildInfos":
-			getBuildInfos.fs.Parse(os.Args[2:])
-			service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.output)
-		}
+	if versionFlag {
+		fmt.Println(version)
+	}
+
+	switch os.Args[1] {
+	case "createRelease":
+		createRelease.fs.Parse(os.Args[2:])
+		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm, &createRelease.uploadArtifacts)
+	case "getBuildInfos":
+		getBuildInfos.fs.Parse(os.Args[2:])
+		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.output)
 	}
 }
