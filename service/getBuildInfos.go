@@ -8,18 +8,18 @@ import (
 	"regexp"
 )
 
-func GetBuildInfos(cienv *string, overrideVersion *string, patchLevel *string, output *string) {
+func GetBuildInfos(cienv string, overrideVersion *string, patchLevel *string, output *string) {
 	var gitVersion string
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
 	} else {
-		gitVersion = gitcontroller.GetLatestReleaseVersion(*cienv)
+		gitVersion = gitcontroller.GetLatestReleaseVersion(cienv)
 	}
 
 	if *patchLevel != "" {
 		log.Println("patchLevel has Override:", *patchLevel)
 	} else {
-		if *cienv == "Github" {
+		if cienv == "Github" {
 			// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
 			regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/((feature|bugfix|fix)/(.+)))`
 			r := regexp.MustCompile(regex)

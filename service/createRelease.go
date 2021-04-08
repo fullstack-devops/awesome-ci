@@ -17,7 +17,6 @@ func runcmd(cmd string, shell bool) string {
 		out, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {
 			fmt.Println(err)
-			panic("some error found")
 		}
 		return string(out)
 	}
@@ -28,19 +27,19 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
+func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
 	var gitVersion string
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
 	} else {
-		gitVersion = gitcontroller.GetLatestReleaseVersion(*cienv)
+		gitVersion = gitcontroller.GetLatestReleaseVersion(cienv)
 	}
 
 	var patchLevel string
 	if *getVersionIncrease != "" {
 		patchLevel = *getVersionIncrease
 	} else {
-		if *cienv == "Github" {
+		if cienv == "Github" {
 			// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
 			regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/((feature|bugfix|fix)/(.+)))`
 			r := regexp.MustCompile(regex)
@@ -53,8 +52,8 @@ func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *s
 				patchLevel = mergeMessage[5]
 			} else {
 				fmt.Println("No merge message found pls make shure this regex matches: ", regex)
-				fmt.Print("Example: Merge pull request #3 from some-orga/feature/awesome-feature\n\n")
-				fmt.Print("If you like to set your patch level manually by flag: -level (feautre|bugfix)\n\n")
+				fmt.Println("Example: Merge pull request #3 from some-orga/feature/awesome-feature")
+				fmt.Println("If you like to set your patch level manually by flag: -level (feautre|bugfix)")
 				os.Exit(1)
 			}
 		}
@@ -67,7 +66,7 @@ func CreateRelease(cienv *string, overrideVersion *string, getVersionIncrease *s
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitcontroller.CreateNextGitHubRelease(*cienv, newVersion, *uploadArtifacts)
+		gitcontroller.CreateNextGitHubRelease(cienv, newVersion, *uploadArtifacts)
 	}
 
 	if *publishNpm != "" {
