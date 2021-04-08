@@ -29,7 +29,7 @@ type getBuildInfosSet struct {
 	fs         *flag.FlagSet
 	version    string
 	patchLevel string
-	output     string
+	format     string
 }
 
 func init() {
@@ -48,8 +48,8 @@ func init() {
 	// getNewReleaseVersion
 	getBuildInfos.fs = flag.NewFlagSet("getBuildInfos", flag.ExitOnError)
 	getBuildInfos.fs.StringVar(&getBuildInfos.version, "version", "", "override version to Update")
-	getBuildInfos.fs.StringVar(&getBuildInfos.patchLevel, "patchLevel", "bugfix", "predefine version to Update")
-	getBuildInfos.fs.StringVar(&getBuildInfos.output, "output", "pr,version", "define output by get")
+	getBuildInfos.fs.StringVar(&getBuildInfos.patchLevel, "patchLevel", "", "predefine version to Update")
+	getBuildInfos.fs.StringVar(&getBuildInfos.format, "format", "pr,version", "define output by get")
 }
 
 func main() {
@@ -78,6 +78,6 @@ func main() {
 		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm, &createRelease.uploadArtifacts)
 	case "getBuildInfos":
 		getBuildInfos.fs.Parse(os.Args[2:])
-		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.output)
+		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
 	}
 }
