@@ -24,7 +24,7 @@ jobs:
           chmod +x awesome-ci-latest
       - name: get next Version for project build
         id: version_step
-        run: echo "::set-output name=new_version::$(./awesome-ci-latest getBuildInfos -format version)"
+        run: echo "::set-output name=new_version::$(./awesome-ci-latest getBuildInfos -format version -patchLevel bugfix)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
