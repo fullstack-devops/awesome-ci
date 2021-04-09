@@ -129,22 +129,26 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 	if uploadArtifacts != "" {
 		log.Printf("Uploading artifacts from: %s\n", uploadArtifacts)
 
-		file, err := ioutil.ReadFile(uploadArtifacts)
-		if err != nil {
-			log.Fatal(err)
-		}
+		artifactsToUpload := strings.Split(uploadArtifacts, ",")
 
-		releaseFileName := uploadArtifacts[strings.LastIndex(uploadArtifacts, "/")+1:]
+		for _, artifact := range artifactsToUpload {
+			file, err := ioutil.ReadFile(artifact)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
-		newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
-		log.Println("url for uploading asset to release:", newUploadUrl)
-		respUploadArtifact := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
-		if respUploadArtifact["name"] == releaseFileName {
-			fmt.Println(releaseFileName + " sucsessfully uploaded")
-		} else {
-			log.Fatalln("Somethin went wrong at uploading asset:", respUploadArtifact["message"])
-			os.Exit(1)
+			releaseFileName := artifact[strings.LastIndex(artifact, "/")+1:]
+
+			uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
+			newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
+			// log.Println("url for uploading asset to release:", newUploadUrl)
+			respUploadArtifact := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
+			if respUploadArtifact["name"] == releaseFileName {
+				fmt.Printf("Sucsessfully uploaded asset: %s\n", releaseFileName)
+			} else {
+				log.Fatalln("Somethin went wrong at uploading asset:", respUploadArtifact["message"])
+				os.Exit(1)
+			}
 		}
 	}
 }
