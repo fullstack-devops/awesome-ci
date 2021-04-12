@@ -1,36 +1,42 @@
 # Awesome CI
 
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-Describe the problem(s) this project solves.
-Describe how this software can improve the lives of its audience.
+**Description**: This tool makes your workflow easier! With the help of [SemVer](https://semver.org/lang/) and naming conventions, a lot of time can be saved when creating a release.
 
-Other things to include:
-
-  - **Technology stack**: Indicate the technological nature of the software, including primary programming language(s) and whether the software is intended as standalone or as a module in a framework or other ecosystem.
-  - **Status**:  Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
-
-## Dependencies
-
-This project works with standart go libraries 
-
+- **Technology stack**: This tool is written in golang
+- **Status**: Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
+- **Requests**: Please feel free to open an question or feature request in the Issue Board.
 
 ## Usage
 
-Download the latest [Release](https://gitlab.com/eksrvb/awesome-ci-semver/-/releases) or include the Docker container in your Multi stage Build.
+[Download](https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci) the latest [Release](https://github.com/eksrvb/awesome-ci/releases) or include the Docker container in your Multi stage Build.
 
+### In your CI Pipeline
 
-[GitHub Actions](.examples/GitHub_Actions.md)
+- [Jenkins Pipeline](.examples/GitLab_CI.md)
+- [GitHub Actions](.examples/GitHub_Actions.md)
+- [GitLab CI](.examples/GitLab_CI.md)
 
-Show users how to use the software.
-Be specific.
-Use appropriate formatting when showing code snippets.
+### Supported commands
+
+To Print all available by calling `awesome-ci -help` 
+
+### Requiered and optional environment variables
+
+List of all environmental variables used per CI tool.
+
+**GitHub Actions**
+| Environment variable      | Description                                                     | requiered |
+| ------------------------- | --------------------------------------------------------------- |:---------:|
+| `GITHUB_API_URL`          | Returns the API URL.                                            | true      |
+| `GITHUB_REPOSITORY`       | The owner and repository name.                                  | true      |
+| `GITHUB_TOKEN`            | Must provided in workflow as `env:` (see examples)              | true      |
+| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)             | false     |
 
 ## Installation
 
 The installation is needed only for contirbuting.
 
-Go to your GOPATH under `src/` and run: `git clone https://gitlab.com/eksrvb/awesome-ci-semver.git`
+Go to your GOPATH under `src/` and run: `go get https://gitlab.com/eksrvb/awesome-ci-semver`
 
 ## How to test the software
 
