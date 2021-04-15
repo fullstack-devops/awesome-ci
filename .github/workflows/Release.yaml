@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "main"
+      - '!docu/**'
     paths-ignore:
       - "README.md"
       - '.github/ISSUE_TEMPLATE/**'

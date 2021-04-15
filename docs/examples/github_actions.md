@@ -1,11 +1,13 @@
-# Using awesome-ci in GitHub Actions
+---
+layout: default
+title: GitHub Actions
+parent: Examples
+---
 
-## Table of Contents
-- [Examples](#examples)
-  - [Build and publish npm packages](#build-and-publish-npm-packages)
-  - [Build and upload a go project](#build-and-publish-npm-packages)
+# GitHub Actions examples
 
-## Examples
+- [Build and publish npm packages](#build-and-publish-npm-packages)
+- [Build and upload a go project](#build-and-publish-npm-packages)
 
 
 ### Build and publish npm packages
