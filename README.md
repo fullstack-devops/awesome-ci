@@ -38,9 +38,9 @@ The patching of the version only takes effect if the merged branch begins with t
 
 ### Examples for your CI Pipeline
 
-- [Jenkins Pipeline](.examples/GitLab_CI.md)
-- [GitHub Actions](.examples/GitHub_Actions.md)
-- [GitLab CI](.examples/GitLab_CI.md)
+- [GitHub Actions](examples/GitHub_Actions.md)
+- Jenkins Pipeline (coming soon)
+- GitLab CI (coming soon)
 
 ### Supported commands
 
