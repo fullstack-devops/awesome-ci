@@ -1,40 +1,71 @@
 # Awesome CI
 
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-Describe the problem(s) this project solves.
-Describe how this software can improve the lives of its audience.
+**Description**: This tool makes your workflow easier! With the help of [SemVer](https://semver.org/lang/) and naming conventions, a lot of time can be saved when creating a release.
 
-Other things to include:
+- **Technology stack**: This tool is written in golang
+- **Status**: Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
+- **Requests**: Please feel free to open an question or feature request in the Issue Board.
 
-  - **Technology stack**: Indicate the technological nature of the software, including primary programming language(s) and whether the software is intended as standalone or as a module in a framework or other ecosystem.
-  - **Status**:  Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
+## Table of Contents
 
-## Dependencies
-
-This project works with standart go libraries 
-
+- [Usage](#usage)
+  - [Supported naming rules and effects on the version](#supported-naming-rules-and-effects-on-the-version)
+  - [Examples for your CI Pipeline](#examples-for-your-ci-pipeline)
+  - [Supported commands](#supported-commands)
+  - [Requiered and optional environment variables](#requiered-and-optional-environment-variables)
+- [Known issues](#known-issues)
+- [Getting help](#getting-help)
+- [Open source licensing info](#open-source-licensing-info)
+- [Credits and references](#credits-and-references)
 
 ## Usage
 
-Download the latest [Release](https://gitlab.com/eksrvb/awesome-ci-semver/-/releases) or include the Docker container in your Multi stage Build.
+to use this tool in your ci pipeline, [download](https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci) the most recently published release. How you can integrate this into your respective pipeline can be found in the following document.
 
+> Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and __GitLab CI__
 
-[GitHub Actions](.examples/GitHub_Actions.md)
+### Supported naming rules and effects on the version
 
-Show users how to use the software.
-Be specific.
-Use appropriate formatting when showing code snippets.
+The patching of the version only takes effect if the merged branch begins with the following aliases, for example: `feature/my-awesome-feature`
 
-## Installation
+> The tailing `/` behind the alias is **always** requiered!
 
-The installation is needed only for contirbuting.
+| SemVer | supported aliases                           | version example |
+| ------ | ------------------------------------------- | --------------- |
+| MAJOR  | major                                       | 1.0.0 => 2.0.0  |
+| MINOR  | minor, feature                              | 1.0.0 => 1.1.0  |
+| PATCH  | patch, bugfix, fix                          | 1.0.0 => 1.0.1  |
 
-Go to your GOPATH under `src/` and run: `git clone https://gitlab.com/eksrvb/awesome-ci-semver.git`
+### Examples for your CI Pipeline
 
-## How to test the software
+- [GitHub Actions](examples/GitHub_Actions.md)
+- Jenkins Pipeline (coming soon)
+- GitLab CI (coming soon)
 
-If the software includes automated tests, detail how to run those tests.
+### Supported commands
+
+To Print all available by calling `awesome-ci -help` 
+
+### Requiered and optional environment variables
+
+List of all environmental variables used per CI tool.
+
+**GitHub Actions**
+| Environment variable      | Description                                                     | requiered |
+| ------------------------- | --------------------------------------------------------------- |:---------:|
+| `GITHUB_API_URL`          | Returns the API URL. (Already set in runner)                    | true      |
+| `GITHUB_REPOSITORY`       | The owner and repository name. (Already set in runner)          | true      |
+| `GITHUB_TOKEN`            | Must provided in workflow as `env:` (see examples)              | true      |
+| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)             | false     |
+
+**Jenkins Pipeline**
+| Environment variable      | Description                                                     | requiered |
+| ------------------------- | --------------------------------------------------------------- |:---------:|
+| `JENKINS_URL`             | Returns the URL of your Jenkins instance. (Already set)         | true      |
+| `GIT_URL`                 | Will only be set by using the GitHub Plugin.                    | true      |
+| `GITHUB_TOKEN`            | Must provided in pipeling as `env.GITHUB_TOKEN` (see examples)  | true      |
+| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)             | false     |
+ > To see your Jenkins environment variables go to: `${YOUR_JENKINS_HOST}/env-vars.html`
 
 ## Known issues
 
@@ -46,23 +77,19 @@ If you have questions, concerns, bug reports, etc, please file an issue in this 
 
 ## Getting involved
 
-This section should detail why people should get involved and describe key areas you are
-currently focusing on; e.g., trying to get feedback on features, fixing certain bugs, building
-important pieces, etc.
+General instructions on _how_ to contribute: [CONTRIBUTING](CONTRIBUTING.md)
 
-General instructions on _how_ to contribute should be stated with a link to [CONTRIBUTING](CONTRIBUTING.md).
+General instructions _during_ the contribution period: [CONTRIBUTION](CONTRIBUTION.md)
 
 
 ----
 
 ## Open source licensing info
-1. [TERMS](TERMS.md)
-2. [LICENSE](LICENSE)
-3. [CFPB Source Code Policy](https://github.com/cfpb/source-code-policy/)
+1. [LICENSE](LICENSE)
 
 
 ----
 
 ## Credits and references
 
-- [SemVer](https://semver.org/lang/de/)
+- [SemVer](https://semver.org/)
