@@ -2,6 +2,7 @@
 layout: default
 title: getBuildInfos
 parent: Commands
+nav_order: 2
 ---
 
 # Creating a release
