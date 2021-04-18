@@ -1,37 +1,29 @@
 # Awesome CI
 
-**Description**: This tool makes your workflow easier! With the help of [SemVer](https://semver.org/lang/) and naming conventions, a lot of time can be saved when creating a release.
+**Description**: This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of [SemVer](https://semver.org/). The required version number is created with the correct naming of the branch prefix.
 
 - **Technology stack**: This tool is written in golang
 - **Status**: Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
-- **Requests**: Please feel free to open an question or feature request in the Issue Board.
-
-## Table of Contents
-
-- [Main features]()
-- [Usage](#usage)
-- [Documentation](https://eksrvb.github.io/awesome-ci/)
-- [Known issues](#known-issues)
-- [Getting help](#getting-help)
-- [Open source licensing info](#open-source-licensing-info)
-- [Credits and references](#credits-and-references)
+- **Requests and Issues**: Please feel free to open an question or feature request in the Issue Board.
 
 ## Usage
 
-to use this tool in your ci pipeline, [download](https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci) the most recently published release. How you can integrate this into your respective pipeline can be found in the following document.
+This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of SemVer. The required version number is created with the correct naming of the branch prefix.
 
+You can use this tool in your CI pipeline or locally on your command line. Just [download](https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci) the most recently released version and get started. You can find out how to integrate this into your respective pipeline in the following document. There are also several examples in the [examples section](https://eksrvb.github.io/awesome-ci/docs/examples) of the documentation. If an example is not included, please feel free to inquire about a related [issue](https://github.com/eksrvb/awesome-ci/issues/new/choose).
+
+If more functionality is needed you can just open a problem in this project and of course bugs can be fixed in the same way by filing a [bug report](https://github.com/eksrvb/awesome-ci/issues/new/choose).
+
+If you have any questions, you can find a form on the issue board. First, make sure your question is already in the [Questions and Answers](https://eksrvb.github.io/awesome-ci/docs/questions_and_answers) section before asking a question. You can find frequently asked questions there too.
 
 ## Documentation
 
-[See the manual](https://eksrvb.github.io/awesome-ci/) for setup and usage instructions.
-
-## Known issues
-
-There are no known Issues yet.
+[See the manual](https://eksrvb.github.io/awesome-ci/) for setup, usage instructions and a lot more. (the documentation is still rising)
 
 ## Getting help
 
 If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
+You can find frequently asked questions directly in the "Questions and Answers" section.
 
 ## Getting involved
 
