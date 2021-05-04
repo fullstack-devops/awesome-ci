@@ -12,6 +12,12 @@ type infosMergeMessage struct {
 	PatchLevel string
 }
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func runcmd(cmd string, shell bool) string {
 	if shell {
 		out, err := exec.Command("bash", "-c", cmd).Output()
