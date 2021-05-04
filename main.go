@@ -4,6 +4,7 @@ import (
 	"awesome-ci/service"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -11,6 +12,8 @@ var (
 	cienv         string
 	createRelease CreateReleaseSet
 	getBuildInfos getBuildInfosSet
+	parseJson     parseJsonYamlSet
+	parseYaml     parseJsonYamlSet
 	version       string
 	versionFlag   bool
 	//debug         bool
@@ -32,6 +35,12 @@ type getBuildInfosSet struct {
 	format     string
 }
 
+type parseJsonYamlSet struct {
+	fs    *flag.FlagSet
+	file  string
+	value string
+}
+
 func init() {
 	flag.StringVar(&cienv, "cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
 	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
@@ -50,6 +59,16 @@ func init() {
 	getBuildInfos.fs.StringVar(&getBuildInfos.version, "version", "", "override version to Update")
 	getBuildInfos.fs.StringVar(&getBuildInfos.patchLevel, "patchLevel", "", "predefine version to Update")
 	getBuildInfos.fs.StringVar(&getBuildInfos.format, "format", "pr,version", "define output by get")
+
+	// parseJSON
+	parseJson.fs = flag.NewFlagSet("parseJSON", flag.ExitOnError)
+	parseJson.fs.StringVar(&parseJson.file, "file", "", "file to be parsed")
+	parseJson.fs.StringVar(&parseJson.value, "value", "", "value for output")
+
+	// parseYAML
+	parseYaml.fs = flag.NewFlagSet("parseYAML", flag.ExitOnError)
+	parseYaml.fs.StringVar(&parseYaml.file, "file", "", "file to be parsed")
+	parseYaml.fs.StringVar(&parseYaml.value, "value", "", "value for output")
 }
 
 func main() {
@@ -62,6 +81,8 @@ func main() {
 		createRelease.fs.PrintDefaults()
 		fmt.Print("\nSubcommand: getBuildInfos\n")
 		getBuildInfos.fs.PrintDefaults()
+		fmt.Print("\nSubcommand: parseJSON, parseYAML\n")
+		parseJson.fs.PrintDefaults()
 		fmt.Print("\nUsage:\n  awesome-ci [subcommand] [options]\n")
 		fmt.Print("\nUse awesome-ci createRelease -patchLevel bugfix -dry-run\n")
 		fmt.Print("CI examples at: https://github.com/eksrvb/awesome-ci\n")
@@ -70,6 +91,7 @@ func main() {
 
 	if versionFlag {
 		fmt.Println(version)
+		os.Exit(0)
 	}
 
 	switch os.Args[1] {
@@ -79,5 +101,13 @@ func main() {
 	case "getBuildInfos":
 		getBuildInfos.fs.Parse(os.Args[2:])
 		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
+	case "parseJSON":
+		parseJson.fs.Parse(os.Args[2:])
+		service.ParseJson(&parseJson.file, &parseJson.value)
+	case "parseYAML":
+		parseYaml.fs.Parse(os.Args[2:])
+		service.ParseYaml(&parseYaml.file, &parseYaml.value)
+	default:
+		log.Fatalln("Not a valid Subcommand")
 	}
 }
