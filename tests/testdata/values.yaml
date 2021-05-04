@@ -1,0 +1,5 @@
+value1: hello
+value2: world
+deepObject:
+  value1: hello
+  value2: world
