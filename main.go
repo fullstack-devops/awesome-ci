@@ -58,7 +58,7 @@ func init() {
 	getBuildInfos.fs = flag.NewFlagSet("getBuildInfos", flag.ExitOnError)
 	getBuildInfos.fs.StringVar(&getBuildInfos.version, "version", "", "override version to Update")
 	getBuildInfos.fs.StringVar(&getBuildInfos.patchLevel, "patchLevel", "", "predefine version to Update")
-	getBuildInfos.fs.StringVar(&getBuildInfos.format, "format", "pr,version", "define output by get")
+	getBuildInfos.fs.StringVar(&getBuildInfos.format, "format", "", "define output by get")
 
 	// parseJSON
 	parseJson.fs = flag.NewFlagSet("parseJSON", flag.ExitOnError)

@@ -42,3 +42,5 @@ This can be useful in connection with `-version` when creating a manual release.
 ```bash
 awesome-ci createRelease -patchLevel feature
 ```
+
+... more documentation to be done ;)
