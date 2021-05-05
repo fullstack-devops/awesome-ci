@@ -28,9 +28,9 @@ The patching of the version only takes effect if the merged branch begins with t
 
 | SemVer | supported aliases                           | version example |
 | ------ | ------------------------------------------- | --------------- |
-| MAJOR  | major                                       | 1.0.0 => 2.0.0  |
-| MINOR  | minor, feature                              | 1.0.0 => 1.1.0  |
-| PATCH  | patch, bugfix, fix                          | 1.0.0 => 1.0.1  |
+| MAJOR  | major                                       | 1.2.3 => 2.0.0  |
+| MINOR  | minor, feature                              | 1.2.3 => 1.3.0  |
+| PATCH  | patch, bugfix, fix                          | 1.2.3 => 1.2.4  |
 
 
 
@@ -56,7 +56,7 @@ List of all environmental variables used per CI tool.
 | ------------------------- | --------------------------------------------------------------- |:---------:|
 | `JENKINS_URL`             | Returns the URL of your Jenkins instance. (Already set)         | true      |
 | `GIT_URL`                 | Will only be set by using the GitHub Plugin.                    | true      |
-| `GITHUB_TOKEN`            | Must provided in pipeling as `env.GITHUB_TOKEN` (see examples)  | true      |
+| `GITHUB_TOKEN`            | Must provided in pipeline as `env.GITHUB_TOKEN` (see examples)  | true      |
 | `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)             | false     |
 
 > To see your Jenkins environment variables go to: `${YOUR_JENKINS_HOST}/env-vars.html`
