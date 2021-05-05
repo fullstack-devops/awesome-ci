@@ -6,9 +6,16 @@ nav_order: 1
 ---
 
 # GitHub Actions examples
+{: .no_toc }
 
-- [Build and publish npm packages](#build-and-publish-npm-packages)
-- [Build and upload a go project](#build-and-publish-npm-packages)
+<details open markdown="block">
+  <summary>
+    Table of contents
+  </summary>
+  {: .text-delta }
+1. TOC
+{:toc}
+</details>
 
 
 ### Build and publish npm packages

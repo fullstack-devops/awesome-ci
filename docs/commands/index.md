@@ -7,6 +7,7 @@ permalink: /docs/commands
 ---
 
 # Commands
+{: .no_toc }
 
 Overview of all available transfer parameters.
 
@@ -28,7 +29,9 @@ awesome-ci [option] [subcommand] [subcommand-option]
 
 You can find out more about the subcommands by clicking on the relevant one in the navigation.
 
-| Subcommand          | Description                                             |
-| ------------------- | ------------------------------------------------------- |
-| `createRelease`     | creates a release at GitHub or GitLab                   |
-| `createRelease`     | prints out any git information and can manipulate these |
+| Subcommand                                                                         | Description                                             |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [createRelease](https://eksrvb.github.io/awesome-ci/commands/createRelease.html)   | creates a release at GitHub or GitLab                   |
+| [getBuildInfos](https://eksrvb.github.io/awesome-ci/commands/getBuildInfos.html)   | prints out any git information and can manipulate these |
+| [parseJSON](https://eksrvb.github.io/awesome-ci/commands/parseJSON.html)           | can parse simple JSON files                             |
+| [parseYAML](https://eksrvb.github.io/awesome-ci/commands/parseYAML.html)           | can parse simple YAML files                             |
