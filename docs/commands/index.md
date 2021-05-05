@@ -3,11 +3,11 @@ layout: default
 title: Commands
 nav_order: 2
 has_children: true
+has_toc: false
 permalink: /docs/commands
 ---
 
 # Commands
-{: .no_toc }
 
 Overview of all available transfer parameters.
 
