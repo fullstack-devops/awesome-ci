@@ -2,7 +2,6 @@ package service
 
 import (
 	"awesome-ci/gitcontroller"
-	"awesome-ci/semver"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -34,7 +33,7 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 		}
 	}
 
-	newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
+	newVersion := increaseSemVer(patchLevel, gitVersion)
 	if *isDryRun {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Would writing new release: %s\n", newVersion)
