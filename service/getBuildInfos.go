@@ -2,7 +2,6 @@ package service
 
 import (
 	"awesome-ci/gitcontroller"
-	"awesome-ci/semver"
 	"fmt"
 	"strings"
 )
@@ -33,7 +32,7 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 		} else {
 			gitVersion = gitcontroller.GetLatestReleaseVersion(cienv)
 		}
-		nextVersion = semver.IncreaseSemVer(patchLevel, gitVersion)
+		nextVersion = increaseSemVer(patchLevel, gitVersion)
 	}
 
 	if *format != "" {

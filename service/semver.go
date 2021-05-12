@@ -1,4 +1,4 @@
-package semver
+package service
 
 import (
 	"fmt"
@@ -7,8 +7,7 @@ import (
 	"strings"
 )
 
-// IncreaseSemVer ...
-func IncreaseSemVer(versionNaming string, version string) (incresedVersion string) {
+func increaseSemVer(versionNaming string, version string) (incresedVersion string) {
 	incresedVersion = "0.0.0"
 
 	if strings.HasPrefix(versionNaming, "release") {

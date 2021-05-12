@@ -42,7 +42,7 @@ type parseJsonYamlSet struct {
 }
 
 func init() {
-	flag.StringVar(&cienv, "cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
+	flag.StringVar(&cienv, "cienv", "", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
 	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
 	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
@@ -94,18 +94,18 @@ func main() {
 		os.Exit(0)
 	}
 
-	switch os.Args[1] {
+	switch flag.Args()[0] {
 	case "createRelease":
-		createRelease.fs.Parse(os.Args[2:])
+		createRelease.fs.Parse(flag.Args()[1:])
 		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm, &createRelease.uploadArtifacts)
 	case "getBuildInfos":
-		getBuildInfos.fs.Parse(os.Args[2:])
+		getBuildInfos.fs.Parse(flag.Args()[1:])
 		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
 	case "parseJSON":
-		parseJson.fs.Parse(os.Args[2:])
+		parseJson.fs.Parse(flag.Args()[1:])
 		service.ParseJson(&parseJson.file, &parseJson.value)
 	case "parseYAML":
-		parseYaml.fs.Parse(os.Args[2:])
+		parseYaml.fs.Parse(flag.Args()[1:])
 		service.ParseYaml(&parseYaml.file, &parseYaml.value)
 	default:
 		log.Fatalln("Not a valid Subcommand")
