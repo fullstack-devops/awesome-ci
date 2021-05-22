@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
+func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
 	var gitVersion string
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
@@ -24,7 +24,7 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 		patchLevel = *getVersionIncrease
 	} else {
 		if cienv == "Github" {
-			buildInfos, err := getMergeMessage()
+			buildInfos, err := getLatestCommitMessage()
 			if err != nil {
 				log.Fatal(err)
 			} else {
@@ -40,7 +40,7 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitcontroller.CreateNextGitHubRelease(cienv, newVersion, *uploadArtifacts)
+		gitcontroller.CreateNextGitHubRelease(cienv, getDefaultBranch(), newVersion, preRelease, *uploadArtifacts)
 	}
 
 	if *publishNpm != "" {
