@@ -28,7 +28,7 @@ type NewRelease struct {
 	PreRelease      bool   `json:"prerelease"`
 }
 
-func newGetRequest(endpoint string, token string) map[string]interface{} {
+func newGitHubGetRequest(endpoint string, token string) map[string]interface{} {
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
@@ -58,7 +58,7 @@ func newGetRequest(endpoint string, token string) map[string]interface{} {
 	return result
 }
 
-func newPostRequest(endpoint string, token string, isFile bool, requestBody []byte) map[string]interface{} {
+func newGitHubPostRequest(endpoint string, token string, isFile bool, requestBody []byte) map[string]interface{} {
 	timeout := time.Duration(5 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
@@ -88,9 +88,12 @@ func newPostRequest(endpoint string, token string, isFile bool, requestBody []by
 	return result
 }
 
-func github_getLatestReleaseVersion(conf GitConfiguration) string {
-	url := fmt.Sprintf("%s/repos/%s/releases/latest", conf.ApiUrl, conf.Repository)
-	result := newGetRequest(url, conf.AccessToken)
+func github_getLatestReleaseVersion(apiUrl string, repository string, accessToken string) string {
+	if !strings.HasSuffix(apiUrl, "/") {
+		apiUrl = apiUrl + "/"
+	}
+	url := fmt.Sprintf("%srepos/%s/releases/latest", apiUrl, repository)
+	result := newGitHubGetRequest(url, accessToken)
 
 	var version string
 	if result["message"] == "Not Found" {
@@ -103,22 +106,22 @@ func github_getLatestReleaseVersion(conf GitConfiguration) string {
 	return version
 }
 
-func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion string, uploadArtifacts string) {
+func github_createNextGitHubRelease(apiUrl string, repository string, accessToken string, branch string, newReleaseVersion string, preRelease bool, uploadArtifacts string) {
 	requestBody, err := json.Marshal(NewRelease{
 		TagName:         newReleaseVersion,
-		TargetCommitish: conf.DefaultBranchName,
+		TargetCommitish: strings.Trim(branch, "\n"),
 		Name:            "Release " + newReleaseVersion,
 		Body:            "",
 		Draft:           false,
-		PreRelease:      false,
+		PreRelease:      preRelease,
 	})
 	if err != nil {
-		fmt.Println("(github_createNextGitHubRelease) Error building requestBody", err)
+		fmt.Println("(github_createNextGitHubRelease) Error building requestBody: ", err)
 	}
 
-	url := fmt.Sprintf("%s/repos/%s/releases", conf.ApiUrl, conf.Repository)
+	url := fmt.Sprintf("%s/repos/%s/releases", apiUrl, repository)
 	log.Println("url for creating release:", url)
-	respCreateRelease := newPostRequest(url, conf.AccessToken, false, requestBody)
+	respCreateRelease := newGitHubPostRequest(url, accessToken, false, requestBody)
 	if respCreateRelease["name"] == "Release "+newReleaseVersion {
 		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
 	} else {
@@ -142,7 +145,7 @@ func github_createNextGitHubRelease(conf GitConfiguration, newReleaseVersion str
 			uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
 			newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
 			// log.Println("url for uploading asset to release:", newUploadUrl)
-			respUploadArtifact := newPostRequest(newUploadUrl, conf.AccessToken, true, file)
+			respUploadArtifact := newGitHubPostRequest(newUploadUrl, accessToken, true, file)
 			if respUploadArtifact["name"] == releaseFileName {
 				fmt.Printf("Sucsessfully uploaded asset: %s\n", releaseFileName)
 			} else {

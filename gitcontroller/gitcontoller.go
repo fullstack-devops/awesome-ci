@@ -1,7 +1,6 @@
 package gitcontroller
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -43,6 +42,7 @@ func evaluateEnvironment(overirdecienv string) (cienv string) {
 
 	}
 
+	// goes only at cienv override
 	switch cienv {
 	case "github_runner":
 		_, githubRunnerToken := os.LookupEnv("GITHUB_TOKEN")
@@ -55,44 +55,29 @@ func evaluateEnvironment(overirdecienv string) (cienv string) {
 	}
 }
 
-func determanEnvironment(environment string) GitConfiguration {
-	var conf GitConfiguration
-	switch environment {
-	case "github_runner":
-		return GitConfiguration{
-			ApiUrl:            os.Getenv("GITHUB_API_URL"),
-			Repository:        os.Getenv("GITHUB_REPOSITORY"),
-			AccessToken:       os.Getenv("GITHUB_TOKEN"),
-			DefaultBranchName: getEnv("GIT_DEFAULT_BRANCH_NAME", "main", false),
-		}
-
-	case "custom":
-		fmt.Println("In order to establish a connection to the github please provide the following environment variables:")
-		fmt.Printf("   GIT_HOSTNAME      %s\n", getEnv("GIT_HOSTNAME", "git.daimler.com", false))
-		fmt.Printf("   GIT_API_VERSION   %s\n", getEnv("GIT_API_VERSION", "v3", false))
-		fmt.Printf("   GIT_ORGA          %s\n", getEnv("GIT_ORGA", "not-set", false))
-		fmt.Printf("   GIT_REPO          %s\n", getEnv("GIT_REPO", "not-set", false))
-		fmt.Printf("   GIT_ACCESS_TOKEN  %s\n", getEnv("GIT_ACCESS_TOKEN", "not-set", true))
-	}
-
-	return conf
-}
-
 // GetLatestReleaseVersion
 func GetLatestReleaseVersion(environment string) string {
 	switch evaluateEnvironment(environment) {
 	case "github_runner":
-		conf := determanEnvironment(environment)
-		return github_getLatestReleaseVersion(conf)
+		return github_getLatestReleaseVersion(
+			os.Getenv("GITHUB_API_URL"),
+			os.Getenv("GITHUB_REPOSITORY"),
+			os.Getenv("GITHUB_TOKEN"))
 	}
 	return ""
 }
 
 // GetLatestReleaseVersion
-func CreateNextGitHubRelease(environment string, newReleaseVersion string, uploadArtifacts string) {
+func CreateNextGitHubRelease(environment string, releaseBranch string, newReleaseVersion string, preRelease *bool, uploadArtifacts string) {
 	switch evaluateEnvironment(environment) {
 	case "github_runner":
-		conf := determanEnvironment(environment)
-		github_createNextGitHubRelease(conf, newReleaseVersion, uploadArtifacts)
+		github_createNextGitHubRelease(
+			os.Getenv("GITHUB_API_URL"),
+			os.Getenv("GITHUB_REPOSITORY"),
+			os.Getenv("GITHUB_TOKEN"),
+			releaseBranch,
+			newReleaseVersion,
+			*preRelease,
+			uploadArtifacts)
 	}
 }

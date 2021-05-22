@@ -33,7 +33,7 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func getMergeMessage() (infos infosMergeMessage, err error) {
+func getLatestCommitMessage() (infos infosMergeMessage, err error) {
 	// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
 	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/((feature|bugfix|fix)/(.+)))`
 	r := regexp.MustCompile(regex)
@@ -49,4 +49,8 @@ func getMergeMessage() (infos infosMergeMessage, err error) {
 			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
 			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)")
 	}
+}
+
+func getDefaultBranch() string {
+	return runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
 }

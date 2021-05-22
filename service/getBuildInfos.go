@@ -11,7 +11,7 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 	var infosMergeMessage infosMergeMessage
 	if cienv == "Github" {
 		var err error
-		infosMergeMessage, err = getMergeMessage()
+		infosMergeMessage, err = getLatestCommitMessage()
 		if err != nil {
 			infosMergeMessage.PRNumber = "/"
 		}
