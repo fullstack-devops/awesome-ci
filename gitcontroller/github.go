@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,80 +13,23 @@ import (
 	"time"
 )
 
-type GitConfiguration struct {
+var gitHubSettings GitHubSettings
+
+type GitHubSettings struct {
 	ApiUrl            string
 	Repository        string
 	AccessToken       string
 	DefaultBranchName string
 }
 
-type NewRelease struct {
-	TagName         string `json:"tag_name"`
-	TargetCommitish string `json:"target_commitish"`
-	Name            string `json:"name"`
-	Body            string `json:"Body"`
-	Draft           bool   `json:"draft"`
-	PreRelease      bool   `json:"prerelease"`
-}
+func github_getPrNumberForBranch(branch string) int {
+	url := fmt.Sprintf("%srepos/%s/pulls?state=open&head=%s", gitHubSettings.ApiUrl, gitHubSettings.Repository, branch[:len(branch)-1])
+	respBytes := newGitHubGetRequestUnmapped(url, gitHubSettings.AccessToken)
+	var result []ReposRepoPull
 
-func newGitHubGetRequest(endpoint string, token string) map[string]interface{} {
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
+	json.Unmarshal(respBytes, &result)
 
-	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
-	req.Header.Add("Accept", "application/vnd.github.v3+json")
-	req.Header.Add("Authorization", "token "+token)
-	if err != nil {
-		log.Fatalln("(newGetRequest) Error at building request: ", err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalln("(newGetRequest) Error form response:", err, resp)
-	}
-	defer resp.Body.Close()
-
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
-	if result["message"] == "Bad credentials" {
-		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
-		os.Exit(1)
-	}
-
-	return result
-}
-
-func newGitHubPostRequest(endpoint string, token string, isFile bool, requestBody []byte) map[string]interface{} {
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
-
-	request, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(requestBody))
-	if err != nil {
-		log.Fatalln("(newPostRequest) Error at building request: ", err)
-	}
-	if isFile {
-		request.Header.Set("Content-Type", "application/octet-stream")
-	} else {
-		request.Header.Set("Accept", "application/vnd.github.v3+json")
-	}
-	request.Header.Set("Authorization", "token "+token)
-
-	resp, err := client.Do(request)
-	if err != nil {
-		log.Fatalln("(newPostRequest) Error form response:", err, resp)
-		os.Exit(1)
-	}
-	defer resp.Body.Close()
-
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
-	return result
+	return result[0].Number
 }
 
 func github_getLatestReleaseVersion(apiUrl string, repository string, accessToken string) string {
@@ -173,4 +117,100 @@ func githubErrorPrinter(responseErrors map[string]interface{}) string {
 		}
 	}
 	return outputString
+}
+
+// run web requests
+func newGitHubGetRequestUnmapped(endpoint string, token string) []byte {
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		log.Fatalln("(newGetRequest) Error at building request: ", err)
+	}
+	req.Header.Add("Accept", "application/vnd.github.v3+json")
+	req.Header.Add("Authorization", "token "+token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln("(newGetRequest) Error form response:", err, resp)
+	}
+	defer resp.Body.Close()
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if result["message"] == "Bad credentials" {
+		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
+		os.Exit(1)
+	}
+
+	return b
+}
+
+func newGitHubGetRequest(endpoint string, token string) map[string]interface{} {
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	req.Header.Add("Accept", "application/vnd.github.v3+json")
+	req.Header.Add("Authorization", "token "+token)
+	if err != nil {
+		log.Fatalln("(newGetRequest) Error at building request: ", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln("(newGetRequest) Error form response:", err, resp)
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if result["message"] == "Bad credentials" {
+		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
+		os.Exit(1)
+	}
+
+	return result
+}
+
+func newGitHubPostRequest(endpoint string, token string, isFile bool, requestBody []byte) map[string]interface{} {
+	timeout := time.Duration(5 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	request, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Fatalln("(newPostRequest) Error at building request: ", err)
+	}
+	if isFile {
+		request.Header.Set("Content-Type", "application/octet-stream")
+	} else {
+		request.Header.Set("Accept", "application/vnd.github.v3+json")
+	}
+	request.Header.Set("Authorization", "token "+token)
+
+	resp, err := client.Do(request)
+	if err != nil {
+		log.Fatalln("(newPostRequest) Error form response:", err, resp)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	return result
 }

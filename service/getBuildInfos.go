@@ -9,13 +9,13 @@ import (
 func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *string, format *string) {
 
 	var infosMergeMessage infosMergeMessage
-	if cienv == "Github" {
-		var err error
-		infosMergeMessage, err = getLatestCommitMessage()
-		if err != nil {
-			infosMergeMessage.PRNumber = "/"
-		}
+	//if cienv == "Github" {
+	//	var err error
+	infosMergeMessage, err := getLatestCommitMessage()
+	if err != nil {
+		infosMergeMessage.PRNumber = fmt.Sprint(gitcontroller.GetPrNumberForBranch(getCurrentBranchName()))
 	}
+	//}
 
 	var patchLevel string
 	if *getVersionIncrease != "" {
