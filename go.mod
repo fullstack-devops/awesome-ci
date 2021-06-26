@@ -1,6 +1,6 @@
 module awesome-ci
 
-go 1.15
+go 1.16
 
 require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
