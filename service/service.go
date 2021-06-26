@@ -54,3 +54,7 @@ func getLatestCommitMessage() (infos infosMergeMessage, err error) {
 func getDefaultBranch() string {
 	return runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
 }
+
+func getCurrentBranchName() string {
+	return runcmd(`git branch --show-current`, true)
+}

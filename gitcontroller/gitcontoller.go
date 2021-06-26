@@ -37,6 +37,11 @@ func evaluateEnvironment(overirdecienv string) (cienv string) {
 			if !githubRunnerToken {
 				log.Fatalln("Apparently you are using a GitHub-Runner.\nPlease provide the GITHUB_TOKEN!\nSee ")
 			}
+			gitHubSettings = GitHubSettings{
+				ApiUrl:      os.Getenv("GITHUB_API_URL"),
+				Repository:  os.Getenv("GITHUB_REPOSITORY"),
+				AccessToken: os.Getenv("GITHUB_TOKEN"),
+			}
 			return "github_runner"
 		}
 
@@ -67,7 +72,16 @@ func GetLatestReleaseVersion(environment string) string {
 	return ""
 }
 
-// GetLatestReleaseVersion
+// GetPrNumberForBranch
+func GetPrNumberForBranch(branch string) int {
+	switch evaluateEnvironment("") {
+	case "github_runner":
+		return github_getPrNumberForBranch(branch)
+	}
+	return 0
+}
+
+// CreateNextGitHubRelease
 func CreateNextGitHubRelease(environment string, releaseBranch string, newReleaseVersion string, preRelease *bool, uploadArtifacts string) {
 	switch evaluateEnvironment(environment) {
 	case "github_runner":
