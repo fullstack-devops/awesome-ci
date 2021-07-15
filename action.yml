@@ -1,0 +1,30 @@
+name: 'awesome-ci'
+description: 'Download awesome-ci in the latest version and run commands'
+inputs:
+  run:
+    description: 'Repository name with owner. For example, actions/checkout'
+    required: false
+    default: ${{ github.repository }}
+  ref:
+    description: >
+      The branch, tag or SHA to checkout. When checking out the repository that
+      triggered a workflow, this defaults to the reference or SHA for that
+      event.  Otherwise, uses the default branch.
+    required: false
+  token:
+    description: >
+      Personal access token (PAT) used to fetch the repository. The PAT is configured
+      with the local git config, which enables your scripts to run authenticated git
+      commands. The post-job step removes the PAT.
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get Build infos
+      shell: bash
+      run: |
+        wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
+        chmod +x awesome-ci
+        mv awesome-ci /usr/local/src/awesome-ci
+        ln -s /usr/local/src/awesome-ci /usr/local/bin/
