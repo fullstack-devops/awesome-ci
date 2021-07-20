@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15
+          go-version: 1.16
       - name: Set up awesome-ci
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
@@ -32,8 +32,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}"
-      - name: Test writed Version
+      - name: Print version of awesome-ci
         run: ./awesome-ci -version
+      - name: Integration testing
+        run: ./tools/test.sh
       - name: Create Release
         run: ./awesome-ci createRelease -uploadArtifacts awesome-ci
         env:

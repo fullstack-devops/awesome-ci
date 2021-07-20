@@ -1,6 +1,8 @@
 package main
 
 import (
+	"awesome-ci/ciRunnerController"
+	"awesome-ci/gitOnlineController"
 	"awesome-ci/service"
 	"flag"
 	"fmt"
@@ -11,7 +13,7 @@ import (
 var (
 	cienv         string
 	createRelease CreateReleaseSet
-	getBuildInfos getBuildInfosSet
+	getBuildInfos GetBuildInfosSet
 	parseJson     parseJsonYamlSet
 	parseYaml     parseJsonYamlSet
 	version       string
@@ -25,10 +27,11 @@ type CreateReleaseSet struct {
 	patchLevel      string
 	publishNpm      string
 	uploadArtifacts string
+	preRelease      bool
 	dryRun          bool
 }
 
-type getBuildInfosSet struct {
+type GetBuildInfosSet struct {
 	fs         *flag.FlagSet
 	version    string
 	patchLevel string
@@ -42,7 +45,7 @@ type parseJsonYamlSet struct {
 }
 
 func init() {
-	flag.StringVar(&cienv, "cienv", "Github", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
+	flag.StringVar(&cienv, "cienv", "", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
 	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
 	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
@@ -53,6 +56,7 @@ func init() {
 	createRelease.fs.StringVar(&createRelease.publishNpm, "publishNpm", "", "runs npm publish --tag <createdTag> with custom directory")
 	createRelease.fs.StringVar(&createRelease.uploadArtifacts, "uploadArtifacts", "", "uploads atifacts to release (file)")
 	createRelease.fs.BoolVar(&createRelease.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
+	createRelease.fs.BoolVar(&createRelease.preRelease, "preRelease", false, "creates an github pre release")
 
 	// getNewReleaseVersion
 	getBuildInfos.fs = flag.NewFlagSet("getBuildInfos", flag.ExitOnError)
@@ -94,18 +98,23 @@ func main() {
 		os.Exit(0)
 	}
 
-	switch os.Args[1] {
+	// distribute environment settings
+	environment := service.EvaluateEnvironment()
+	ciRunnerController.CiEnvironment = environment
+	gitOnlineController.CiEnvironment = environment
+
+	switch flag.Args()[0] {
 	case "createRelease":
-		createRelease.fs.Parse(os.Args[2:])
-		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.publishNpm, &createRelease.uploadArtifacts)
+		createRelease.fs.Parse(flag.Args()[1:])
+		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.preRelease, &createRelease.publishNpm, &createRelease.uploadArtifacts)
 	case "getBuildInfos":
-		getBuildInfos.fs.Parse(os.Args[2:])
+		getBuildInfos.fs.Parse(flag.Args()[1:])
 		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
 	case "parseJSON":
-		parseJson.fs.Parse(os.Args[2:])
+		parseJson.fs.Parse(flag.Args()[1:])
 		service.ParseJson(&parseJson.file, &parseJson.value)
 	case "parseYAML":
-		parseYaml.fs.Parse(os.Args[2:])
+		parseYaml.fs.Parse(flag.Args()[1:])
 		service.ParseYaml(&parseYaml.file, &parseYaml.value)
 	default:
 		log.Fatalln("Not a valid Subcommand")
