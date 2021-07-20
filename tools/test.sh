@@ -5,10 +5,10 @@ echo "Start testing ..."
 exit_status="0"
 echo -e "\nTesting JSON values ..."
 
-json1=$(./awesome-ci parseJSON -file ./tests/testdata/values.json -value .value1)
-json2=$(./awesome-ci parseJSON -file ./tests/testdata/values.json -value .value2)
+json1=$($1 parseJSON -file ./tests/testdata/values.json -value .value1)
+json2=$($1 parseJSON -file ./tests/testdata/values.json -value .value2)
 # Not yet implemented
-json3=$(./awesome-ci parseJSON -file ./tests/testdata/values.json -value .deepObject.value1)
+json3=$($1 parseJSON -file ./tests/testdata/values.json -value .deepObject.value1)
 
 if [ "$json1" == "hello" ] && [ "$json2" == "world" ]; then 
     echo "JSON testing successful"
@@ -19,10 +19,10 @@ fi
 
 echo -e "\nTesting YAML values ..."
 
-json1=$(./awesome-ci parseYAML -file ./tests/testdata/values.yaml -value .value1)
-json2=$(./awesome-ci parseYAML -file ./tests/testdata/values.yaml -value .value2)
+json1=$($1 parseYAML -file ./tests/testdata/values.yaml -value .value1)
+json2=$($1 parseYAML -file ./tests/testdata/values.yaml -value .value2)
 # Not yet implemented
-json3=$(./awesome-ci parseYAML -file ./tests/testdata/values.yaml -value .deepObject.value1)
+json3=$($1 parseYAML -file ./tests/testdata/values.yaml -value .deepObject.value1)
 
 if [ "$json1" == "hello" ] && [ "$json2" == "world" ]; then 
     echo "YAML testing successful"
@@ -33,11 +33,11 @@ fi
 
 echo -e "\nTesting output for getBuildInfos ..."
 
-./awesome-ci getBuildInfos
+$1 getBuildInfos
 
 
 echo -e "\nTesting output for createRelease -dry-run ..."
 
-./awesome-ci createRelease -dry-run -patchLevel bugfix
+$1 createRelease -dry-run -patchLevel bugfix
 
 exit $exit_status
