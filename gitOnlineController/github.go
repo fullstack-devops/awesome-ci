@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -61,7 +62,8 @@ func github_createNextGitHubRelease(branch string, newReleaseVersion string, pre
 	if respCreateRelease["name"] == "Release "+newReleaseVersion {
 		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
 	} else {
-		log.Fatalln("Somethin went worng at creating release:\n", githubErrorPrinter(respCreateRelease))
+		fmt.Println("Somethin went worng at creating release:\n", githubErrorPrinter(respCreateRelease))
+		os.Exit(1)
 	}
 
 	if uploadArtifacts != "" {
