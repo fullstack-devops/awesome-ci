@@ -38,18 +38,18 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, newVersion, preRelease, *uploadArtifacts)
-	}
 
-	if *publishNpm != "" {
-		// check if subfolder has slash
-		pathToSource := *publishNpm
-		if !strings.HasSuffix(*publishNpm, "/") {
-			pathToSource = *publishNpm + "/"
+		if *publishNpm != "" {
+			// check if subfolder has slash
+			pathToSource := *publishNpm
+			if !strings.HasSuffix(*publishNpm, "/") {
+				pathToSource = *publishNpm + "/"
+			}
+			fmt.Printf("Puplishing npm packages under path: %s\n", pathToSource)
+			npmPublish(pathToSource, newVersion)
 		}
-		fmt.Printf("Puplishing npm packages under path: %s\n", pathToSource)
-		npmPublish(pathToSource, newVersion)
 	}
+	gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, newVersion, preRelease, isDryRun, uploadArtifacts)
 }
 
 func npmPublish(pathToSource string, newVersion string) {

@@ -82,7 +82,7 @@ jobs:
       - name: Build and write version to binary
         run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}"
       - name: Create Release and upload
-        run: ./awesome-ci createRelease -uploadArtifacts my-compiled-bynary
+        run: ./awesome-ci createRelease -uploadArtifacts file=my-compiled-binary
         env:
           GITHUB_TOKEN: $\{\{ secrets.GITHUB_TOKEN \}\}
 ```
