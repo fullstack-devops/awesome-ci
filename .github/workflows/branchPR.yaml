@@ -24,10 +24,9 @@ jobs:
       - name: Set up awesome-ci
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          mv awesome-ci awesome-ci-latest
-          chmod +x awesome-ci-latest
-      - name: setup build Infos
-        run: ./awesome-ci-latest getBuildInfos
+          chmod +x awesome-ci
+      - name: set build Infos
+        run: ./awesome-ci getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build amd64
