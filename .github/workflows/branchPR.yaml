@@ -41,12 +41,12 @@ jobs:
           GOOS: linux
           GOARCH: arm64
       - name: Print version of awesome-ci
-        run: ./awesome-ci -version
+        run: ./out/awesome-ci -version
       - name: Integration testing
-        run: ./tools/test.sh
+        run: ./tools/test.sh ./out/awesome-ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test writing dummy Release
-        run: ./awesome-ci createRelease -patchLevel bugfix -dry-run
+        run: ./out/awesome-ci createRelease -patchLevel bugfix -dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
