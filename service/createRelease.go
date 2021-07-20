@@ -1,47 +1,44 @@
 package service
 
 import (
-	"awesome-ci/gitcontroller"
-	"awesome-ci/semver"
+	"awesome-ci/gitOnlineController"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, publishNpm *string, uploadArtifacts *string) {
+func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
 	var gitVersion string
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
 	} else {
-		gitVersion = gitcontroller.GetLatestReleaseVersion(cienv)
+		gitVersion = gitOnlineController.GetLatestReleaseVersion()
 	}
 
 	var patchLevel string
 	if *getVersionIncrease != "" {
 		patchLevel = *getVersionIncrease
 	} else {
-		if cienv == "Github" {
-			buildInfos, err := getMergeMessage()
-			if err != nil {
-				log.Fatal(err)
-			} else {
-				patchLevel = buildInfos.PatchLevel
-			}
+		buildInfos, err := getLatestCommitMessage()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		} else {
+			patchLevel = buildInfos.PatchLevel
 		}
 	}
 
-	newVersion := semver.IncreaseSemVer(patchLevel, gitVersion)
+	newVersion := increaseSemVer(patchLevel, gitVersion)
 	if *isDryRun {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Would writing new release: %s\n", newVersion)
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitcontroller.CreateNextGitHubRelease(cienv, newVersion, *uploadArtifacts)
+		gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, newVersion, preRelease, *uploadArtifacts)
 	}
 
 	if *publishNpm != "" {
