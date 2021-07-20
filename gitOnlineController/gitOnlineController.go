@@ -23,13 +23,14 @@ func GetLatestReleaseVersion() string {
 }
 
 // CreateNextGitHubRelease
-func CreateNextGitHubRelease(releaseBranch string, newReleaseVersion string, preRelease *bool, uploadArtifacts string) {
+func CreateNextGitHubRelease(releaseBranch string, newReleaseVersion string, preRelease *bool, isDryRun *bool, uploadArtifacts *string) {
 	switch CiEnvironment.GitType {
 	case "github":
 		github_createNextGitHubRelease(
 			releaseBranch,
 			newReleaseVersion,
-			*preRelease,
+			preRelease,
+			isDryRun,
 			uploadArtifacts)
 	}
 }
