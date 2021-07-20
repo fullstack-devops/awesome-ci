@@ -12,11 +12,12 @@ import (
 func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *string, format *string) {
 
 	var infosMergeMessage infosMergeMessage
+	var branchName = getCurrentBranchName()
 	//if cienv == "Github" {
 	//	var err error
 	infosMergeMessage, err := getLatestCommitMessage()
 	if err != nil {
-		infosMergeMessage.PRNumber = fmt.Sprint(gitOnlineController.GetPrNumberForBranch(getCurrentBranchName()))
+		infosMergeMessage.PRNumber = fmt.Sprint(gitOnlineController.GetPrNumberForBranch(branchName))
 	}
 	//}
 
@@ -25,18 +26,21 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 		patchLevel = *getVersionIncrease
 	} else {
 		patchLevel = infosMergeMessage.PatchLevel
+		if patchLevel == "" {
+			i := strings.Index(branchName, "/")
+			patchLevel = branchName[:i]
+		}
 	}
 
 	var gitVersion string
-	var nextVersion string
 	if strings.Contains(*format, "version") || *format == "" {
 		if *overrideVersion != "" {
 			gitVersion = *overrideVersion
 		} else {
 			gitVersion = gitOnlineController.GetLatestReleaseVersion()
 		}
-		nextVersion = increaseSemVer(patchLevel, gitVersion)
 	}
+	nextVersion := increaseSemVer(patchLevel, gitVersion)
 
 	var envs []string
 	envs = append(envs, fmt.Sprintf("PR=%s", infosMergeMessage.PRNumber))
@@ -71,7 +75,7 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 
 func getLatestCommitMessage() (infos infosMergeMessage, err error) {
 	// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
-	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/(([0-9a-z\-]+)/(.+)))`
+	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z\-]+)/(([0-9a-z\-]+)/(.+)))`
 	r := regexp.MustCompile(regex)
 
 	// mergeMessage := r.FindStringSubmatch(`Merge pull request #3 from test-orga/feature/test-1`)
@@ -92,5 +96,6 @@ func getDefaultBranch() string {
 }
 
 func getCurrentBranchName() string {
-	return runcmd(`git branch --show-current`, true)
+	branchName := runcmd(`git branch --show-current`, true)
+	return strings.ReplaceAll(branchName, "\n", "")
 }
