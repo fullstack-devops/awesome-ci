@@ -15,7 +15,7 @@ import (
 )
 
 func github_getPrNumberForBranch(branch string) int {
-	url := fmt.Sprintf("%srepos/%s/pulls?state=open&head=%s", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, branch[:len(branch)-1])
+	url := fmt.Sprintf("%srepos/%s/pulls?state=open&head=%s", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, branch)
 	respBytes := newGitHubGetRequestUnmapped(url)
 	var result []models.GithubReposRepoPull
 

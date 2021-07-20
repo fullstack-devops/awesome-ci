@@ -15,6 +15,7 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 	//if cienv == "Github" {
 	//	var err error
 	infosMergeMessage, err := getLatestCommitMessage()
+	fmt.Println(infosMergeMessage)
 	if err != nil {
 		infosMergeMessage.PRNumber = fmt.Sprint(gitOnlineController.GetPrNumberForBranch(getCurrentBranchName()))
 	}
@@ -71,7 +72,7 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 
 func getLatestCommitMessage() (infos infosMergeMessage, err error) {
 	// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
-	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/(([0-9a-z\-]+)/(.+)))`
+	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z\-]+)/(([0-9a-z\-]+)/(.+)))`
 	r := regexp.MustCompile(regex)
 
 	// mergeMessage := r.FindStringSubmatch(`Merge pull request #3 from test-orga/feature/test-1`)
@@ -92,5 +93,6 @@ func getDefaultBranch() string {
 }
 
 func getCurrentBranchName() string {
-	return runcmd(`git branch --show-current`, true)
+	branchName := runcmd(`git branch --show-current`, true)
+	return strings.ReplaceAll(branchName, "\n", "")
 }
