@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -25,7 +24,8 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 	} else {
 		buildInfos, err := getLatestCommitMessage()
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		} else {
 			patchLevel = buildInfos.PatchLevel
 		}

@@ -38,6 +38,6 @@ echo -e "\nTesting output for getBuildInfos ..."
 
 echo -e "\nTesting output for createRelease -dry-run ..."
 
-./awesome-ci createRelease -dry-run
+./awesome-ci createRelease -dry-run -patchLevel bugfix
 
 exit $exit_status
