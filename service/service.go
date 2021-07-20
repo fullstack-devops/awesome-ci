@@ -1,11 +1,15 @@
 package service
 
 import (
-	"errors"
+	"awesome-ci/models"
 	"fmt"
+	"log"
+	"os"
 	"os/exec"
-	"regexp"
+	"strings"
 )
+
+var CiEnvironment models.CIEnvironment
 
 type infosMergeMessage struct {
 	PRNumber   string
@@ -33,28 +37,49 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func getLatestCommitMessage() (infos infosMergeMessage, err error) {
-	// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
-	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z-]+)/((feature|bugfix|fix)/(.+)))`
-	r := regexp.MustCompile(regex)
+func EvaluateEnvironment() models.CIEnvironment {
+	// env to check for github_runner
+	githubRunnerApi, githubRunnerApiBool := os.LookupEnv("GITHUB_API_URL")
+	githubRunnerRep, githubRunnerRepBool := os.LookupEnv("GITHUB_REPOSITORY")
+	githubEnv, githubEnvBool := os.LookupEnv("GITHUB_ENV")
+	// env to check for jenkins pipelines
+	gitlabCi, gitlabCiBool := os.LookupEnv("GITLAB_CI")
+	// env to check for jenkins pipelines
+	_, jenkinsUrlBool := os.LookupEnv("JENKINS_URL")
 
-	// mergeMessage := r.FindStringSubmatch(`Merge pull request #3 from test-orga/feature/test-1`)
-	mergeMessage := r.FindStringSubmatch(runcmd(`git log -1 --pretty=format:"%s"`, true))
-	if len(mergeMessage) > 0 {
-		infos.PRNumber = mergeMessage[1]
-		infos.PatchLevel = mergeMessage[5]
-		return infos, nil
+	if githubRunnerApiBool && githubRunnerRepBool && githubEnvBool {
+		CiEnvironment.GitType = "github"
+
+		if !strings.HasSuffix(githubRunnerApi, "/") {
+			githubRunnerApi = githubRunnerApi + "/"
+		}
+		CiEnvironment.GitInfos.ApiUrl = githubRunnerApi
+
+		CiEnvironment.GitInfos.FullRepo = githubRunnerRep
+		CiEnvironment.GitInfos.Orga = strings.Split(githubRunnerRep, "/")[0]
+		CiEnvironment.GitInfos.Repo = strings.Split(githubRunnerRep, "/")[1]
+		githubRunnerToken, githubRunnerTokenBool := os.LookupEnv("GITHUB_TOKEN")
+		if !githubRunnerTokenBool {
+			log.Fatalln("Apparently you are using a GitHub-Runner.\nPlease provide the GITHUB_TOKEN!\nSee https://docs.github.com/en/actions/reference/authentication-in-a-workflow#using-the-github_token-in-a-workflow\nand https://eksrvb.github.io/awesome-ci/examples/github_actions.html")
+		}
+		CiEnvironment.GitInfos.ApiToken = githubRunnerToken
+
+		CiEnvironment.RunnerType = "github_runner"
+		CiEnvironment.RunnerInfo.EnvFile = githubEnv
+
+		return CiEnvironment
+	} else if jenkinsUrlBool {
+		fmt.Println("Note: Jenkins is not fully implemented yet")
+		CiEnvironment.GitType = "github"
+
+		CiEnvironment.RunnerType = "jenkins"
+	} else if gitlabCiBool && gitlabCi == "true" {
+		fmt.Println("Note: GitLab CI is not fully implemented yet")
 	} else {
-		return infos, errors.New("No merge message found pls make shure this regex matches: " + regex +
-			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
-			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)")
+		log.Fatalln("Could not determan running environment!\nFor support please open an Issue at https://github.com/eksrvb/awesome-ci/issues")
 	}
-}
 
-func getDefaultBranch() string {
-	return runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
-}
+	CiEnvironment.GitInfos.DefaultBranchName = getDefaultBranch()
 
-func getCurrentBranchName() string {
-	return runcmd(`git branch --show-current`, true)
+	return CiEnvironment
 }
