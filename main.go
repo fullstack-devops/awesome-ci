@@ -1,6 +1,8 @@
 package main
 
 import (
+	"awesome-ci/ciRunnerController"
+	"awesome-ci/gitOnlineController"
 	"awesome-ci/service"
 	"flag"
 	"fmt"
@@ -95,6 +97,11 @@ func main() {
 		fmt.Println(version)
 		os.Exit(0)
 	}
+
+	// distribute environment settings
+	environment := service.EvaluateEnvironment()
+	ciRunnerController.CiEnvironment = environment
+	gitOnlineController.CiEnvironment = environment
 
 	switch flag.Args()[0] {
 	case "createRelease":

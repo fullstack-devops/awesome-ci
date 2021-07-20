@@ -1,6 +1,7 @@
-package gitcontroller
+package gitOnlineController
 
 import (
+	"awesome-ci/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -8,36 +9,27 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
 
-var gitHubSettings GitHubSettings
-
-type GitHubSettings struct {
-	ApiUrl            string
-	Repository        string
-	AccessToken       string
-	DefaultBranchName string
-}
-
 func github_getPrNumberForBranch(branch string) int {
-	url := fmt.Sprintf("%srepos/%s/pulls?state=open&head=%s", gitHubSettings.ApiUrl, gitHubSettings.Repository, branch[:len(branch)-1])
-	respBytes := newGitHubGetRequestUnmapped(url, gitHubSettings.AccessToken)
-	var result []ReposRepoPull
+	url := fmt.Sprintf("%srepos/%s/pulls?state=open&head=%s", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, branch[:len(branch)-1])
+	respBytes := newGitHubGetRequestUnmapped(url)
+	var result []models.GithubReposRepoPull
 
 	json.Unmarshal(respBytes, &result)
 
-	return result[0].Number
+	if len(result) > 0 {
+		return result[0].Number
+	} else {
+		return 0
+	}
 }
 
-func github_getLatestReleaseVersion(apiUrl string, repository string, accessToken string) string {
-	if !strings.HasSuffix(apiUrl, "/") {
-		apiUrl = apiUrl + "/"
-	}
-	url := fmt.Sprintf("%srepos/%s/releases/latest", apiUrl, repository)
-	result := newGitHubGetRequest(url, accessToken)
+func github_getLatestReleaseVersion() string {
+	url := fmt.Sprintf("%srepos/%s/releases/latest", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo)
+	result := newGitHubGetRequest(url, CiEnvironment.GitInfos.ApiToken)
 
 	var version string
 	if result["message"] == "Not Found" {
@@ -50,8 +42,8 @@ func github_getLatestReleaseVersion(apiUrl string, repository string, accessToke
 	return version
 }
 
-func github_createNextGitHubRelease(apiUrl string, repository string, accessToken string, branch string, newReleaseVersion string, preRelease bool, uploadArtifacts string) {
-	requestBody, err := json.Marshal(NewRelease{
+func github_createNextGitHubRelease(branch string, newReleaseVersion string, preRelease bool, uploadArtifacts string) {
+	requestBody, err := json.Marshal(models.GithubNewRelease{
 		TagName:         newReleaseVersion,
 		TargetCommitish: strings.Trim(branch, "\n"),
 		Name:            "Release " + newReleaseVersion,
@@ -63,14 +55,13 @@ func github_createNextGitHubRelease(apiUrl string, repository string, accessToke
 		fmt.Println("(github_createNextGitHubRelease) Error building requestBody: ", err)
 	}
 
-	url := fmt.Sprintf("%s/repos/%s/releases", apiUrl, repository)
-	log.Println("url for creating release:", url)
-	respCreateRelease := newGitHubPostRequest(url, accessToken, false, requestBody)
+	url := fmt.Sprintf("%srepos/%s/releases", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo)
+
+	respCreateRelease := newGitHubPostRequest(url, CiEnvironment.GitInfos.ApiToken, false, requestBody)
 	if respCreateRelease["name"] == "Release "+newReleaseVersion {
 		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
 	} else {
 		log.Fatalln("Somethin went worng at creating release:\n", githubErrorPrinter(respCreateRelease))
-		os.Exit(1)
 	}
 
 	if uploadArtifacts != "" {
@@ -89,12 +80,11 @@ func github_createNextGitHubRelease(apiUrl string, repository string, accessToke
 			uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
 			newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
 			// log.Println("url for uploading asset to release:", newUploadUrl)
-			respUploadArtifact := newGitHubPostRequest(newUploadUrl, accessToken, true, file)
+			respUploadArtifact := newGitHubPostRequest(newUploadUrl, CiEnvironment.GitInfos.ApiToken, true, file)
 			if respUploadArtifact["name"] == releaseFileName {
 				fmt.Printf("Sucsessfully uploaded asset: %s\n", releaseFileName)
 			} else {
 				log.Fatalln("Somethin went wrong at uploading asset:", respUploadArtifact["message"])
-				os.Exit(1)
 			}
 		}
 	}
@@ -119,44 +109,8 @@ func githubErrorPrinter(responseErrors map[string]interface{}) string {
 	return outputString
 }
 
-// run web requests
-func newGitHubGetRequestUnmapped(endpoint string, token string) []byte {
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
-
-	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
-	if err != nil {
-		log.Fatalln("(newGetRequest) Error at building request: ", err)
-	}
-	req.Header.Add("Accept", "application/vnd.github.v3+json")
-	req.Header.Add("Authorization", "token "+token)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalln("(newGetRequest) Error form response:", err, resp)
-	}
-	defer resp.Body.Close()
-
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
-	if result["message"] == "Bad credentials" {
-		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
-		os.Exit(1)
-	}
-
-	return b
-}
-
 func newGitHubGetRequest(endpoint string, token string) map[string]interface{} {
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(15 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -179,14 +133,13 @@ func newGitHubGetRequest(endpoint string, token string) map[string]interface{} {
 
 	if result["message"] == "Bad credentials" {
 		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
-		os.Exit(1)
 	}
 
 	return result
 }
 
 func newGitHubPostRequest(endpoint string, token string, isFile bool, requestBody []byte) map[string]interface{} {
-	timeout := time.Duration(5 * time.Second)
+	timeout := time.Duration(15 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
@@ -205,7 +158,6 @@ func newGitHubPostRequest(endpoint string, token string, isFile bool, requestBod
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Fatalln("(newPostRequest) Error form response:", err, resp)
-		os.Exit(1)
 	}
 	defer resp.Body.Close()
 
@@ -213,4 +165,39 @@ func newGitHubPostRequest(endpoint string, token string, isFile bool, requestBod
 	json.NewDecoder(resp.Body).Decode(&result)
 
 	return result
+}
+
+// run web requests to github x
+func newGitHubGetRequestUnmapped(endpoint string) []byte {
+	timeout := time.Duration(15 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		log.Fatalln("(newGetRequest) Error at building request: ", err)
+	}
+	req.Header.Add("Accept", "application/vnd.github.v3+json")
+	req.Header.Add("Authorization", "token "+CiEnvironment.GitInfos.ApiToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln("(newGetRequest) Error form response:", err, resp)
+	}
+	defer resp.Body.Close()
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if result["message"] == "Bad credentials" {
+		log.Fatalln("Please provide the right credentials and make sure you have the right access rights!")
+	}
+
+	return b
 }
