@@ -30,8 +30,16 @@ jobs:
         run: ./awesome-ci-latest getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build
-        run: go build -v -ldflags "-X main.version=$NEXT_VERSION"
+      - name: Build amd64
+        run: go build -v -ldflags "-X main.version=$NEXT_VERSION" -o out/awesome-ci
+        env:
+          GOOS: linux
+          GOARCH: amd64
+      - name: Build arm64
+        run: go build -v -ldflags "-X main.version=$NEXT_VERSION" -o out/awesome-ci-arm64
+        env:
+          GOOS: linux
+          GOARCH: arm64
       - name: Print version of awesome-ci
         run: ./awesome-ci -version
       - name: Integration testing
