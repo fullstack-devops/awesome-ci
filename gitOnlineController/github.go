@@ -43,50 +43,65 @@ func github_getLatestReleaseVersion() string {
 	return version
 }
 
-func github_createNextGitHubRelease(branch string, newReleaseVersion string, preRelease bool, uploadArtifacts string) {
-	requestBody, err := json.Marshal(models.GithubNewRelease{
-		TagName:         newReleaseVersion,
-		TargetCommitish: strings.Trim(branch, "\n"),
-		Name:            "Release " + newReleaseVersion,
-		Body:            "",
-		Draft:           false,
-		PreRelease:      preRelease,
-	})
-	if err != nil {
-		fmt.Println("(github_createNextGitHubRelease) Error building requestBody: ", err)
+func github_createNextGitHubRelease(branch string, newReleaseVersion string, preRelease *bool, isDryRun *bool, uploadArtifacts *string) {
+	var respCreateRelease map[string]interface{}
+
+	if !*isDryRun {
+		requestBody, err := json.Marshal(models.GithubNewRelease{
+			TagName:         newReleaseVersion,
+			TargetCommitish: strings.Trim(branch, "\n"),
+			Name:            "Release " + newReleaseVersion,
+			Body:            "",
+			Draft:           false,
+			PreRelease:      *preRelease,
+		})
+		if err != nil {
+			fmt.Println("(github_createNextGitHubRelease) Error building requestBody: ", err)
+		}
+
+		url := fmt.Sprintf("%srepos/%s/releases", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo)
+
+		respCreateRelease = newGitHubPostRequest(url, CiEnvironment.GitInfos.ApiToken, false, requestBody)
+		if respCreateRelease["name"] == "Release "+newReleaseVersion {
+			fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
+		} else {
+			fmt.Println("Somethin went worng at creating release:\n", githubErrorPrinter(respCreateRelease))
+			os.Exit(1)
+		}
+
 	}
 
-	url := fmt.Sprintf("%srepos/%s/releases", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo)
+	if *uploadArtifacts != "" {
+		fmt.Printf("Uploading artifacts from: %s\n", *uploadArtifacts)
 
-	respCreateRelease := newGitHubPostRequest(url, CiEnvironment.GitInfos.ApiToken, false, requestBody)
-	if respCreateRelease["name"] == "Release "+newReleaseVersion {
-		fmt.Println("Release " + newReleaseVersion + " sucsessfully created")
-	} else {
-		fmt.Println("Somethin went worng at creating release:\n", githubErrorPrinter(respCreateRelease))
-		os.Exit(1)
-	}
-
-	if uploadArtifacts != "" {
-		log.Printf("Uploading artifacts from: %s\n", uploadArtifacts)
-
-		artifactsToUpload := strings.Split(uploadArtifacts, ",")
+		artifactsToUpload := strings.Split(*uploadArtifacts, ",")
 
 		for _, artifact := range artifactsToUpload {
-			file, err := ioutil.ReadFile(artifact)
-			if err != nil {
-				log.Fatal(err)
+			var sanFilename, fixedUploadUrl, releaseFileName string
+			var data []byte
+			if strings.HasPrefix(artifact, "file=") {
+				sanFilename = artifact[5:]
+				fmt.Println("Uploading file: ", sanFilename)
+				var err error
+				data, err = ioutil.ReadFile(sanFilename)
+				if err != nil {
+					log.Fatal(err)
+				}
+				releaseFileName = sanFilename[strings.LastIndex(sanFilename, "/")+1:]
+				uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
+				fixedUploadUrl = strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
+
 			}
 
-			releaseFileName := artifact[strings.LastIndex(artifact, "/")+1:]
-
-			uploadUrl := fmt.Sprintf("%s", respCreateRelease["upload_url"])
-			newUploadUrl := strings.Replace(uploadUrl, "{?name,label}", "?name="+releaseFileName, -1)
-			// log.Println("url for uploading asset to release:", newUploadUrl)
-			respUploadArtifact := newGitHubPostRequest(newUploadUrl, CiEnvironment.GitInfos.ApiToken, true, file)
-			if respUploadArtifact["name"] == releaseFileName {
-				fmt.Printf("Sucsessfully uploaded asset: %s\n", releaseFileName)
+			if *isDryRun {
+				fmt.Println("Would upload artifact ", sanFilename, " as ", releaseFileName)
 			} else {
-				log.Fatalln("Somethin went wrong at uploading asset:", respUploadArtifact["message"])
+				respUploadArtifact := newGitHubPostRequest(fixedUploadUrl, CiEnvironment.GitInfos.ApiToken, true, data)
+				if respUploadArtifact["name"] == releaseFileName {
+					fmt.Printf("Sucsessfully uploaded asset: %s\n", releaseFileName)
+				} else {
+					log.Fatalln("Somethin went wrong at uploading asset:", respUploadArtifact["message"])
+				}
 			}
 		}
 	}

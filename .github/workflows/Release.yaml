@@ -30,13 +30,23 @@ jobs:
         run: echo "::set-output name=new_version::$(./awesome-ci-latest getBuildInfos -format version)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build
-        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}"
+      - name: Build amd64
+        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}" -o out/awesome-ci
+        env:
+          GOOS: linux
+          GOARCH: amd64
+      - name: Build arm64
+        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}" -o out/awesome-ci-arm64
+        env:
+          GOOS: linux
+          GOARCH: arm64
       - name: Print version of awesome-ci
-        run: ./awesome-ci -version
+        run: ./out/awesome-ci -version
       - name: Integration testing
-        run: ./tools/test.sh
+        run: ./tools/test.sh ./out/awesome-ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
-        run: ./awesome-ci createRelease -uploadArtifacts awesome-ci
+        run: ./awesome-ci createRelease -uploadArtifacts "out/awesome-ci,out/awesome-ci-arm64"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
