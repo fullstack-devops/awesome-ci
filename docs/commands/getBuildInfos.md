@@ -39,7 +39,8 @@ Possible infos are: `patchLevel`, `pr`, `version`, `nextVersion`
 
 ```bash
 awesome-ci getBuildInfos -patchLevel feature -version 1.0.0
-# Output:
+
+#### Info output:
 Pull Request: 17
 Current release version: 1.0.0
 Patch level: feature
@@ -49,4 +50,23 @@ Possible new release version: 1.1.0
 awesome-ci getBuildInfos -patchLevel feature -version 1.0.0 -format "pr,next_version"
 # Output:
 17,1.1.0
+```
+
+### Special to github actions
+
+With a github action, all available information is always set as environment variables.
+
+```bash
+#### Setting Env variables:
+PR=17
+ORGA=eksrvb
+REPO=playground
+VERSION=0.4.4
+NEXT_VERSION=0.4.5
+
+#### Info output:
+Pull Request: 17
+Current release version: 0.4.4
+Patch level: bugfix
+Possible new release version: 0.4.5
 ```

@@ -74,13 +74,12 @@ jobs:
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
           chmod +x awesome-ci
-      - name: get next Version for project build
-        id: version_step
-        run: echo "::set-output name=new_version::$(./awesome-ci getBuildInfos -format version)"
+      - name: set environment variables
+        run: awesome-ci getBuildInfos
         env:
           GITHUB_TOKEN: $\{\{ secrets.GITHUB_TOKEN \}\}
       - name: Build and write version to binary
-        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}"
+        run: go build -v -ldflags "-X main.version=$NEXT_VERSION"
       - name: Create Release and upload
         run: ./awesome-ci createRelease -uploadArtifacts file=my-compiled-binary
         env:
