@@ -31,4 +31,13 @@ else
     exit_status="1"
 fi
 
+echo -e "\nTesting output for getBuildInfos ..."
+
+./awesome-ci getBuildInfos
+
+
+echo -e "\nTesting output for createRelease -dry-run ..."
+
+./awesome-ci createRelease -dry-run
+
 exit $exit_status
