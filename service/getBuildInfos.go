@@ -12,12 +12,12 @@ import (
 func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *string, format *string) {
 
 	var infosMergeMessage infosMergeMessage
+	var branchName = getCurrentBranchName()
 	//if cienv == "Github" {
 	//	var err error
 	infosMergeMessage, err := getLatestCommitMessage()
-	fmt.Println(infosMergeMessage)
 	if err != nil {
-		infosMergeMessage.PRNumber = fmt.Sprint(gitOnlineController.GetPrNumberForBranch(getCurrentBranchName()))
+		infosMergeMessage.PRNumber = fmt.Sprint(gitOnlineController.GetPrNumberForBranch(branchName))
 	}
 	//}
 
@@ -26,18 +26,21 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 		patchLevel = *getVersionIncrease
 	} else {
 		patchLevel = infosMergeMessage.PatchLevel
+		if patchLevel == "" {
+			i := strings.Index(branchName, "/")
+			patchLevel = branchName[:i]
+		}
 	}
 
 	var gitVersion string
-	var nextVersion string
 	if strings.Contains(*format, "version") || *format == "" {
 		if *overrideVersion != "" {
 			gitVersion = *overrideVersion
 		} else {
 			gitVersion = gitOnlineController.GetLatestReleaseVersion()
 		}
-		nextVersion = increaseSemVer(patchLevel, gitVersion)
 	}
+	nextVersion := increaseSemVer(patchLevel, gitVersion)
 
 	var envs []string
 	envs = append(envs, fmt.Sprintf("PR=%s", infosMergeMessage.PRNumber))
