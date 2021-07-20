@@ -47,6 +47,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
-        run: ./awesome-ci createRelease -uploadArtifacts "out/awesome-ci,out/awesome-ci-arm64"
+        run: ./out/awesome-ci createRelease -uploadArtifacts "out/awesome-ci,out/awesome-ci-arm64"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
