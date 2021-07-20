@@ -23,20 +23,18 @@ jobs:
       - name: Set up awesome-ci
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          mv awesome-ci awesome-ci-latest
-          chmod +x awesome-ci-latest
-      - name: get next Version for project build
-        id: version_step
-        run: echo "::set-output name=new_version::$(./awesome-ci-latest getBuildInfos -format version)"
+          chmod +x awesome-ci
+      - name: set build Infos
+        run: ./awesome-ci getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build amd64
-        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}" -o out/awesome-ci
+        run: go build -v -ldflags "-X main.version=$NEXT_VERSION" -o out/awesome-ci
         env:
           GOOS: linux
           GOARCH: amd64
       - name: Build arm64
-        run: go build -v -ldflags "-X main.version=${{ steps.version_step.outputs.new_version }}" -o out/awesome-ci-arm64
+        run: go build -v -ldflags "-X main.version=$NEXT_VERSION" -o out/awesome-ci-arm64
         env:
           GOOS: linux
           GOARCH: arm64
@@ -47,6 +45,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
-        run: ./out/awesome-ci createRelease -uploadArtifacts "out/awesome-ci,out/awesome-ci-arm64"
+        run: ./out/awesome-ci createRelease -uploadArtifacts "file=out/awesome-ci,file=out/awesome-ci-arm64"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
