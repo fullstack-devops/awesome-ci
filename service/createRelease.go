@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/gitcontroller"
+	"awesome-ci/gitOnlineController"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,20 +16,18 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 	if *overrideVersion != "" {
 		gitVersion = *overrideVersion
 	} else {
-		gitVersion = gitcontroller.GetLatestReleaseVersion(cienv)
+		gitVersion = gitOnlineController.GetLatestReleaseVersion()
 	}
 
 	var patchLevel string
 	if *getVersionIncrease != "" {
 		patchLevel = *getVersionIncrease
 	} else {
-		if cienv == "Github" {
-			buildInfos, err := getLatestCommitMessage()
-			if err != nil {
-				log.Fatal(err)
-			} else {
-				patchLevel = buildInfos.PatchLevel
-			}
+		buildInfos, err := getLatestCommitMessage()
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			patchLevel = buildInfos.PatchLevel
 		}
 	}
 
@@ -40,7 +38,7 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", newVersion)
-		gitcontroller.CreateNextGitHubRelease(cienv, getDefaultBranch(), newVersion, preRelease, *uploadArtifacts)
+		gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, newVersion, preRelease, *uploadArtifacts)
 	}
 
 	if *publishNpm != "" {
