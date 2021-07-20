@@ -27,7 +27,7 @@ jobs:
           mv awesome-ci awesome-ci-latest
           chmod +x awesome-ci-latest
       - name: setup build Infos
-        run: ./awesome-ci-latest getBuildInfos -patchLevel bugfix
+        run: ./awesome-ci-latest getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
@@ -36,6 +36,8 @@ jobs:
         run: ./awesome-ci -version
       - name: Integration testing
         run: ./tools/test.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test writing dummy Release
         run: ./awesome-ci createRelease -patchLevel bugfix -dry-run
         env:
