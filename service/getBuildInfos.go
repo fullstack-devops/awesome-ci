@@ -37,6 +37,8 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 
 	var envs []string
 	envs = append(envs, fmt.Sprintf("ACI_PR=%d", prNumber))
+	envs = append(envs, fmt.Sprintf("ACI_PR_SHA=%s", prInfos.Head.Sha))
+	envs = append(envs, fmt.Sprintf("ACI_PR_SHA_SHORT=%s", prInfos.Head.Sha[:8]))
 	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", CiEnvironment.GitInfos.Orga))
 	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", CiEnvironment.GitInfos.Repo))
 	envs = append(envs, fmt.Sprintf("ACI_BRANCH=%s", branchName))
