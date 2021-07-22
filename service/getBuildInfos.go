@@ -119,10 +119,11 @@ func getNameRevHead() (pr int, branchName string, err error) {
 	fmt.Println(len(regexIsPRMached), regexIsPRMached)
 	regexIsBranchMached := regexIsBranch.FindStringSubmatch(gitNameRevHead)
 	fmt.Println(len(regexIsBranchMached), regexIsBranchMached)
-	if len(regexIsPRMached) > 2 {
+	if len(regexIsPRMached) > 1 {
 		pr, err = strconv.Atoi(regexIsPRMached[1])
-	} else if len(regexIsBranchMached) > 2 {
+	} else if len(regexIsBranchMached) > 1 {
 		branchName = regexIsPRMached[1]
+		pr = gitOnlineController.GetPrNumberForBranch(branchName)
 	} else {
 		err = errors.New("no branch or pr in 'git name-rev head' found")
 	}
