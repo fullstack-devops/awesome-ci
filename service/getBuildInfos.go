@@ -82,7 +82,6 @@ func getPRInfos() (prInfos models.GitHubPullRequest, prNumber int, err error) {
 			return
 		}
 	}
-	fmt.Println(prNumber)
 	prInfos, err = gitOnlineController.GetPrInfos(prNumber)
 	if err != nil {
 		fmt.Println("could not load any information about the current pull request", err)
@@ -117,9 +116,7 @@ func getNameRevHead() (pr int, branchName string, err error) {
 	regexIsBranch := regexp.MustCompile(`HEAD (.*)`)
 
 	regexIsPRMached := regexIsPR.FindStringSubmatch(gitNameRevHead)
-	fmt.Println(len(regexIsPRMached), regexIsPRMached)
 	regexIsBranchMached := regexIsBranch.FindStringSubmatch(gitNameRevHead)
-	fmt.Println(len(regexIsBranchMached), regexIsBranchMached)
 	if len(regexIsPRMached) > 1 {
 		pr, err = strconv.Atoi(regexIsPRMached[1])
 	} else if len(regexIsBranchMached) > 1 {

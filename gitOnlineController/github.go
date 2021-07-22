@@ -31,8 +31,7 @@ func github_getPrNumberForBranch(branch string) int {
 func github_getPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err error) {
 	url := fmt.Sprintf("%srepos/%s/pulls%d", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, prNumber)
 	respBytes := newGitHubGetRequestUnmapped(url)
-	var result []models.GithubReposRepoPull
-	err = json.Unmarshal(respBytes, &result)
+	err = json.Unmarshal(respBytes, &prInfos)
 	return
 }
 
