@@ -11,11 +11,11 @@ nav_order: 2
 awesome-ci createRelease [subcommand-option]
 ```
 
-| Subcommand option   | Description                                                                   |
-| ------------------- | ----------------------------------------------------------------------------- |
-| `-version`          | overrides any version from git and patches the given string.                  |
-| `-patchLevel`       | overrides the patchLevel. make shure our following the alias definition.      |
-| `-format`           | pastes the required output to the console. This can be extracted to variables |
+| Subcommand option | Description                                                                   |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `-version`        | overrides any version from git and patches the given string.                  |
+| `-patchLevel`     | overrides the patchLevel. make shure our following the alias definition.      |
+| `-format`         | pastes the required output to the console. This can be extracted to variables |
 
 ### -version
 
@@ -46,6 +46,7 @@ Current release version: 1.0.0
 Patch level: feature
 Possible new release version: 1.1.0
 ```
+
 ```bash
 awesome-ci getBuildInfos -patchLevel feature -version 1.0.0 -format "pr,next_version"
 # Output:
@@ -54,15 +55,17 @@ awesome-ci getBuildInfos -patchLevel feature -version 1.0.0 -format "pr,next_ver
 
 ### Special to github actions
 
-With a github action, all available information is always set as environment variables.
+With a github action, all available information is always set as environment variables. Once set the Variables ale awailable in all steps and runners.
 
 ```bash
 #### Setting Env variables:
-PR=17
-ORGA=eksrvb
-REPO=playground
-VERSION=0.4.4
-NEXT_VERSION=0.4.5
+ACI_PR=17
+ACI_ORGA=eksrvb
+ACI_REPO=playground
+ACI_BRANCH=bugfix/test-pr
+ACI_PATCH_LEVEL=bugfix
+ACI_VERSION=0.4.4
+ACI_NEXT_VERSION=0.4.5
 
 #### Info output:
 Pull Request: 17

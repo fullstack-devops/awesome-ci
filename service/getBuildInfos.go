@@ -3,6 +3,7 @@ package service
 import (
 	"awesome-ci/ciRunnerController"
 	"awesome-ci/gitOnlineController"
+	"awesome-ci/models"
 	"errors"
 	"fmt"
 	"regexp"
@@ -11,37 +12,28 @@ import (
 )
 
 func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *string, format *string) {
+	var prInfos models.GitHubPullRequest
 
-	var infosMergeMessage infosMergeMessage
-	pr, branchName, err := getNameRevHead()
+	prNumber, branchName, err := getNameRevHead()
 	if err != nil {
 		panic(err)
 	}
 
-	if pr != 0 {
-		prInfos, err := gitOnlineController.GetPrInfos(pr)
-		if err != nil {
-			fmt.Println("could not load any information about the current pull request", err)
-		}
-		branchName = prInfos.Head.Ref
+	if prNumber == 0 {
+		prNumber, err = getPrFromMergeMessage()
 	}
-	//if cienv == "Github" {
-	//	var err error
-	infosMergeMessage, err = getLatestCommitMessage()
+
+	prInfos, err = gitOnlineController.GetPrInfos(prNumber)
 	if err != nil {
-
+		fmt.Println("could not load any information about the current pull request", err)
 	}
-	//}
+	branchName = prInfos.Head.Ref
 
-	var patchLevel string
+	i := strings.Index(branchName, "/")
+	patchLevel := branchName[:i]
+
 	if *getVersionIncrease != "" {
 		patchLevel = *getVersionIncrease
-	} else {
-		patchLevel = infosMergeMessage.PatchLevel
-		if patchLevel == "" {
-			i := strings.Index(branchName, "/")
-			patchLevel = branchName[:i]
-		}
 	}
 
 	var gitVersion string
@@ -55,16 +47,18 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 	nextVersion := increaseSemVer(patchLevel, gitVersion)
 
 	var envs []string
-	envs = append(envs, fmt.Sprintf("PR=%s", infosMergeMessage.PRNumber))
-	envs = append(envs, fmt.Sprintf("ORGA=%s", CiEnvironment.GitInfos.Orga))
-	envs = append(envs, fmt.Sprintf("REPO=%s", CiEnvironment.GitInfos.Repo))
-	envs = append(envs, fmt.Sprintf("VERSION=%s", gitVersion))
-	envs = append(envs, fmt.Sprintf("NEXT_VERSION=%s", nextVersion))
+	envs = append(envs, fmt.Sprintf("ACI_PR=%d", prNumber))
+	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", CiEnvironment.GitInfos.Orga))
+	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", CiEnvironment.GitInfos.Repo))
+	envs = append(envs, fmt.Sprintf("ACI_BRANCH=%s", branchName))
+	envs = append(envs, fmt.Sprintf("ACI_PATCH_LEVEL=%s", patchLevel))
+	envs = append(envs, fmt.Sprintf("ACI_VERSION=%s", gitVersion))
+	envs = append(envs, fmt.Sprintf("ACI_NEXT_VERSION=%s", nextVersion))
 	ciRunnerController.SetEnvVariables(envs)
 
 	if *format != "" {
 		replacer := strings.NewReplacer(
-			"pr", infosMergeMessage.PRNumber,
+			"pr", fmt.Sprint(prNumber),
 			"version", gitVersion,
 			"next_version", nextVersion,
 			"patchLevel", patchLevel)
@@ -78,7 +72,7 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 		}
 
 		fmt.Println("\n#### Info output:")
-		fmt.Printf("Pull Request: %s\n", infosMergeMessage.PRNumber)
+		fmt.Printf("Pull Request: %d\n", prNumber)
 		fmt.Printf("Current release version: %s\n", gitVersion)
 		fmt.Printf("Patch level: %s\n", patchLevel)
 		fmt.Printf("Possible new release version: %s\n", nextVersion)
@@ -98,6 +92,20 @@ func getLatestCommitMessage() (infos infosMergeMessage, err error) {
 		return infos, nil
 	} else {
 		return infos, errors.New("No merge message found pls make shure this regex matches: " + regex +
+			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
+			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)")
+	}
+}
+
+func getPrFromMergeMessage() (pr int, err error) {
+	regex := `.*#([0-9]+).*`
+	r := regexp.MustCompile(regex)
+
+	mergeMessage := r.FindStringSubmatch(runcmd(`git log -1 --pretty=format:"%s"`, true))
+	if len(mergeMessage) > 1 {
+		return strconv.Atoi(mergeMessage[1])
+	} else {
+		return 0, errors.New("No PR found in merge message pls make shure this regex matches: " + regex +
 			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
 			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)")
 	}
