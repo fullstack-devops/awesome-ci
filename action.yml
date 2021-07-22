@@ -1,0 +1,12 @@
+name: "Setup awesome-ci tooling"
+description: "Setup awesome-ci as a CI tool in the latest stable version"
+runs:
+  using: "composite"
+  steps:
+    - name: Get Build infos
+      shell: bash
+      run: |
+        wget $DL_URL -O awesome-ci
+        echo "PATH=$PATH:$(pwd)/awesome-ci" >> $GITHUB_ENV
+      env:
+        DL_URL: https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
