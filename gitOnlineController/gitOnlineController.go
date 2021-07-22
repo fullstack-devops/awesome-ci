@@ -5,12 +5,12 @@ import "awesome-ci/models"
 var CiEnvironment models.CIEnvironment
 
 // GetPrNumberForBranch
-func GetPrNumberForBranch(branch string) int {
+func GetPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err error) {
 	switch CiEnvironment.GitType {
 	case "github":
-		return github_getPrNumberForBranch(branch)
+		prInfos, err = github_getPrInfos(prNumber)
 	}
-	return 0
+	return
 }
 
 // GetLatestReleaseVersion
