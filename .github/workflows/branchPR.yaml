@@ -25,6 +25,11 @@ jobs:
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
           chmod +x awesome-ci
+      - name: debuging git
+        run: |
+          echo "git name-rev HEAD: $(git name-rev HEAD)"
+          echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
+          echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: set build Infos
         run: ./awesome-ci getBuildInfos
         env:
