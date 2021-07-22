@@ -10,34 +10,34 @@ import (
 	"strings"
 )
 
-func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
+func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
+
+	prInfos, _, err := getPRInfos()
+	if err != nil {
+		panic(err)
+	}
+
+	branchName := prInfos.Head.Ref
+	patchLevel := branchName[:strings.Index(branchName, "/")]
+
+	if *patchLevelOverr != "" {
+		patchLevel = *patchLevelOverr
+	}
+
 	var gitVersion string
-	if *overrideVersion != "" {
-		gitVersion = *overrideVersion
+	if *versionOverr != "" {
+		gitVersion = *versionOverr
 	} else {
 		gitVersion = gitOnlineController.GetLatestReleaseVersion()
 	}
+	nextVersion := increaseSemVer(patchLevel, gitVersion)
 
-	var patchLevel string
-	if *getVersionIncrease != "" {
-		patchLevel = *getVersionIncrease
-	} else {
-		buildInfos, err := getLatestCommitMessage()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		} else {
-			patchLevel = buildInfos.PatchLevel
-		}
-	}
-
-	newVersion := increaseSemVer(patchLevel, gitVersion)
 	if *isDryRun {
 		fmt.Printf("Old version: %s\n", gitVersion)
-		fmt.Printf("Would writing new release: %s\n", newVersion)
+		fmt.Printf("Would writing new release: %s\n", nextVersion)
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
-		fmt.Printf("Writing new release: %s\n", newVersion)
+		fmt.Printf("Writing new release: %s\n", nextVersion)
 
 		if *publishNpm != "" {
 			// check if subfolder has slash
@@ -46,13 +46,13 @@ func CreateRelease(cienv string, overrideVersion *string, getVersionIncrease *st
 				pathToSource = *publishNpm + "/"
 			}
 			fmt.Printf("Puplishing npm packages under path: %s\n", pathToSource)
-			npmPublish(pathToSource, newVersion)
+			npmPublish(pathToSource, nextVersion)
 		}
 	}
-	gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, newVersion, preRelease, isDryRun, uploadArtifacts)
+	gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, nextVersion, preRelease, isDryRun, uploadArtifacts)
 }
 
-func npmPublish(pathToSource string, newVersion string) {
+func npmPublish(pathToSource string, nextVersion string) {
 
 	// opening package.json
 	jsonFile, err := os.Open(pathToSource + "package.json")
@@ -65,7 +65,7 @@ func npmPublish(pathToSource string, newVersion string) {
 	var result map[string]interface{}
 	json.NewDecoder(jsonFile).Decode(&result)
 
-	result["version"] = newVersion
+	result["version"] = nextVersion
 
 	b, err := json.MarshalIndent(result, "", " ")
 	if err != nil {
@@ -80,7 +80,7 @@ func npmPublish(pathToSource string, newVersion string) {
 		os.Exit(2)
 	}
 
-	command := exec.Command("npm", "publish", pathToSource, "--tag", fmt.Sprintf("%s@%s", result["name"], newVersion))
+	command := exec.Command("npm", "publish", pathToSource, "--tag", fmt.Sprintf("%s@%s", result["name"], nextVersion))
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 	// Run the command
