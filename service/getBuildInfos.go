@@ -82,6 +82,7 @@ func getPRInfos() (prInfos models.GitHubPullRequest, prNumber int, err error) {
 			return
 		}
 	}
+	fmt.Println(prNumber)
 	prInfos, err = gitOnlineController.GetPrInfos(prNumber)
 	if err != nil {
 		fmt.Println("could not load any information about the current pull request", err)
