@@ -25,7 +25,7 @@ jobs:
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
           chmod +x awesome-ci
-      - name: debuging git
+      - name: debugging git
         run: |
           echo "git name-rev HEAD: $(git name-rev HEAD)"
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
