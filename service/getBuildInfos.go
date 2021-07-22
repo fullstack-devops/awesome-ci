@@ -6,18 +6,30 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *string, format *string) {
 
 	var infosMergeMessage infosMergeMessage
-	var branchName = getCurrentBranchName()
+	pr, branchName, err := getNameRevHead()
+	if err != nil {
+		panic(err)
+	}
+
+	if pr != 0 {
+		prInfos, err := gitOnlineController.GetPrInfos(pr)
+		if err != nil {
+			fmt.Println("could not load any information about the current pull request", err)
+		}
+		branchName = prInfos.Head.Ref
+	}
 	//if cienv == "Github" {
 	//	var err error
-	infosMergeMessage, err := getLatestCommitMessage()
+	infosMergeMessage, err = getLatestCommitMessage()
 	if err != nil {
-		infosMergeMessage.PRNumber = fmt.Sprint(gitOnlineController.GetPrNumberForBranch(branchName))
+
 	}
 	//}
 
@@ -96,6 +108,26 @@ func getDefaultBranch() string {
 }
 
 func getCurrentBranchName() string {
-	branchName := runcmd(`git branch --show-current`, true)
+	branchName := runcmd(`git name-rev HEAD`, true)
 	return strings.ReplaceAll(branchName, "\n", "")
+}
+
+func getNameRevHead() (pr int, branchName string, err error) {
+	pr = 0
+	branchName = ""
+	gitNameRevHead := runcmd(`git name-rev HEAD`, true)
+
+	regexIsPR := regexp.MustCompile(`HEAD remotes/pull/([0-9]+)/.*`)
+	regexIsBranch := regexp.MustCompile(`HEAD (.*)`)
+
+	regexIsPRMached := regexIsPR.FindStringSubmatch(gitNameRevHead)
+	regexIsBranchMached := regexIsBranch.FindStringSubmatch(gitNameRevHead)
+	if len(regexIsPRMached) > 2 {
+		pr, err = strconv.Atoi(regexIsPRMached[1])
+	} else if len(regexIsBranchMached) > 2 {
+		branchName = regexIsPRMached[1]
+	} else {
+		err = errors.New("no branch or pr in 'git name-rev head' found")
+	}
+	return
 }

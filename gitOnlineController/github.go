@@ -14,18 +14,12 @@ import (
 	"time"
 )
 
-func github_getPrNumberForBranch(branch string) int {
-	url := fmt.Sprintf("%srepos/%s/pulls?state=open&head=%s", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, branch)
+func github_getPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err error) {
+	url := fmt.Sprintf("%srepos/%s/pulls%d", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, prNumber)
 	respBytes := newGitHubGetRequestUnmapped(url)
 	var result []models.GithubReposRepoPull
-
-	json.Unmarshal(respBytes, &result)
-
-	if len(result) > 0 {
-		return result[0].Number
-	} else {
-		return 0
-	}
+	err = json.Unmarshal(respBytes, &result)
+	return
 }
 
 func github_getLatestReleaseVersion() string {
