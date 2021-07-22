@@ -35,12 +35,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build amd64
-        run: go build -v -ldflags "-X main.version=$NEXT_VERSION" -o out/awesome-ci
+        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci
         env:
           GOOS: linux
           GOARCH: amd64
       - name: Build arm64
-        run: go build -v -ldflags "-X main.version=$NEXT_VERSION" -o out/awesome-ci-arm64
+        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci-arm64
         env:
           GOOS: linux
           GOARCH: arm64
