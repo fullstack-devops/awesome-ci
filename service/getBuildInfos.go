@@ -11,35 +11,24 @@ import (
 	"strings"
 )
 
-func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *string, format *string) {
-	var prInfos models.GitHubPullRequest
+func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, format *string) {
 
-	prNumber, branchName, err := getNameRevHead()
+	prInfos, prNumber, err := getPRInfos()
 	if err != nil {
 		panic(err)
 	}
 
-	if prNumber == 0 {
-		prNumber, err = getPrFromMergeMessage()
-	}
+	branchName := prInfos.Head.Ref
+	patchLevel := branchName[:strings.Index(branchName, "/")]
 
-	prInfos, err = gitOnlineController.GetPrInfos(prNumber)
-	if err != nil {
-		fmt.Println("could not load any information about the current pull request", err)
-	}
-	branchName = prInfos.Head.Ref
-
-	i := strings.Index(branchName, "/")
-	patchLevel := branchName[:i]
-
-	if *getVersionIncrease != "" {
-		patchLevel = *getVersionIncrease
+	if *patchLevelOverr != "" {
+		patchLevel = *patchLevelOverr
 	}
 
 	var gitVersion string
 	if strings.Contains(*format, "version") || *format == "" {
-		if *overrideVersion != "" {
-			gitVersion = *overrideVersion
+		if *versionOverr != "" {
+			gitVersion = *versionOverr
 		} else {
 			gitVersion = gitOnlineController.GetLatestReleaseVersion()
 		}
@@ -77,6 +66,27 @@ func GetBuildInfos(cienv string, overrideVersion *string, getVersionIncrease *st
 		fmt.Printf("Patch level: %s\n", patchLevel)
 		fmt.Printf("Possible new release version: %s\n", nextVersion)
 	}
+}
+
+func getPRInfos() (prInfos models.GitHubPullRequest, prNumber int, err error) {
+	prNumber = 0
+	// Try to get PR number from 'git name-rev HEAD'
+	prNumber, _, err = getNameRevHead()
+	if err != nil {
+		return
+	}
+	// Try to get PR number from merge message 'merge'
+	if prNumber == 0 {
+		prNumber, err = getPrFromMergeMessage()
+		if err != nil {
+			return
+		}
+	}
+	prInfos, err = gitOnlineController.GetPrInfos(prNumber)
+	if err != nil {
+		fmt.Println("could not load any information about the current pull request", err)
+	}
+	return
 }
 
 func getLatestCommitMessage() (infos infosMergeMessage, err error) {
