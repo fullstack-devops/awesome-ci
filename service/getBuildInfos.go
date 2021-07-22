@@ -89,24 +89,6 @@ func getPRInfos() (prInfos models.GitHubPullRequest, prNumber int, err error) {
 	return
 }
 
-func getLatestCommitMessage() (infos infosMergeMessage, err error) {
-	// Output: []string {FullString, PR, FullBranch, Orga, branch, branchBegin, restOfBranch}
-	regex := `[a-zA-z ]+#([0-9]+) from (([0-9a-zA-Z\-]+)/(([0-9a-z\-]+)/(.+)))`
-	r := regexp.MustCompile(regex)
-
-	// mergeMessage := r.FindStringSubmatch(`Merge pull request #3 from test-orga/feature/test-1`)
-	mergeMessage := r.FindStringSubmatch(runcmd(`git log -1 --pretty=format:"%s"`, true))
-	if len(mergeMessage) > 0 {
-		infos.PRNumber = mergeMessage[1]
-		infos.PatchLevel = mergeMessage[5]
-		return infos, nil
-	} else {
-		return infos, errors.New("No merge message found pls make shure this regex matches: " + regex +
-			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
-			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)")
-	}
-}
-
 func getPrFromMergeMessage() (pr int, err error) {
 	regex := `.*#([0-9]+).*`
 	r := regexp.MustCompile(regex)
@@ -125,11 +107,6 @@ func getDefaultBranch() string {
 	return runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
 }
 
-func getCurrentBranchName() string {
-	branchName := runcmd(`git name-rev HEAD`, true)
-	return strings.ReplaceAll(branchName, "\n", "")
-}
-
 func getNameRevHead() (pr int, branchName string, err error) {
 	pr = 0
 	branchName = ""
@@ -139,7 +116,9 @@ func getNameRevHead() (pr int, branchName string, err error) {
 	regexIsBranch := regexp.MustCompile(`HEAD (.*)`)
 
 	regexIsPRMached := regexIsPR.FindStringSubmatch(gitNameRevHead)
+	fmt.Println(len(regexIsPRMached), regexIsPRMached)
 	regexIsBranchMached := regexIsBranch.FindStringSubmatch(gitNameRevHead)
+	fmt.Println(len(regexIsBranchMached), regexIsBranchMached)
 	if len(regexIsPRMached) > 2 {
 		pr, err = strconv.Atoi(regexIsPRMached[1])
 	} else if len(regexIsBranchMached) > 2 {
