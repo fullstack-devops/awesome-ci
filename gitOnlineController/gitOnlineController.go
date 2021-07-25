@@ -13,6 +13,14 @@ func GetPrNumberForBranch(branch string) int {
 	return 0
 }
 
+func GetIssueComments(issueNumber int) (issueComments []models.GitHubIssueComment, err error) {
+	switch CiEnvironment.GitType {
+	case "github":
+		issueComments, err = github_getIssueComments(issueNumber)
+	}
+	return
+}
+
 // GetPrNumberForBranch
 func GetPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err error) {
 	switch CiEnvironment.GitType {
