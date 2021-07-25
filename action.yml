@@ -7,6 +7,7 @@ runs:
       shell: bash
       run: |
         wget $DL_URL -O awesome-ci
-        echo "PATH=$PATH:$(pwd)/awesome-ci" >> $GITHUB_ENV
+        chmod +x awesome-ci
+        echo "PATH=$(pwd)/awesome-ci:$PATH" >> $GITHUB_ENV
       env:
         DL_URL: https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
