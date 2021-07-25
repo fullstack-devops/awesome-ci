@@ -12,7 +12,7 @@ import (
 
 func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
 
-	prInfos, _, err := getPRInfos()
+	prInfos, prNumber, err := getPRInfos()
 	if err != nil {
 		panic(err)
 	}
@@ -22,6 +22,11 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 
 	if *patchLevelOverr != "" {
 		patchLevel = *patchLevelOverr
+	}
+
+	// if an comment exists with aci=major, make a major version!
+	if detectIfMajor(prNumber) {
+		patchLevel = "major"
 	}
 
 	var gitVersion string
