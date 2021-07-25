@@ -32,7 +32,7 @@ The patching of the version only takes effect if the merged branch begins with t
 | MINOR  | feature                                     | 1.2.3 => 1.3.0  |
 | PATCH  | bugfix                                      | 1.2.3 => 1.2.4  |
 
-![awesome-ci workflow](https://github.com/eksrvb/awesome-ci/blob/main/docs/aci-workflow.drawio.png "awesome-ci workflow")
+![awesome-ci workflow](aci-workflow.drawio.png "awesome-ci workflow")
 
 > Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and __GitLab CI__
 
