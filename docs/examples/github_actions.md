@@ -33,14 +33,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
+      - uses: eksrvb/awesome-ci@main
       - uses: actions/setup-node@v2
         with:
           node-version: '14.x'
           registry-url: 'https://registry.npmjs.org'
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
       - name: install npm packages
         run: npm install
       - name: package Applikation
@@ -66,14 +63,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - uses: eksrvb/awesome-ci@main
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.15
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
       - name: set environment variables
         run: awesome-ci getBuildInfos
         env:
