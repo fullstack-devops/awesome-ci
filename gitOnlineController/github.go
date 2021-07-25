@@ -35,6 +35,13 @@ func github_getPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err erro
 	return
 }
 
+func github_getIssueComments(issueNumber int) (issueComments []models.GitHubIssueComment, err error) {
+	url := fmt.Sprintf("%srepos/%s/issues/%d/comments", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, issueNumber)
+	respBytes := newGitHubGetRequestUnmapped(url)
+	err = json.Unmarshal(respBytes, &issueComments)
+	return
+}
+
 func github_getLatestReleaseVersion() string {
 	url := fmt.Sprintf("%srepos/%s/releases/latest", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo)
 	result := newGitHubGetRequest(url, CiEnvironment.GitInfos.ApiToken)
