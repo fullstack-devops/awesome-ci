@@ -21,6 +21,11 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 	branchName := prInfos.Head.Ref
 	patchLevel := branchName[:strings.Index(branchName, "/")]
 
+	// if an comment exists with aci=major, make a major version!
+	if detectIfMajor(prNumber) {
+		patchLevel = "major"
+	}
+
 	if *patchLevelOverr != "" {
 		patchLevel = *patchLevelOverr
 	}
@@ -128,4 +133,19 @@ func getNameRevHead() (pr int, branchName string, err error) {
 		err = errors.New("no branch or pr in 'git name-rev head' found:" + gitNameRevHead)
 	}
 	return
+}
+
+func detectIfMajor(issueNumber int) bool {
+	resBool := false
+	issueComments, err := gitOnlineController.GetIssueComments(issueNumber)
+	if err != nil {
+		panic(err)
+	}
+	for _, comment := range issueComments {
+		if strings.Contains(comment.Body, "aci=major") {
+			resBool = true
+			break
+		}
+	}
+	return resBool
 }
