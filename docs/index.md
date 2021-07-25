@@ -28,7 +28,7 @@ The patching of the version only takes effect if the merged branch begins with t
 
 | SemVer | supported aliases                           | version example |
 | ------ | ------------------------------------------- | --------------- |
-| MAJOR  | `comment PR`                                | 1.2.3 => 2.0.0  |
+| MAJOR  | [comment PR`](#major-specialties)           | 1.2.3 => 2.0.0  |
 | MINOR  | feature                                     | 1.2.3 => 1.3.0  |
 | PATCH  | bugfix                                      | 1.2.3 => 1.2.4  |
 
@@ -36,6 +36,9 @@ The patching of the version only takes effect if the merged branch begins with t
 
 > Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and __GitLab CI__
 
+### Major specialties
+
+To create a major release, a member of the repos with write permissions must write a comment with the content `aci=major`. awesome-ci then creates a major release.
 
 ### Requiered and optional environment variables
 
