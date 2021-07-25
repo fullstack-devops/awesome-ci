@@ -28,11 +28,11 @@ The patching of the version only takes effect if the merged branch begins with t
 
 | SemVer | supported aliases                           | version example |
 | ------ | ------------------------------------------- | --------------- |
-| MAJOR  | major                                       | 1.2.3 => 2.0.0  |
-| MINOR  | minor, feature                              | 1.2.3 => 1.3.0  |
-| PATCH  | patch, bugfix, fix                          | 1.2.3 => 1.2.4  |
+| MAJOR  | `comment PR`                                | 1.2.3 => 2.0.0  |
+| MINOR  | feature                                     | 1.2.3 => 1.3.0  |
+| PATCH  | bugfix                                      | 1.2.3 => 1.2.4  |
 
-
+![awesome-ci workflow](https://github.com/eksrvb/awesome-ci/blob/main/docs/aci-workflow.drawio.png "awesome-ci workflow")
 
 > Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and __GitLab CI__
 
