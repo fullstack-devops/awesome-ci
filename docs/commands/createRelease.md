@@ -43,4 +43,13 @@ This can be useful in connection with `-version` when creating a manual release.
 awesome-ci createRelease -patchLevel feature
 ```
 
+### -uploadArtifacts
+
+The `-patchLevel` option can updload a single or multiple artifacts.
+
+However, you must choose the format of the artefacts.
+
+eg.: `-uploadArtifacts "file=path/to/file,file=path/to/second/file"`
+
+
 ... more documentation to be done ;)
