@@ -12,37 +12,14 @@ import (
 
 func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
 
-	prInfos, prNumber, err := getPRInfos()
-	if err != nil {
-		panic(err)
-	}
-
-	branchName := prInfos.Head.Ref
-	patchLevel := branchName[:strings.Index(branchName, "/")]
-
-	if *patchLevelOverr != "" {
-		patchLevel = *patchLevelOverr
-	}
-
-	// if an comment exists with aci=major, make a major version!
-	if detectIfMajor(prNumber) {
-		patchLevel = "major"
-	}
-
-	var gitVersion string
-	if *versionOverr != "" {
-		gitVersion = *versionOverr
-	} else {
-		gitVersion = gitOnlineController.GetLatestReleaseVersion()
-	}
-	nextVersion := increaseSemVer(patchLevel, gitVersion)
+	_, _, buildInfos := setBuildInfos(versionOverr, patchLevelOverr)
 
 	if *isDryRun {
-		fmt.Printf("Old version: %s\n", gitVersion)
-		fmt.Printf("Would writing new release: %s\n", nextVersion)
+		fmt.Printf("Old version: %s\n", buildInfos.Version)
+		fmt.Printf("Would writing new release: %s\n", buildInfos.NextVersion)
 	} else {
-		fmt.Printf("Old version: %s\n", gitVersion)
-		fmt.Printf("Writing new release: %s\n", nextVersion)
+		fmt.Printf("Old version: %s\n", buildInfos.Version)
+		fmt.Printf("Writing new release: %s\n", buildInfos.NextVersion)
 
 		if *publishNpm != "" {
 			// check if subfolder has slash
@@ -51,10 +28,10 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 				pathToSource = *publishNpm + "/"
 			}
 			fmt.Printf("Puplishing npm packages under path: %s\n", pathToSource)
-			npmPublish(pathToSource, nextVersion)
+			npmPublish(pathToSource, buildInfos.NextVersion)
 		}
 	}
-	gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, nextVersion, preRelease, isDryRun, uploadArtifacts)
+	gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, buildInfos.NextVersion, preRelease, isDryRun, uploadArtifacts)
 }
 
 func npmPublish(pathToSource string, nextVersion string) {

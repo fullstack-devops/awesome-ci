@@ -6,6 +6,7 @@ import (
 	"awesome-ci/models"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,66 +14,73 @@ import (
 
 func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, format *string) {
 
-	prInfos, prNumber, err := getPRInfos()
-	if err != nil {
-		panic(err)
-	}
-
-	branchName := prInfos.Head.Ref
-	patchLevel := branchName[:strings.Index(branchName, "/")]
-
-	// if an comment exists with aci=major, make a major version!
-	if detectIfMajor(prNumber) {
-		patchLevel = "major"
-	}
-
-	if *patchLevelOverr != "" {
-		patchLevel = *patchLevelOverr
-	}
-
-	var gitVersion string
-	if strings.Contains(*format, "version") || *format == "" {
-		if *versionOverr != "" {
-			gitVersion = *versionOverr
-		} else {
-			gitVersion = gitOnlineController.GetLatestReleaseVersion()
-		}
-	}
-	nextVersion := increaseSemVer(patchLevel, gitVersion)
-
-	var envs []string
-	envs = append(envs, fmt.Sprintf("ACI_PR=%d", prNumber))
-	envs = append(envs, fmt.Sprintf("ACI_PR_SHA=%s", prInfos.Head.Sha))
-	envs = append(envs, fmt.Sprintf("ACI_PR_SHA_SHORT=%s", prInfos.Head.Sha[:8]))
-	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", strings.ToLower(CiEnvironment.GitInfos.Orga)))
-	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", strings.ToLower(CiEnvironment.GitInfos.Repo)))
-	envs = append(envs, fmt.Sprintf("ACI_BRANCH=%s", branchName))
-	envs = append(envs, fmt.Sprintf("ACI_PATCH_LEVEL=%s", patchLevel))
-	envs = append(envs, fmt.Sprintf("ACI_VERSION=%s", gitVersion))
-	envs = append(envs, fmt.Sprintf("ACI_NEXT_VERSION=%s", nextVersion))
-	ciRunnerController.SetEnvVariables(envs)
+	envs, _, buildInfos := setBuildInfos(versionOverr, patchLevelOverr)
 
 	if *format != "" {
 		replacer := strings.NewReplacer(
-			"pr", fmt.Sprint(prNumber),
-			"version", gitVersion,
-			"next_version", nextVersion,
-			"patchLevel", patchLevel)
+			"pr", fmt.Sprint(buildInfos.PrNumber),
+			"version", buildInfos.Version,
+			"next_version", buildInfos.NextVersion,
+			"patchLevel", buildInfos.PatchLevel)
 		output := replacer.Replace(*format)
 		fmt.Print(output)
 	} else {
 		fmt.Println("#### Setting Env variables:")
 
 		for _, env := range envs {
-			fmt.Println(env)
+			fmt.Println(env.Key + "=" + env.Value)
 		}
 
 		fmt.Println("\n#### Info output:")
-		fmt.Printf("Pull Request: %d\n", prNumber)
-		fmt.Printf("Current release version: %s\n", gitVersion)
-		fmt.Printf("Patch level: %s\n", patchLevel)
-		fmt.Printf("Possible new release version: %s\n", nextVersion)
+		fmt.Printf("Pull Request: %d\n", buildInfos.PrNumber)
+		fmt.Printf("Current release version: %s\n", buildInfos.Version)
+		fmt.Printf("Patch level: %s\n", buildInfos.PatchLevel)
+		fmt.Printf("Possible new release version: %s\n", buildInfos.NextVersion)
 	}
+}
+
+func setBuildInfos(versionOverr *string, patchLevelOverr *string) (envs []models.BuildEnvironmentVariable, prInfos models.GitHubPullRequest, buildInfos models.BuildInfos) {
+	prInfos, prNumber, err := getPRInfos()
+	if err != nil {
+		panic(err)
+	}
+	buildInfos.PrNumber = prNumber
+
+	branchName := prInfos.Head.Ref
+	buildInfos.PatchLevel = branchName[:strings.Index(branchName, "/")]
+
+	// if an comment exists with aci=major, make a major version!
+	if detectIfMajor(buildInfos.PrNumber) {
+		buildInfos.PatchLevel = "major"
+	}
+
+	if *patchLevelOverr != "" {
+		buildInfos.PatchLevel = *patchLevelOverr
+	}
+
+	if *versionOverr != "" {
+		buildInfos.Version = *versionOverr
+	} else {
+		buildInfos.Version = gitOnlineController.GetLatestReleaseVersion()
+	}
+	buildInfos.NextVersion = increaseSemVer(buildInfos.PatchLevel, buildInfos.Version)
+
+	envs = []models.BuildEnvironmentVariable{
+		{Key: "ACI_PR", Value: fmt.Sprintf("%d", buildInfos.PrNumber)},
+		{Key: "ACI_PR_SHA", Value: prInfos.Head.Sha},
+		{Key: "ACI_PR_SHA_SHORT", Value: prInfos.Head.Sha[:8]},
+		{Key: "ACI_ORGA", Value: strings.ToLower(CiEnvironment.GitInfos.Orga)},
+		{Key: "ACI_REPO", Value: strings.ToLower(CiEnvironment.GitInfos.Repo)},
+		{Key: "ACI_BRANCH", Value: branchName},
+		{Key: "ACI_PATCH_LEVEL", Value: buildInfos.PatchLevel},
+		{Key: "ACI_VERSION", Value: buildInfos.Version},
+		{Key: "ACI_NEXT_VERSION", Value: buildInfos.NextVersion},
+	}
+	ciRunnerController.SetEnvVariables(envs)
+	for _, env := range envs {
+		os.Setenv(env.Key, env.Value)
+	}
+	return
 }
 
 func getPRInfos() (prInfos models.GitHubPullRequest, prNumber int, err error) {

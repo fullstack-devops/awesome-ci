@@ -30,7 +30,9 @@ jobs:
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: set build Infos
-        run: ./awesome-ci getBuildInfos
+        run: |
+          ./awesome-ci getBuildInfos
+          export | grep "ACI_"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build amd64

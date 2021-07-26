@@ -16,3 +16,15 @@ type CIEnvironment struct {
 		EnvFile string
 	}
 }
+
+type BuildEnvironmentVariable struct {
+	Key   string
+	Value string
+}
+
+type BuildInfos struct {
+	PrNumber    int
+	Version     string
+	NextVersion string
+	PatchLevel  string
+}
