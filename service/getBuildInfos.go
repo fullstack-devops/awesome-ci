@@ -144,7 +144,7 @@ func detectIfMajor(issueNumber int) bool {
 	for _, comment := range issueComments {
 		// Must have permission in the repo to create a major version
 		// MANNEQUIN|NONE https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
-		if strings.Contains(comment.Body, "aci=major") && strings.Contains("MANNEQUIN|NONE", comment.AuthorAssociation) {
+		if strings.Contains(comment.Body, "aci=major") && !strings.Contains("MANNEQUIN|NONE", comment.AuthorAssociation) {
 			resBool = true
 			break
 		}
