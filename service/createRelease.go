@@ -85,7 +85,7 @@ func npmPublish(pathToSource string, nextVersion string) {
 		os.Exit(2)
 	}
 
-	command := exec.Command("npm", "publish", pathToSource, "--tag", fmt.Sprintf("%s@%s", result["name"], nextVersion))
+	command := exec.Command("npm", "publish", pathToSource, "--tag", nextVersion, "--tag latest")
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 	// Run the command
