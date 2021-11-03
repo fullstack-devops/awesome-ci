@@ -3,12 +3,13 @@ package service
 import (
 	"awesome-ci/ciRunnerController"
 	"awesome-ci/gitOnlineController"
-	"awesome-ci/models"
 	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/google/go-github/v39/github"
 )
 
 func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, format *string) {
@@ -18,7 +19,7 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 		panic(err)
 	}
 
-	branchName := prInfos.Head.Ref
+	branchName := *prInfos.Head.Ref
 	patchLevel := branchName[:strings.Index(branchName, "/")]
 
 	// if an comment exists with aci=major, make a major version!
@@ -40,11 +41,12 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 	}
 	nextVersion := increaseSemVer(patchLevel, gitVersion)
 
+	prSHA := *prInfos.Head.SHA
 	var envs []string
 	envs = append(envs, fmt.Sprintf("ACI_PR=%d", prNumber))
-	envs = append(envs, fmt.Sprintf("ACI_PR_SHA=%s", prInfos.Head.Sha))
-	envs = append(envs, fmt.Sprintf("ACI_PR_SHA_SHORT=%s", prInfos.Head.Sha[:8]))
-	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", strings.ToLower(CiEnvironment.GitInfos.Orga)))
+	envs = append(envs, fmt.Sprintf("ACI_PR_SHA=%s", prSHA))
+	envs = append(envs, fmt.Sprintf("ACI_PR_SHA_SHORT=%s", prSHA[:8]))
+	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", strings.ToLower(CiEnvironment.GitInfos.Owner)))
 	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", strings.ToLower(CiEnvironment.GitInfos.Repo)))
 	envs = append(envs, fmt.Sprintf("ACI_BRANCH=%s", branchName))
 	envs = append(envs, fmt.Sprintf("ACI_PATCH_LEVEL=%s", patchLevel))
@@ -75,7 +77,7 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 	}
 }
 
-func getPRInfos() (prInfos models.GitHubPullRequest, prNumber int, err error) {
+func getPRInfos() (prInfos *github.PullRequest, prNumber int, err error) {
 	prNumber = 0
 	// Try to get PR number from 'git name-rev HEAD'
 	prNumber, _, err = getNameRevHead()

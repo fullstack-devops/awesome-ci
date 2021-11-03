@@ -6,11 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 )
 
@@ -26,13 +23,6 @@ func github_getPrNumberForBranch(branch string) int {
 	} else {
 		return 0
 	}
-}
-
-func github_getPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err error) {
-	url := fmt.Sprintf("%srepos/%s/pulls/%d", CiEnvironment.GitInfos.ApiUrl, CiEnvironment.GitInfos.FullRepo, prNumber)
-	respBytes := newGitHubGetRequestUnmapped(url)
-	err = json.Unmarshal(respBytes, &prInfos)
-	return
 }
 
 func github_getIssueComments(issueNumber int) (issueComments []models.GitHubIssueComment, err error) {
@@ -57,13 +47,13 @@ func github_getLatestReleaseVersion() string {
 	return version
 }
 
-func github_createNextGitHubRelease(branch string, newReleaseVersion string, preRelease *bool, isDryRun *bool, uploadArtifacts *string) {
+/* func github_createNextGitHubRelease(branch string, newReleaseVersion string, preRelease *bool, isDryRun *bool, uploadArtifacts *string) {
 	var respCreateRelease map[string]interface{}
 
 	if !*isDryRun {
 		requestBody, err := json.Marshal(models.GithubNewRelease{
 			TagName:         newReleaseVersion,
-			TargetCommitish: strings.Trim(branch, "\n"),
+			TargetCommitish: CiEnvironment.GitInfos.DefaultBranchName,
 			Name:            "Release " + newReleaseVersion,
 			Body:            "",
 			Draft:           false,
@@ -119,7 +109,7 @@ func github_createNextGitHubRelease(branch string, newReleaseVersion string, pre
 			}
 		}
 	}
-}
+} */
 
 func githubErrorPrinter(responseErrors map[string]interface{}) string {
 	var errors []map[string]interface{}

@@ -1,8 +1,18 @@
 package gitOnlineController
 
-import "awesome-ci/models"
+import (
+	"awesome-ci/models"
+	"context"
+	"log"
 
-var CiEnvironment models.CIEnvironment
+	"github.com/google/go-github/github"
+	"github.com/xanzy/go-gitlab"
+)
+
+var (
+	gitHubCtx     = context.Background()
+	CiEnvironment models.CIEnvironment
+)
 
 // GetPrNumberForBranch
 func GetPrNumberForBranch(branch string) int {
@@ -22,10 +32,10 @@ func GetIssueComments(issueNumber int) (issueComments []models.GitHubIssueCommen
 }
 
 // GetPrNumberForBranch
-func GetPrInfos(prNumber int) (prInfos models.GitHubPullRequest, err error) {
+func GetPrInfos(prNumber int) (pullRequest *github.PullRequest, err error) {
 	switch CiEnvironment.GitType {
 	case "github":
-		prInfos, err = github_getPrInfos(prNumber)
+		pullRequest, _, err = CiEnvironment.GithubClient.PullRequests.Get(gitHubCtx, CiEnvironment.GitInfos.Owner, CiEnvironment.GitInfos.Repo, prNumber)
 	}
 	return
 }
@@ -40,14 +50,43 @@ func GetLatestReleaseVersion() string {
 }
 
 // CreateNextGitHubRelease
-func CreateNextGitHubRelease(releaseBranch string, newReleaseVersion string, preRelease *bool, isDryRun *bool, uploadArtifacts *string) {
-	switch CiEnvironment.GitType {
-	case "github":
-		github_createNextGitHubRelease(
-			releaseBranch,
-			newReleaseVersion,
-			preRelease,
-			isDryRun,
-			uploadArtifacts)
+func CreateNextGitRelease(releaseObject interface{}, uploadArtifacts *string) (err error) {
+	switch rel := releaseObject.(type) {
+	case github.RepositoryRelease:
+		repositoryRelease, _, err := CiEnvironment.GithubClient.Repositories.CreateRelease(
+			gitHubCtx,
+			CiEnvironment.GitInfos.Owner,
+			CiEnvironment.GitInfos.Repo,
+			&rel)
+		if err != nil {
+			return err
+		}
+
+		if uploadArtifacts != nil {
+			filesAndInfos, err := getFilesAndInfos(*uploadArtifacts)
+			if err != nil {
+				return err
+			}
+
+			for _, fileAndInfo := range filesAndInfos {
+				log.Println("uploading file as asset to release", fileAndInfo)
+				// Upload assets to GitHub Release
+				_, _, err := CiEnvironment.GithubClient.Repositories.UploadReleaseAsset(
+					gitHubCtx,
+					CiEnvironment.GitInfos.Owner,
+					CiEnvironment.GitInfos.Repo,
+					repositoryRelease.GetID(),
+					&github.UploadOptions{
+						Name: fileAndInfo.Name,
+					},
+					&fileAndInfo.File)
+				if err != nil {
+					log.Println("error at uploading asset to release: ", err)
+				}
+			}
+		}
+	case *gitlab.Release:
+		log.Println("Creating a release to GitLab is not jet implemented")
 	}
+	return
 }

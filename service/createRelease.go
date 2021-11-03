@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/google/go-github/v39/github"
 )
 
 func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
@@ -17,7 +19,7 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 		panic(err)
 	}
 
-	branchName := prInfos.Head.Ref
+	branchName := *prInfos.Head.Ref
 	patchLevel := branchName[:strings.Index(branchName, "/")]
 
 	if *patchLevelOverr != "" {
@@ -43,10 +45,22 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 	} else {
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", nextVersion)
+		relName := "Release " + nextVersion
+		draft := false
+
+		releaseObject := github.RepositoryRelease{
+			TargetCommitish: &branchName,
+			TagName:         &nextVersion,
+			Name:            &relName,
+			Draft:           &draft,
+			Prerelease:      preRelease,
+		}
+
+		gitOnlineController.CreateNextGitRelease(releaseObject, uploadArtifacts)
 
 		if *publishNpm != "" {
-			// check if subfolder has slash
 			pathToSource := *publishNpm
+			// check if subfolder has slash
 			if !strings.HasSuffix(*publishNpm, "/") {
 				pathToSource = *publishNpm + "/"
 			}
@@ -54,7 +68,6 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 			npmPublish(pathToSource, nextVersion)
 		}
 	}
-	gitOnlineController.CreateNextGitHubRelease(CiEnvironment.GitInfos.DefaultBranchName, nextVersion, preRelease, isDryRun, uploadArtifacts)
 }
 
 func npmPublish(pathToSource string, nextVersion string) {
