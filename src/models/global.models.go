@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v39/github"
 	"github.com/xanzy/go-gitlab"
 )
 

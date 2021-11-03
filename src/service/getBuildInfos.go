@@ -1,8 +1,9 @@
 package service
 
 import (
-	"awesome-ci/ciRunnerController"
-	"awesome-ci/gitOnlineController"
+	"awesome-ci/src/ciRunnerController"
+	"awesome-ci/src/gitOnlineController"
+	"awesome-ci/src/semver"
 	"errors"
 	"fmt"
 	"regexp"
@@ -39,7 +40,7 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 			gitVersion = gitOnlineController.GetLatestReleaseVersion()
 		}
 	}
-	nextVersion := increaseSemVer(patchLevel, gitVersion)
+	nextVersion, err := semver.IncreaseVersion(patchLevel, gitVersion)
 
 	prSHA := *prInfos.Head.SHA
 	var envs []string

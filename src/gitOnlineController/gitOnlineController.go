@@ -1,11 +1,11 @@
 package gitOnlineController
 
 import (
-	"awesome-ci/models"
+	"awesome-ci/src/models"
 	"context"
 	"log"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v39/github"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -14,24 +14,25 @@ var (
 	CiEnvironment models.CIEnvironment
 )
 
-// GetPrNumberForBranch
+/* // GetPrNumberForBranch
 func GetPrNumberForBranch(branch string) int {
 	switch CiEnvironment.GitType {
 	case "github":
 		return github_getPrNumberForBranch(branch)
 	}
 	return 0
-}
+} */
 
-func GetIssueComments(issueNumber int) (issueComments []models.GitHubIssueComment, err error) {
+func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, err error) {
 	switch CiEnvironment.GitType {
 	case "github":
-		issueComments, err = github_getIssueComments(issueNumber)
+		opts := github.IssueListCommentsOptions{}
+		issueComments, _, err = CiEnvironment.GithubClient.Issues.ListComments(context.Background(), CiEnvironment.GitInfos.Repo, "", issueNumber, &opts)
 	}
 	return
 }
 
-// GetPrNumberForBranch
+// GetPrInfos
 func GetPrInfos(prNumber int) (pullRequest *github.PullRequest, err error) {
 	switch CiEnvironment.GitType {
 	case "github":
@@ -41,12 +42,12 @@ func GetPrInfos(prNumber int) (pullRequest *github.PullRequest, err error) {
 }
 
 // GetLatestReleaseVersion
-func GetLatestReleaseVersion() string {
+func GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
 	switch CiEnvironment.GitType {
 	case "github":
-		return github_getLatestReleaseVersion()
+		latestRelease, _, err = CiEnvironment.GithubClient.Repositories.GetLatestRelease(gitHubCtx, CiEnvironment.GitInfos.Owner, CiEnvironment.GitInfos.Repo)
 	}
-	return ""
+	return
 }
 
 // CreateNextGitHubRelease

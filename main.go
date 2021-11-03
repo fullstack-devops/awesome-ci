@@ -1,9 +1,9 @@
 package main
 
 import (
-	"awesome-ci/ciRunnerController"
-	"awesome-ci/gitOnlineController"
-	"awesome-ci/service"
+	"awesome-ci/src/ciRunnerController"
+	"awesome-ci/src/gitOnlineController"
+	"awesome-ci/src/service"
 	"flag"
 	"fmt"
 	"log"

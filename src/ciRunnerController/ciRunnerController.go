@@ -1,6 +1,6 @@
 package ciRunnerController
 
-import "awesome-ci/models"
+import "awesome-ci/src/models"
 
 var CiEnvironment models.CIEnvironment
 

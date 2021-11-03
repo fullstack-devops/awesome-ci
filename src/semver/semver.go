@@ -1,13 +1,15 @@
-package service
+package semver
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
 
-func increaseSemVer(versionNaming string, version string) (incresedVersion string) {
+// IncreaseSemVer increases a given version by naming, see docs
+func IncreaseVersion(versionNaming string, version string) (incresedVersion string, err error) {
 	incresedVersion = version
 
 	if strings.HasPrefix(versionNaming, "major") {
@@ -17,10 +19,10 @@ func increaseSemVer(versionNaming string, version string) (incresedVersion strin
 	} else if strings.HasPrefix(versionNaming, "bugfix") {
 		incresedVersion = patch(version)
 	} else {
-		fmt.Println("Could not determan witch version to set. Given first string does'n start with release, feature or bugfix")
+		err = errors.New("Could not determan witch version to set. Given first string does'n start with release, feature or bugfix")
 	}
 
-	return incresedVersion
+	return
 }
 
 func major(version string) string {

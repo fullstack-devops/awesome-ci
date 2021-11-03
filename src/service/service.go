@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/models"
+	"awesome-ci/src/models"
 	"context"
 	"fmt"
 	"log"

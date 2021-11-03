@@ -1,7 +1,8 @@
 package service
 
 import (
-	"awesome-ci/gitOnlineController"
+	"awesome-ci/src/gitOnlineController"
+	"awesome-ci/src/semver"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -37,7 +38,7 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 	} else {
 		gitVersion = gitOnlineController.GetLatestReleaseVersion()
 	}
-	nextVersion := increaseSemVer(patchLevel, gitVersion)
+	nextVersion, err := semver.IncreaseVersion(patchLevel, gitVersion)
 
 	if *isDryRun {
 		fmt.Printf("Old version: %s\n", gitVersion)
