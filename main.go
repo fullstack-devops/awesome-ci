@@ -1,8 +1,6 @@
 package main
 
 import (
-	"awesome-ci/src/ciRunnerController"
-	"awesome-ci/src/gitOnlineController"
 	"awesome-ci/src/service"
 	"flag"
 	"fmt"
@@ -11,85 +9,131 @@ import (
 )
 
 var (
-	cienv         string
-	createRelease CreateReleaseSet
-	getBuildInfos GetBuildInfosSet
-	parseJson     parseJsonYamlSet
-	parseYaml     parseJsonYamlSet
-	version       string
-	versionFlag   bool
-	//debug         bool
+	// cienv       string
+	releaseSet     ReleaseSet
+	pullrequestSet service.PullRequestSet
+	parseSet       ParseSet
+	version        string
+	versionFlag    bool
 )
 
-type CreateReleaseSet struct {
-	fs              *flag.FlagSet
-	version         string
-	patchLevel      string
-	publishNpm      string
-	uploadArtifacts string
-	preRelease      bool
-	dryRun          bool
+type ReleaseSet struct {
+	Fs     *flag.FlagSet
+	Create struct {
+		Fs         *flag.FlagSet
+		version    string
+		patchLevel string
+		dryRun     bool
+	}
+	Publish struct {
+		Fs              *flag.FlagSet
+		version         string
+		patchLevel      string
+		publishNpm      string
+		uploadArtifacts string
+		dryRun          bool
+	}
 }
 
-type GetBuildInfosSet struct {
-	fs         *flag.FlagSet
-	version    string
-	patchLevel string
-	format     string
-}
-
-type parseJsonYamlSet struct {
-	fs    *flag.FlagSet
-	file  string
-	value string
+type ParseSet struct {
+	Fs   *flag.FlagSet
+	Json struct {
+		Fs    *flag.FlagSet
+		file  string
+		value string
+	}
+	Yaml struct {
+		Fs    *flag.FlagSet
+		file  string
+		value string
+	}
 }
 
 func init() {
-	flag.StringVar(&cienv, "cienv", "", "set your CI Environment for Special Featueres!\nAvalible: Jenkins, Github, Gitlab, Custom\nDefault: Github")
 	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
-	// flag.BoolVar(&debug, "debug", false, "enable debug level by calling it")
 
-	// createReleaseSet
-	createRelease.fs = flag.NewFlagSet("createRelease", flag.ExitOnError)
-	createRelease.fs.StringVar(&createRelease.version, "version", "", "override version to Update")
-	createRelease.fs.StringVar(&createRelease.patchLevel, "patchLevel", "", "predefine version to Update")
-	createRelease.fs.StringVar(&createRelease.publishNpm, "publishNpm", "", "runs npm publish --tag <createdTag> with custom directory")
-	createRelease.fs.StringVar(&createRelease.uploadArtifacts, "uploadArtifacts", "", "uploads atifacts to release (file)")
-	createRelease.fs.BoolVar(&createRelease.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
-	createRelease.fs.BoolVar(&createRelease.preRelease, "preRelease", false, "creates an github pre release")
+	// PullRequestSet
+	pullrequestSet.Fs = flag.NewFlagSet("pullrequest", flag.ExitOnError)
+	pullrequestSet.Fs.Usage = func() {
+		fmt.Println("Available commands:")
+		fmt.Println("  info")
+		fmt.Println("Use \"awesome-ci pullrequest <command> --help\" for more information about a given command.")
+	}
+	pullrequestSet.Info.Fs = flag.NewFlagSet("pullrequest info", flag.ExitOnError)
+	pullrequestSet.Info.Fs.IntVar(&pullrequestSet.Info.Number, "number", 0, "overwrite the issue number")
+	pullrequestSet.Info.Fs.BoolVar(&pullrequestSet.Info.EvalNumber, "eval", false, "indicates whether the number should be determined automatically")
 
-	// getNewReleaseVersion
-	getBuildInfos.fs = flag.NewFlagSet("getBuildInfos", flag.ExitOnError)
-	getBuildInfos.fs.StringVar(&getBuildInfos.version, "version", "", "override version to Update")
-	getBuildInfos.fs.StringVar(&getBuildInfos.patchLevel, "patchLevel", "", "predefine version to Update")
-	getBuildInfos.fs.StringVar(&getBuildInfos.format, "format", "", "define output by get")
+	// ReleaseSet
+	releaseSet.Fs = flag.NewFlagSet("release", flag.ExitOnError)
+	releaseSet.Fs.Usage = func() {
+		fmt.Println("Available commands:")
+		fmt.Println("  info")
+		fmt.Println("  create")
+		fmt.Println("  publish")
+		fmt.Println("Use \"awesome-ci release <command> --help\" for more information about a given command.")
+	}
+	releaseSet.Create.Fs = flag.NewFlagSet("release create", flag.ExitOnError)
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.version, "version", "", "override version to Update")
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.patchLevel, "patchLevel", "", "predefine version to Update")
+	releaseSet.Create.Fs.BoolVar(&releaseSet.Create.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
+	releaseSet.Create.Fs.Usage = func() {
+		fmt.Println("Available options:")
+		releaseSet.Create.Fs.PrintDefaults()
+	}
+	releaseSet.Publish.Fs = flag.NewFlagSet("release publish", flag.ExitOnError)
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.version, "version", "", "override version to Update")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.patchLevel, "patchLevel", "", "predefine version to Update")
+	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
 
 	// parseJSON
-	parseJson.fs = flag.NewFlagSet("parseJSON", flag.ExitOnError)
-	parseJson.fs.StringVar(&parseJson.file, "file", "", "file to be parsed")
-	parseJson.fs.StringVar(&parseJson.value, "value", "", "value for output")
+	parseSet.Fs = flag.NewFlagSet("parse", flag.ExitOnError)
+	parseSet.Fs.Usage = func() {
+		fmt.Println("Available commands:")
+		fmt.Println("  json")
+		fmt.Println("  yaml")
+		fmt.Println("Use \"awesome-ci release <command> --help\" for more information about a given command.")
+	}
+	parseSet.Json.Fs = flag.NewFlagSet("parse json", flag.ExitOnError)
+	parseSet.Json.Fs.StringVar(&parseSet.Json.file, "file", "", "file to be parsed")
+	parseSet.Json.Fs.StringVar(&parseSet.Json.value, "value", "", "value for output")
+	parseSet.Json.Fs.Usage = func() {
+		fmt.Println("Available options:")
+		parseSet.Json.Fs.PrintDefaults()
+	}
+	parseSet.Yaml.Fs = flag.NewFlagSet("parse yaml", flag.ExitOnError)
+	parseSet.Yaml.Fs.StringVar(&parseSet.Yaml.file, "file", "", "file to be parsed")
+	parseSet.Yaml.Fs.StringVar(&parseSet.Yaml.value, "value", "", "value for output")
+	parseSet.Yaml.Fs.Usage = func() {
+		fmt.Println("Available options:")
+		parseSet.Yaml.Fs.PrintDefaults()
+	}
+}
 
-	// parseYAML
-	parseYaml.fs = flag.NewFlagSet("parseYAML", flag.ExitOnError)
-	parseYaml.fs.StringVar(&parseYaml.file, "file", "", "file to be parsed")
-	parseYaml.fs.StringVar(&parseYaml.value, "value", "", "value for output")
+func returnHelpIfEmpty(args []string, usage func()) {
+	if len(args) < 1 {
+		usage()
+		os.Exit(0)
+	}
+}
+
+func printNoValidCommand(usage func()) {
+	fmt.Println("The given command is not known!")
+	fmt.Println("")
+	usage()
+	os.Exit(1)
 }
 
 func main() {
 	flag.Usage = func() {
 		fmt.Println("awesome-ci makes your CI easy.")
-		fmt.Print("\n  Find more information and examples at: https://github.com/eksrvb/awesome-ci\n\n")
+		fmt.Println("  Find more information and examples at: https://github.com/eksrvb/awesome-ci")
+		fmt.Println()
 		fmt.Println("Available commands:")
-		flag.PrintDefaults()
-		fmt.Print("\nSubcommand: createRelease\n")
-		createRelease.fs.PrintDefaults()
-		fmt.Print("\nSubcommand: getBuildInfos\n")
-		getBuildInfos.fs.PrintDefaults()
-		fmt.Print("\nSubcommand: parseJSON, parseYAML\n")
-		parseJson.fs.PrintDefaults()
-		fmt.Print("\nUsage:\n  awesome-ci [subcommand] [options]\n")
-		fmt.Print("\nUse awesome-ci createRelease -patchLevel bugfix -dry-run\n")
-		fmt.Print("CI examples at: https://github.com/eksrvb/awesome-ci\n")
+		fmt.Println("  pullrequest")
+		fmt.Println("  release")
+		fmt.Println("  parse")
+		fmt.Println("")
+		fmt.Println("Use \"awesome-ci <command> --help\" for more information about a given command.")
 	}
 	flag.Parse()
 
@@ -98,25 +142,61 @@ func main() {
 		os.Exit(0)
 	}
 
+	returnHelpIfEmpty(flag.Args(), flag.Usage)
+
 	// distribute environment settings
 	environment := service.EvaluateEnvironment()
-	ciRunnerController.CiEnvironment = environment
-	gitOnlineController.CiEnvironment = environment
+	service.CiEnvironment = environment
 
-	switch flag.Args()[0] {
-	case "createRelease":
-		createRelease.fs.Parse(flag.Args()[1:])
-		service.CreateRelease(cienv, &createRelease.version, &createRelease.patchLevel, &createRelease.dryRun, &createRelease.preRelease, &createRelease.publishNpm, &createRelease.uploadArtifacts)
+	switch flag.Arg(0) {
+	case "pullrequest":
+		pullrequestSet.Fs.Parse(flag.Args()[1:])
+		returnHelpIfEmpty(flag.Args()[1:], pullrequestSet.Fs.Usage)
+		switch flag.Arg(1) {
+		case "info":
+			err := pullrequestSet.Info.Fs.Parse(flag.Args()[2:])
+			if err != nil {
+				log.Fatalln(err)
+			}
+			service.PrintPRInfos(&pullrequestSet.Info)
+		default:
+			printNoValidCommand(pullrequestSet.Fs.Usage)
+		}
+	case "release":
+		releaseSet.Fs.Parse(flag.Args()[1:])
+		returnHelpIfEmpty(flag.Args()[1:], releaseSet.Fs.Usage)
+		switch flag.Arg(1) {
+		case "create":
+			err := releaseSet.Create.Fs.Parse(flag.Args()[2:])
+			if err != nil {
+				log.Fatalln(err)
+			}
+			service.ReleaseCreate(&releaseSet.Create.version, &releaseSet.Create.patchLevel, &releaseSet.Create.dryRun)
+		case "publish":
+			err := releaseSet.Publish.Fs.Parse(flag.Args()[2:])
+			if err != nil {
+				log.Fatalln(err)
+			}
+		default:
+			printNoValidCommand(releaseSet.Fs.Usage)
+		}
 	case "getBuildInfos":
-		getBuildInfos.fs.Parse(flag.Args()[1:])
-		service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
-	case "parseJSON":
-		parseJson.fs.Parse(flag.Args()[1:])
-		service.ParseJson(&parseJson.file, &parseJson.value)
-	case "parseYAML":
-		parseYaml.fs.Parse(flag.Args()[1:])
-		service.ParseYaml(&parseYaml.file, &parseYaml.value)
+		// getBuildInfos.fs.Parse(flag.Args()[1:])
+		// service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
+	case "parse":
+		parseSet.Fs.Parse(flag.Args()[1:])
+		returnHelpIfEmpty(flag.Args()[1:], parseSet.Fs.Usage)
+		switch flag.Arg(1) {
+		case "json":
+			parseSet.Json.Fs.Parse(flag.Args()[2:])
+			service.ParseJson(&parseSet.Json.file, &parseSet.Json.value)
+		case "yaml":
+			parseSet.Yaml.Fs.Parse(flag.Args()[2:])
+			service.ParseJson(&parseSet.Yaml.file, &parseSet.Yaml.value)
+		default:
+			printNoValidCommand(parseSet.Fs.Usage)
+		}
 	default:
-		log.Fatalln("Not a valid Subcommand")
+		printNoValidCommand(flag.Usage)
 	}
 }

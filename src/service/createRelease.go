@@ -1,11 +1,11 @@
 package service
 
 import (
-	"awesome-ci/src/gitOnlineController"
 	"awesome-ci/src/semver"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,9 +13,9 @@ import (
 	"github.com/google/go-github/v39/github"
 )
 
-func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, isDryRun *bool, preRelease *bool, publishNpm *string, uploadArtifacts *string) {
+func ReleaseCreate(versionOverr *string, patchLevelOverr *string, isDryRun *bool) {
 
-	prInfos, prNumber, err := getPRInfos()
+	prInfos, prNumber, err := getPRInfos(nil)
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +36,11 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 	if *versionOverr != "" {
 		gitVersion = *versionOverr
 	} else {
-		gitVersion = gitOnlineController.GetLatestReleaseVersion()
+		repositoryRelease, err := CiEnvironment.GetLatestReleaseVersion()
+		if err != nil {
+			log.Println(err)
+		}
+		gitVersion = *repositoryRelease.TagName
 	}
 	nextVersion, err := semver.IncreaseVersion(patchLevel, gitVersion)
 
@@ -47,27 +51,16 @@ func CreateRelease(cienv string, versionOverr *string, patchLevelOverr *string, 
 		fmt.Printf("Old version: %s\n", gitVersion)
 		fmt.Printf("Writing new release: %s\n", nextVersion)
 		relName := "Release " + nextVersion
-		draft := false
+		draft := true
 
 		releaseObject := github.RepositoryRelease{
 			TargetCommitish: &branchName,
 			TagName:         &nextVersion,
 			Name:            &relName,
 			Draft:           &draft,
-			Prerelease:      preRelease,
 		}
 
-		gitOnlineController.CreateNextGitRelease(releaseObject, uploadArtifacts)
-
-		if *publishNpm != "" {
-			pathToSource := *publishNpm
-			// check if subfolder has slash
-			if !strings.HasSuffix(*publishNpm, "/") {
-				pathToSource = *publishNpm + "/"
-			}
-			fmt.Printf("Puplishing npm packages under path: %s\n", pathToSource)
-			npmPublish(pathToSource, nextVersion)
-		}
+		CiEnvironment.ManageGitRelease(releaseObject, nil)
 	}
 }
 

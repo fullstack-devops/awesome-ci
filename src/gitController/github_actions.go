@@ -1,4 +1,4 @@
-package ciRunnerController
+package gitController
 
 import (
 	"log"

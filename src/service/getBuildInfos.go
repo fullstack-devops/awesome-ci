@@ -1,21 +1,19 @@
 package service
 
 import (
-	"awesome-ci/src/ciRunnerController"
-	"awesome-ci/src/gitOnlineController"
+	"awesome-ci/src/gitController"
 	"awesome-ci/src/semver"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/google/go-github/v39/github"
 )
 
 func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, format *string) {
 
-	prInfos, prNumber, err := getPRInfos()
+	prInfos, prNumber, err := getPRInfos(nil)
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +35,11 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 		if *versionOverr != "" {
 			gitVersion = *versionOverr
 		} else {
-			gitVersion = gitOnlineController.GetLatestReleaseVersion()
+			repositoryRelease, err := CiEnvironment.GetLatestReleaseVersion()
+			if err != nil {
+				log.Println(err)
+			}
+			gitVersion = *repositoryRelease.TagName
 		}
 	}
 	nextVersion, err := semver.IncreaseVersion(patchLevel, gitVersion)
@@ -47,13 +49,13 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 	envs = append(envs, fmt.Sprintf("ACI_PR=%d", prNumber))
 	envs = append(envs, fmt.Sprintf("ACI_PR_SHA=%s", prSHA))
 	envs = append(envs, fmt.Sprintf("ACI_PR_SHA_SHORT=%s", prSHA[:8]))
-	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", strings.ToLower(CiEnvironment.GitInfos.Owner)))
-	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", strings.ToLower(CiEnvironment.GitInfos.Repo)))
+	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", strings.ToLower(*CiEnvironment.GitInfos.Owner)))
+	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", strings.ToLower(*CiEnvironment.GitInfos.Repo)))
 	envs = append(envs, fmt.Sprintf("ACI_BRANCH=%s", branchName))
 	envs = append(envs, fmt.Sprintf("ACI_PATCH_LEVEL=%s", patchLevel))
 	envs = append(envs, fmt.Sprintf("ACI_VERSION=%s", gitVersion))
 	envs = append(envs, fmt.Sprintf("ACI_NEXT_VERSION=%s", nextVersion))
-	ciRunnerController.SetEnvVariables(envs)
+	gitController.SetEnvVariables(envs)
 
 	if *format != "" {
 		replacer := strings.NewReplacer(
@@ -76,27 +78,6 @@ func GetBuildInfos(cienv string, versionOverr *string, patchLevelOverr *string, 
 		fmt.Printf("Patch level: %s\n", patchLevel)
 		fmt.Printf("Possible new release version: %s\n", nextVersion)
 	}
-}
-
-func getPRInfos() (prInfos *github.PullRequest, prNumber int, err error) {
-	prNumber = 0
-	// Try to get PR number from 'git name-rev HEAD'
-	prNumber, _, err = getNameRevHead()
-	if err != nil {
-		return
-	}
-	// Try to get PR number from merge message 'merge'
-	if prNumber == 0 {
-		prNumber, err = getPrFromMergeMessage()
-		if err != nil {
-			return
-		}
-	}
-	prInfos, err = gitOnlineController.GetPrInfos(prNumber)
-	if err != nil {
-		fmt.Println("could not load any information about the current pull request", err)
-	}
-	return
 }
 
 func getPrFromMergeMessage() (pr int, err error) {
@@ -131,7 +112,7 @@ func getNameRevHead() (pr int, branchName string, err error) {
 		pr, err = strconv.Atoi(regexIsPRMached[1])
 	} else if len(regexIsBranchMached) > 1 {
 		branchName = regexIsBranchMached[1]
-		pr = gitOnlineController.GetPrNumberForBranch(branchName)
+		// pr, err = CiEnvironment.GetPrNumberForBranch(branchName)
 	} else {
 		err = errors.New("no branch or pr in 'git name-rev head' found:" + gitNameRevHead)
 	}
@@ -140,14 +121,14 @@ func getNameRevHead() (pr int, branchName string, err error) {
 
 func detectIfMajor(issueNumber int) bool {
 	resBool := false
-	issueComments, err := gitOnlineController.GetIssueComments(issueNumber)
+	issueComments, err := CiEnvironment.GetIssueComments(issueNumber)
 	if err != nil {
 		panic(err)
 	}
 	for _, comment := range issueComments {
 		// Must have permission in the repo to create a major version
 		// MANNEQUIN|NONE https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
-		if strings.Contains(comment.Body, "aci=major") && !strings.Contains("MANNEQUIN|NONE", comment.AuthorAssociation) {
+		if strings.Contains(*comment.Body, "aci=major") && !strings.Contains("MANNEQUIN|NONE", *comment.AuthorAssociation) {
 			resBool = true
 			break
 		}

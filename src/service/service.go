@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/src/models"
+	"awesome-ci/src/gitController"
 	"context"
 	"fmt"
 	"log"
@@ -14,7 +14,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var CiEnvironment models.CIEnvironment
+var CiEnvironment gitController.CIEnvironment
 
 func check(e error) {
 	if e != nil {
@@ -37,7 +37,7 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func EvaluateEnvironment() (ciEnvironment models.CIEnvironment) {
+func EvaluateEnvironment() (ciEnvironment gitController.CIEnvironment) {
 	// env to check for github_runner
 	githubRunnerApi, githubRunnerApiBool := os.LookupEnv("GITHUB_API_URL")
 	githubRunnerRep, githubRunnerRepBool := os.LookupEnv("GITHUB_REPOSITORY")
@@ -47,24 +47,21 @@ func EvaluateEnvironment() (ciEnvironment models.CIEnvironment) {
 	// env to check for jenkins pipelines
 	_, jenkinsUrlBool := os.LookupEnv("JENKINS_URL")
 	// env to check for jenkins pipelines
-	gitTypeOverride, gitTypeOverrideBool := os.LookupEnv("ACI_GIT_TYPE")
+	// gitTypeOverride, gitTypeOverrideBool := os.LookupEnv("ACI_GIT_TYPE")
 
 	if githubRunnerApiBool && githubRunnerRepBool && githubEnvBool {
-		ciEnvironment.GitType = "github"
-
 		if !strings.HasSuffix(githubRunnerApi, "/") {
 			githubRunnerApi = githubRunnerApi + "/"
 		}
-		ciEnvironment.GitInfos.ApiUrl = githubRunnerApi
+		ciEnvironment.GitInfos.ApiUrl = &githubRunnerApi
 
-		ciEnvironment.GitInfos.FullRepo = githubRunnerRep
-		ciEnvironment.GitInfos.Owner = strings.Split(githubRunnerRep, "/")[0]
-		ciEnvironment.GitInfos.Repo = strings.Split(githubRunnerRep, "/")[1]
+		ciEnvironment.GitInfos.Owner = &strings.Split(githubRunnerRep, "/")[0]
+		ciEnvironment.GitInfos.Repo = &strings.Split(githubRunnerRep, "/")[1]
 		githubRunnerToken, githubRunnerTokenBool := os.LookupEnv("GITHUB_TOKEN")
 		if !githubRunnerTokenBool {
 			log.Fatalln("Apparently you are using a GitHub-Runner.\nPlease provide the GITHUB_TOKEN!\nSee https://docs.github.com/en/actions/reference/authentication-in-a-workflow#using-the-github_token-in-a-workflow\nand https://eksrvb.github.io/awesome-ci/examples/github_actions.html")
 		}
-		ciEnvironment.GitInfos.ApiToken = githubRunnerToken
+		ciEnvironment.GitInfos.ApiToken = &githubRunnerToken
 
 		ciEnvironment.RunnerType = "github_runner"
 		ciEnvironment.RunnerInfo.EnvFile = githubEnv
@@ -77,37 +74,35 @@ func EvaluateEnvironment() (ciEnvironment models.CIEnvironment) {
 		if err != nil {
 			log.Fatalln("error at initializing github client: ", err)
 		}
-		ciEnvironment.GithubClient = githubClient
+		ciEnvironment.Clients.GithubClient = githubClient
 
 	} else if jenkinsUrlBool {
 		fmt.Println("Note: Jenkins is not fully implemented yet")
-		ciEnvironment.GitType = "github"
 		ciEnvironment.RunnerType = "jenkins"
 
 	} else if gitlabCiBool && gitlabCi == "true" {
 		fmt.Println("Note: GitLab CI is not fully implemented yet")
-		ciEnvironment.GitType = "gitlab"
 		ciEnvironment.RunnerType = "gitlab"
 
 		gitlabClient, err := gitlab.NewClient(os.Getenv("CI_JOB_TOKEN"))
 		if err != nil {
 			log.Fatalf("Failed to create client: %v", err)
 		}
-		ciEnvironment.GitlabClient = gitlabClient
+		ciEnvironment.Clients.GitlabClient = gitlabClient
 
 	} else {
 		log.Fatalln("Could not determan running environment!\nFor support please open an Issue at https://github.com/eksrvb/awesome-ci/issues")
 	}
 
-	if gitTypeOverrideBool {
+	/* if gitTypeOverrideBool {
 		if strings.Contains("github gitlab", gitTypeOverride) {
 			log.Printf("manual git type override requested. Using: %s", gitTypeOverride)
-			ciEnvironment.GitType = gitTypeOverride
 		} else {
 			log.Fatalf("manual git type override requested. But requested type %s does not matching with github or gitlab", gitTypeOverride)
 		}
-	}
-	ciEnvironment.GitInfos.DefaultBranchName = strings.Trim(getDefaultBranch(), "\n")
+	} */
+	defaultBranchName := strings.Trim(getDefaultBranch(), "\n")
+	ciEnvironment.GitInfos.DefaultBranchName = &defaultBranchName
 
 	return
 }

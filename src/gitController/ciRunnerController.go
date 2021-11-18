@@ -1,8 +1,6 @@
-package ciRunnerController
+package gitController
 
-import "awesome-ci/src/models"
-
-var CiEnvironment models.CIEnvironment
+var CiEnvironment CIEnvironment
 
 // SetEnvVariables
 func SetEnvVariables(envToAppend []string) (err error) {
