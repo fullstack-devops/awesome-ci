@@ -10,30 +10,12 @@ import (
 
 var (
 	// cienv       string
-	releaseSet     ReleaseSet
+	releaseSet     service.ReleaseSet
 	pullrequestSet service.PullRequestSet
 	parseSet       ParseSet
 	version        string
 	versionFlag    bool
 )
-
-type ReleaseSet struct {
-	Fs     *flag.FlagSet
-	Create struct {
-		Fs         *flag.FlagSet
-		version    string
-		patchLevel string
-		dryRun     bool
-	}
-	Publish struct {
-		Fs              *flag.FlagSet
-		version         string
-		patchLevel      string
-		publishNpm      string
-		uploadArtifacts string
-		dryRun          bool
-	}
-}
 
 type ParseSet struct {
 	Fs   *flag.FlagSet
@@ -61,7 +43,7 @@ func init() {
 	}
 	pullrequestSet.Info.Fs = flag.NewFlagSet("pullrequest info", flag.ExitOnError)
 	pullrequestSet.Info.Fs.IntVar(&pullrequestSet.Info.Number, "number", 0, "overwrite the issue number")
-	pullrequestSet.Info.Fs.BoolVar(&pullrequestSet.Info.EvalNumber, "eval", false, "indicates whether the number should be determined automatically")
+	pullrequestSet.Info.Fs.StringVar(&pullrequestSet.Info.Format, "format", "", "define output by get")
 
 	// ReleaseSet
 	releaseSet.Fs = flag.NewFlagSet("release", flag.ExitOnError)
@@ -73,17 +55,18 @@ func init() {
 		fmt.Println("Use \"awesome-ci release <command> --help\" for more information about a given command.")
 	}
 	releaseSet.Create.Fs = flag.NewFlagSet("release create", flag.ExitOnError)
-	releaseSet.Create.Fs.StringVar(&releaseSet.Create.version, "version", "", "override version to Update")
-	releaseSet.Create.Fs.StringVar(&releaseSet.Create.patchLevel, "patchLevel", "", "predefine version to Update")
-	releaseSet.Create.Fs.BoolVar(&releaseSet.Create.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
+	releaseSet.Create.Fs.IntVar(&releaseSet.Create.PrNumber, "prnumber", 0, "overwrite the issue number")
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.Version, "version", "", "override version to Update")
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.PatchLevel, "patchLevel", "", "predefine version to Update")
+	releaseSet.Create.Fs.BoolVar(&releaseSet.Create.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
 	releaseSet.Create.Fs.Usage = func() {
 		fmt.Println("Available options:")
 		releaseSet.Create.Fs.PrintDefaults()
 	}
 	releaseSet.Publish.Fs = flag.NewFlagSet("release publish", flag.ExitOnError)
-	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.version, "version", "", "override version to Update")
-	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.patchLevel, "patchLevel", "", "predefine version to Update")
-	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.dryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Version, "version", "", "override version to Update")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.PatchLevel, "patchLevel", "", "predefine version to Update")
+	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
 
 	// parseJSON
 	parseSet.Fs = flag.NewFlagSet("parse", flag.ExitOnError)
@@ -171,7 +154,7 @@ func main() {
 			if err != nil {
 				log.Fatalln(err)
 			}
-			service.ReleaseCreate(&releaseSet.Create.version, &releaseSet.Create.patchLevel, &releaseSet.Create.dryRun)
+			service.ReleaseCreate(&releaseSet.Create)
 		case "publish":
 			err := releaseSet.Publish.Fs.Parse(flag.Args()[2:])
 			if err != nil {

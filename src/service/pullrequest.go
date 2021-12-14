@@ -1,14 +1,13 @@
 package service
 
 import (
+	"awesome-ci/src/controlEnvs"
 	"awesome-ci/src/gitController"
-	"awesome-ci/src/semver"
 	"flag"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
-
-	"github.com/google/go-github/v39/github"
 )
 
 type PullRequestSet struct {
@@ -17,84 +16,53 @@ type PullRequestSet struct {
 }
 
 type PullRequestInfoSet struct {
-	Fs         *flag.FlagSet
-	Number     int
-	EvalNumber bool
+	Fs     *flag.FlagSet
+	Number int
+	Format string
 }
 
 func PrintPRInfos(args *PullRequestInfoSet) {
-	prInfos, _, err := getPRInfos(args)
+	prInfos, err := getPRInfos(args.Number, true)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println(prInfos)
+	if args.Format != "" {
+		replacer := strings.NewReplacer(
+			"pr", fmt.Sprint(prInfos.PrNumber),
+			"version", prInfos.NextVersion,
+			"latest_version", prInfos.LatestVersion,
+			"patchLevel", prInfos.PatchLevel)
+		output := replacer.Replace(args.Format)
+		fmt.Print(output)
+	} else {
+		fmt.Println("#### Info output:")
+		fmt.Printf("Pull Request: %d\n", prInfos.PrNumber)
+		fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
+		fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
+		fmt.Printf("Possible new release version: %s\n", prInfos.NextVersion)
+	}
 }
 
-func getPRInfos(args *PullRequestInfoSet) (prInfos *github.PullRequest, prNumber int, err error) {
-	if args.Number != 0 {
-		prInfos, err = CiEnvironment.GetPrInfos(args.Number)
+func getPRInfos(prNumber int, silent bool) (aciPrInfos gitController.AciPrInfos, err error) {
+	aciPrInfos, err = CiEnvironment.GetPrInfos(prNumber)
+	switch CiEnvironment.RunnerType {
+	case "github_runner":
+		envVariables, err := controlEnvs.OpenEnvFile(CiEnvironment.RunnerInfo.EnvFile)
 		if err != nil {
-			fmt.Println("could not load any information about the current pull request", err)
+			return aciPrInfos, err
+		}
+		envVariables.Set("ACI_PR", strconv.Itoa(prNumber))
+		envVariables.Set("ACI_PR_SHA", aciPrInfos.Sha)
+		envVariables.Set("ACI_PR_SHA_SHORT", aciPrInfos.ShaShort)
+		envVariables.Set("ACI_PR_BRANCH", strings.ToLower(*CiEnvironment.GitInfos.Owner))
+		envVariables.Set("ACI_ORGA", strings.ToLower(*CiEnvironment.GitInfos.Repo))
+		envVariables.Set("ACI_PATCH_LEVEL", aciPrInfos.PatchLevel)
+		envVariables.Set("ACI_VERSION", aciPrInfos.NextVersion)
+		envVariables.Set("ACI_LATEST_VERSION", aciPrInfos.LatestVersion)
+		err = envVariables.SaveEnvFile()
+		if err != nil {
+			return aciPrInfos, err
 		}
 	}
-
-	branchName := *prInfos.Head.Ref
-	patchLevel := branchName[:strings.Index(branchName, "/")]
-
-	// if an comment exists with aci=major, make a major version!
-	if detectIfMajor(prNumber) {
-		patchLevel = "major"
-	}
-
-	var gitVersion string
-	if strings.Contains(*format, "version") || *format == "" {
-		if *versionOverr != "" {
-			gitVersion = *versionOverr
-		} else {
-			repositoryRelease, err := CiEnvironment.GetLatestReleaseVersion()
-			if err != nil {
-				log.Println(err)
-			}
-			gitVersion = *repositoryRelease.TagName
-		}
-	}
-	nextVersion, err := semver.IncreaseVersion(patchLevel, gitVersion)
-
 	return
 }
-
-func setPrInfosToEnv(prInfos *github.PullRequest) {
-	prSHA := *prInfos.Head.SHA
-	var envs []string
-	envs = append(envs, fmt.Sprintf("ACI_PR=%d", *prInfos.Number))
-	envs = append(envs, fmt.Sprintf("ACI_PR_SHA=%s", prSHA))
-	envs = append(envs, fmt.Sprintf("ACI_PR_SHA_SHORT=%s", prSHA[:8]))
-	envs = append(envs, fmt.Sprintf("ACI_ORGA=%s", strings.ToLower(*CiEnvironment.GitInfos.Owner)))
-	envs = append(envs, fmt.Sprintf("ACI_REPO=%s", strings.ToLower(*CiEnvironment.GitInfos.Repo)))
-	envs = append(envs, fmt.Sprintf("ACI_BRANCH=%s", *prInfos.Head.Ref))
-	envs = append(envs, fmt.Sprintf("ACI_PATCH_LEVEL=%s", patchLevel))
-	envs = append(envs, fmt.Sprintf("ACI_VERSION=%s", gitVersion))
-	envs = append(envs, fmt.Sprintf("ACI_NEXT_VERSION=%s", nextVersion))
-	gitController.SetEnvVariables(envs)
-}
-
-/* func getPRInfos() (prInfos *github.PullRequest, prNumber int, err error) {
-	prNumber = 0
-	// Try to get PR number from 'git name-rev HEAD'
-	prNumber, _, err = getNameRevHead()
-	if err != nil {
-		return
-	}
-	// Try to get PR number from merge message 'merge'
-	if prNumber == 0 {
-		prNumber, err = getPrFromMergeMessage()
-		if err != nil {
-			return
-		}
-	}
-	prInfos, err = CiEnvironment.GetPrInfos(prNumber)
-	if err != nil {
-		fmt.Println("could not load any information about the current pull request", err)
-	}
-	return
-} */

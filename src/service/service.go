@@ -106,3 +106,7 @@ func EvaluateEnvironment() (ciEnvironment gitController.CIEnvironment) {
 
 	return
 }
+
+func getDefaultBranch() string {
+	return runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
+}
