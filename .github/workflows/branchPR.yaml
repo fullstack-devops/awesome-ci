@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci_${$ACI_NEXT_VERSION}_${{ matrix.arch }}
+        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
@@ -67,6 +67,6 @@ jobs:
       - name: get generated artifacts
         run: ls -la
       - name: Integration testing
-        run: ./tools/test.sh ./out/awesome-ci_${$ACI_NEXT_VERSION}_${{ matrix.arch }}
+        run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
