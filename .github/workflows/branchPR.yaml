@@ -54,7 +54,7 @@ jobs:
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: set build Infos
-        run: ./awesome-ci pr infos
+        run: ./awesome-ci getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
