@@ -9,17 +9,17 @@ import (
 )
 
 // IncreaseSemVer increases a given version by naming, see docs
-func IncreaseVersion(versionNaming string, version string) (incresedVersion string, err error) {
+func IncreaseVersion(patchLevel string, version string) (incresedVersion string, err error) {
 	incresedVersion = version
 
-	if strings.HasPrefix(versionNaming, "major") {
+	if strings.HasPrefix(patchLevel, "major") {
 		incresedVersion = major(version)
-	} else if strings.HasPrefix(versionNaming, "feature") {
+	} else if strings.HasPrefix(patchLevel, "feature") {
 		incresedVersion = minor(version)
-	} else if strings.HasPrefix(versionNaming, "bugfix") {
+	} else if strings.HasPrefix(patchLevel, "bugfix") {
 		incresedVersion = patch(version)
 	} else {
-		err = errors.New("Could not determan witch version to set. Given first string does'n start with release, feature or bugfix")
+		err = errors.New("could not determan witch version to set. given first string does'n start with release, feature or bugfix")
 	}
 
 	return

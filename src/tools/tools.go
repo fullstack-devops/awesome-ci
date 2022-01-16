@@ -28,6 +28,12 @@ func GetDefaultBranch() string {
 	return strings.TrimSuffix(branch, "\n")
 }
 
+func DevideOwnerAndRepo(fullRepo string) (owner string, repo string) {
+	owner = strings.ToLower(strings.Split(fullRepo, "/")[0])
+	repo = strings.ToLower(strings.Split(fullRepo, "/")[1])
+	return
+}
+
 func runcmd(cmd string, shell bool) string {
 	if shell {
 		out, err := exec.Command("bash", "-c", cmd).Output()

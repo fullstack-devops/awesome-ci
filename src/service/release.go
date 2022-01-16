@@ -2,6 +2,7 @@ package service
 
 import (
 	"awesome-ci/src/acigithub"
+	"awesome-ci/src/semver"
 	"errors"
 	"flag"
 	"fmt"
@@ -28,35 +29,43 @@ type ReleasePublishSet struct {
 	Fs              *flag.FlagSet
 	Version         string
 	PatchLevel      string
-	ReleaseId       string
-	PublishNpm      string
+	ReleaseId       int64
 	UploadArtifacts string
 	PrNumber        int
 	DryRun          bool
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) {
+	var version string = ""
 	_, err := acigithub.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	prNumber, err := evalPrNumber(&args.PrNumber)
-	if err != nil {
-		log.Fatalln(err)
-	}
 
-	prInfos, _, err := acigithub.GetPrInfos(prNumber)
-	if err != nil {
-		log.Fatalln(err)
+	if args.Version != "" && args.PatchLevel != "" {
+		version, err = semver.IncreaseVersion(args.PatchLevel, args.Version)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} else if args.Version != "" && args.PatchLevel == "" {
+		version = args.Version
+	} else {
+		prNumber, err := evalPrNumber(&args.PrNumber)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		prInfos, _, err := acigithub.GetPrInfos(prNumber)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		version = prInfos.NextVersion
 	}
 
 	if args.DryRun {
-		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
-		fmt.Printf("Would create new release: %s\n", prInfos.NextVersion)
+		fmt.Printf("Would create new release with version: %s\n", version)
 	} else {
-		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
-		fmt.Printf("Writing new release: %s\n", prInfos.NextVersion)
-		createdRelease, err := acigithub.CreateRelease(prInfos, true)
+		fmt.Printf("Writing new release: %s\n", version)
+		createdRelease, err := acigithub.CreateRelease(version, true)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -71,30 +80,36 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 }
 
 func ReleasePublish(args *ReleasePublishSet) {
+	var version string = ""
 	_, err := acigithub.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	prNumber, err := evalPrNumber(&args.PrNumber)
-	if err != nil {
-		log.Fatalln(err)
-	}
 
-	prInfos, _, err := acigithub.GetPrInfos(prNumber)
-	if err != nil {
-		log.Fatalln(err)
+	if args.Version != "" && args.PatchLevel != "" {
+		version, err = semver.IncreaseVersion(args.PatchLevel, args.Version)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} else if args.Version != "" && args.PatchLevel == "" {
+		version = args.Version
+	} else if args.ReleaseId == 0 {
+		prNumber, err := evalPrNumber(&args.PrNumber)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		prInfos, _, err := acigithub.GetPrInfos(prNumber)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		version = prInfos.NextVersion
 	}
-	/* if args.PatchLevel != "" && args.Version != "" {
-
-	} */
 
 	if args.DryRun {
-		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
-		fmt.Printf("Would publishing release: %s\n", prInfos.NextVersion)
+		fmt.Printf("Would publishing release: %s\n", version)
 	} else {
-		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
-		fmt.Printf("Publishing release: %s\n", prInfos.NextVersion)
-		acigithub.PublishRelease(prInfos, &args.UploadArtifacts)
+		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
+		acigithub.PublishRelease(version, args.ReleaseId, &args.UploadArtifacts)
 	}
 }
 
@@ -105,7 +120,7 @@ func evalPrNumber(override *int) (prNumber int, err error) {
 
 	prNumber, err = getPrFromMergeMessage()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	/* if prNumber == 0 {

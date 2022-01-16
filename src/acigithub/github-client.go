@@ -12,16 +12,12 @@ import (
 )
 
 var (
-	GithubClient                       *github.Client
-	githubServerUrl, isgithubServerUrl = os.LookupEnv("GITHUB_ENTERPRISE_SERVER_URL")
-	githubToken, isgithubToken         = os.LookupEnv("GITHUB_TOKEN")
+	GithubClient                         *github.Client
+	ctx                                  = context.Background()
+	githubServerUrl, isgithubServerUrl   = os.LookupEnv("GITHUB_ENTERPRISE_SERVER_URL")
+	githubRepository, isgithubRepository = os.LookupEnv("GITHUB_REPOSITORY")
+	githubToken, isgithubToken           = os.LookupEnv("GITHUB_TOKEN")
 )
-
-func devideOwnerAndRepo(fullRepo string) (owner string, repo string) {
-	owner = strings.ToLower(strings.Split(fullRepo, "/")[0])
-	repo = strings.ToLower(strings.Split(fullRepo, "/")[1])
-	return
-}
 
 // NewGitHubClient Creates a new GitHub Client
 // Needs the Environment Variables: GITHUB_TOKEN

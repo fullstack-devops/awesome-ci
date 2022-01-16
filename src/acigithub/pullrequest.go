@@ -3,18 +3,12 @@ package acigithub
 import (
 	"awesome-ci/src/models"
 	"awesome-ci/src/semver"
-	"context"
+	"awesome-ci/src/tools"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/google/go-github/v39/github"
-)
-
-var (
-	ctx                                  = context.Background()
-	githubRepository, isgithubRepository = os.LookupEnv("GITHUB_REPOSITORY")
 )
 
 // GetPrInfos need the PullRequest-Number
@@ -22,7 +16,7 @@ func GetPrInfos(prNumber int) (standardPrInfos *models.StandardPrInfos, prInfos 
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
 	}
-	owner, repo := devideOwnerAndRepo(githubRepository)
+	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
 	if prNumber != 0 {
 		prInfos, _, err = GithubClient.PullRequests.Get(ctx, owner, repo, prNumber)
 		if err != nil {

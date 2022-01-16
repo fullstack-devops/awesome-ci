@@ -1,7 +1,6 @@
 package acigithub
 
 import (
-	"awesome-ci/src/models"
 	"awesome-ci/src/tools"
 	"fmt"
 	"log"
@@ -12,20 +11,25 @@ import (
 )
 
 // CreateRelease
-func CreateRelease(prInfos *models.StandardPrInfos, draft bool) (createdRelease *github.RepositoryRelease, err error) {
-	relName := "Release " + prInfos.NextVersion
+func CreateRelease(version string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
+	if !isgithubRepository {
+		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
+	}
+	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
+
+	relName := "Release " + version
 	defaultBranch := tools.GetDefaultBranch()
-	fmt.Println(defaultBranch)
+
 	releaseObject := github.RepositoryRelease{
 		TargetCommitish: &defaultBranch,
-		TagName:         &prInfos.NextVersion,
+		TagName:         &version,
 		Name:            &relName,
 		Draft:           &draft,
 	}
 	createdRelease, _, err = GithubClient.Repositories.CreateRelease(
 		ctx,
-		prInfos.Owner,
-		prInfos.Repo,
+		owner,
+		repo,
 		&releaseObject)
 	if err != nil {
 		err = fmt.Errorf("error at creating github release: %v", err)
@@ -42,38 +46,44 @@ func CreateRelease(prInfos *models.StandardPrInfos, draft bool) (createdRelease 
 }
 
 // PublishRelease
-func PublishRelease(prInfos *models.StandardPrInfos, uploadArtifacts *string) (err error) {
+func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (err error) {
+	draftFalse := false
+	if !isgithubRepository {
+		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
+	}
+	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
 
-	releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
-	releaseId, err := strconv.ParseInt(releaseIdStr, 10, 64)
-	if err != nil {
-		fmt.Printf("%s of type %T", releaseIdStr, releaseIdStr)
-		os.Exit(2)
+	if releaseId == 0 {
+		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
+		if !releaseIdBool {
+			log.Fatalln("Not release found creating one...")
+			CreateRelease(version, draftFalse)
+		}
+		releaseId, err = strconv.ParseInt(releaseIdStr, 10, 64)
+		if err != nil {
+			fmt.Printf("%s of type %T", releaseIdStr, releaseIdStr)
+			os.Exit(2)
+		}
 	}
 
-	draftFalse := false
-	if !releaseIdBool {
-		CreateRelease(prInfos, draftFalse)
-	} else {
-		existingRelease, _, err := GithubClient.Repositories.GetRelease(
-			ctx,
-			prInfos.Owner,
-			prInfos.Repo,
-			releaseId)
-		if err != nil {
-			return err
-		}
+	existingRelease, _, err := GithubClient.Repositories.GetRelease(
+		ctx,
+		owner,
+		repo,
+		releaseId)
+	if err != nil {
+		return err
+	}
 
-		*existingRelease.Draft = draftFalse
-		_, _, err = GithubClient.Repositories.EditRelease(
-			ctx,
-			prInfos.Owner,
-			prInfos.Repo,
-			releaseId,
-			existingRelease)
-		if err != nil {
-			return err
-		}
+	*existingRelease.Draft = draftFalse
+	_, _, err = GithubClient.Repositories.EditRelease(
+		ctx,
+		owner,
+		repo,
+		releaseId,
+		existingRelease)
+	if err != nil {
+		return err
 	}
 
 	if uploadArtifacts != nil {
@@ -83,12 +93,12 @@ func PublishRelease(prInfos *models.StandardPrInfos, uploadArtifacts *string) (e
 		}
 
 		for _, fileAndInfo := range filesAndInfos {
-			log.Println("uploading file as asset to release", fileAndInfo)
+			fmt.Printf("uploading %s as asset to release", fileAndInfo.Name())
 			// Upload assets to GitHub Release
 			_, _, err := GithubClient.Repositories.UploadReleaseAsset(
 				ctx,
-				prInfos.Owner,
-				prInfos.Repo,
+				owner,
+				repo,
 				releaseId,
 				&github.UploadOptions{
 					Name: fileAndInfo.Name(),

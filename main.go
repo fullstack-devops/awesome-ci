@@ -49,7 +49,7 @@ func init() {
 	releaseSet.Fs = flag.NewFlagSet("release", flag.ExitOnError)
 	releaseSet.Fs.Usage = func() {
 		fmt.Println("Available commands:")
-		fmt.Println("  info")
+		// fmt.Println("  info")
 		fmt.Println("  create")
 		fmt.Println("  publish")
 		fmt.Println("Use \"awesome-ci release <command> --help\" for more information about a given command.")
@@ -64,8 +64,11 @@ func init() {
 		releaseSet.Create.Fs.PrintDefaults()
 	}
 	releaseSet.Publish.Fs = flag.NewFlagSet("release publish", flag.ExitOnError)
+	releaseSet.Publish.Fs.IntVar(&releaseSet.Publish.PrNumber, "prnumber", 0, "overwrite the issue number")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Version, "version", "", "override version to Update")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.PatchLevel, "patchLevel", "", "predefine version to Update")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.UploadArtifacts, "upload", "", "upload assets to release. eg.: \"file:\"")
+	releaseSet.Publish.Fs.Int64Var(&releaseSet.Publish.ReleaseId, "releaseid", 0, "publish an early defined release")
 	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
 
 	// parseJSON
