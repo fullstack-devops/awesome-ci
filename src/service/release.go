@@ -1,9 +1,11 @@
 package service
 
 import (
+	"awesome-ci/src/acigithub"
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 )
@@ -26,6 +28,7 @@ type ReleasePublishSet struct {
 	Fs              *flag.FlagSet
 	Version         string
 	PatchLevel      string
+	ReleaseId       string
 	PublishNpm      string
 	UploadArtifacts string
 	PrNumber        int
@@ -33,40 +36,65 @@ type ReleasePublishSet struct {
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) {
+	_, err := acigithub.NewGitHubClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
 	prNumber, err := evalPrNumber(&args.PrNumber)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
-	prInfos, err := getPRInfos(prNumber, true)
+	prInfos, _, err := acigithub.GetPrInfos(prNumber)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	if args.DryRun {
 		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
-		fmt.Printf("Would writing new release: %s\n", prInfos.NextVersion)
+		fmt.Printf("Would create new release: %s\n", prInfos.NextVersion)
 	} else {
 		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
 		fmt.Printf("Writing new release: %s\n", prInfos.NextVersion)
-		CiEnvironment.CreateRelease(&prInfos, true)
+		createdRelease, err := acigithub.CreateRelease(prInfos, true)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Println("Create release successful. ID:", *createdRelease.ID)
+		envVars, err := acigithub.OpenEnvFile()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		envVars.Set("ACI_RELEASE_ID", fmt.Sprint(*createdRelease.ID))
+		envVars.SaveEnvFile()
 	}
 }
 
 func ReleasePublish(args *ReleasePublishSet) {
-
-	if args.PatchLevel != "" && args.Version != "" {
-
+	_, err := acigithub.NewGitHubClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	prNumber, err := evalPrNumber(&args.PrNumber)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	// TODO
+	prInfos, _, err := acigithub.GetPrInfos(prNumber)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	/* if args.PatchLevel != "" && args.Version != "" {
+
+	} */
+
 	if args.DryRun {
 		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
 		fmt.Printf("Would publishing release: %s\n", prInfos.NextVersion)
 	} else {
 		fmt.Printf("Old version: %s\n", prInfos.CurrentVersion)
 		fmt.Printf("Publishing release: %s\n", prInfos.NextVersion)
-		CiEnvironment.PublishRelease(&prInfos, &args.UploadArtifacts)
+		acigithub.PublishRelease(prInfos, &args.UploadArtifacts)
 	}
 }
 

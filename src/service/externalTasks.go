@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-func npmPublish(pathToSource string, nextVersion string) {
+func npmPublish(pathToSource string, version string) {
 
 	// opening package.json
 	jsonFile, err := os.Open(pathToSource + "package.json")
@@ -21,7 +21,7 @@ func npmPublish(pathToSource string, nextVersion string) {
 	var result map[string]interface{}
 	json.NewDecoder(jsonFile).Decode(&result)
 
-	result["version"] = nextVersion
+	result["version"] = version
 
 	b, err := json.MarshalIndent(result, "", " ")
 	if err != nil {

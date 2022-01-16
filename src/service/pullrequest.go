@@ -1,12 +1,11 @@
 package service
 
 import (
-	"awesome-ci/src/controlEnvs"
-	"awesome-ci/src/gitController"
+	"awesome-ci/src/acigithub"
 	"flag"
 	"fmt"
 	"log"
-	"strconv"
+	"os"
 	"strings"
 )
 
@@ -22,10 +21,16 @@ type PullRequestInfoSet struct {
 }
 
 func PrintPRInfos(args *PullRequestInfoSet) {
-	prInfos, err := getPRInfos(args.Number, true)
+	_, err := acigithub.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
+	prInfos, _, err := acigithub.GetPrInfos(args.Number)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	errEnvs := standardPrInfosToEnv(prInfos)
 	if args.Format != "" {
 		replacer := strings.NewReplacer(
 			"pr", fmt.Sprint(prInfos.PrNumber),
@@ -40,29 +45,9 @@ func PrintPRInfos(args *PullRequestInfoSet) {
 		fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
 		fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
 		fmt.Printf("Possible new release version: %s\n", prInfos.NextVersion)
-	}
-}
-
-func getPRInfos(prNumber int, silent bool) (aciPrInfos gitController.AciPrInfos, err error) {
-	aciPrInfos, err = CiEnvironment.GetPrInfos(prNumber)
-	switch CiEnvironment.RunnerType {
-	case "github_runner":
-		envVariables, err := controlEnvs.OpenEnvFile(CiEnvironment.RunnerInfo.EnvFile)
-		if err != nil {
-			return aciPrInfos, err
-		}
-		envVariables.Set("ACI_PR", strconv.Itoa(prNumber))
-		envVariables.Set("ACI_PR_SHA", aciPrInfos.Sha)
-		envVariables.Set("ACI_PR_SHA_SHORT", aciPrInfos.ShaShort)
-		envVariables.Set("ACI_PR_BRANCH", strings.ToLower(*CiEnvironment.GitInfos.Owner))
-		envVariables.Set("ACI_ORGA", strings.ToLower(*CiEnvironment.GitInfos.Repo))
-		envVariables.Set("ACI_PATCH_LEVEL", aciPrInfos.PatchLevel)
-		envVariables.Set("ACI_VERSION", aciPrInfos.NextVersion)
-		envVariables.Set("ACI_LATEST_VERSION", aciPrInfos.LatestVersion)
-		err = envVariables.SaveEnvFile()
-		if err != nil {
-			return aciPrInfos, err
+		if errEnvs != nil {
+			log.Fatalln(errEnvs)
 		}
 	}
-	return
+	os.Exit(0)
 }

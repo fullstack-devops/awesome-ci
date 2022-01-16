@@ -35,13 +35,13 @@ func init() {
 	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
 
 	// PullRequestSet
-	pullrequestSet.Fs = flag.NewFlagSet("pullrequest", flag.ExitOnError)
+	pullrequestSet.Fs = flag.NewFlagSet("pr", flag.ExitOnError)
 	pullrequestSet.Fs.Usage = func() {
 		fmt.Println("Available commands:")
 		fmt.Println("  info")
-		fmt.Println("Use \"awesome-ci pullrequest <command> --help\" for more information about a given command.")
+		fmt.Println("Use \"awesome-ci pr <command> --help\" for more information about a given command.")
 	}
-	pullrequestSet.Info.Fs = flag.NewFlagSet("pullrequest info", flag.ExitOnError)
+	pullrequestSet.Info.Fs = flag.NewFlagSet("pr info", flag.ExitOnError)
 	pullrequestSet.Info.Fs.IntVar(&pullrequestSet.Info.Number, "number", 0, "overwrite the issue number")
 	pullrequestSet.Info.Fs.StringVar(&pullrequestSet.Info.Format, "format", "", "define output by get")
 
@@ -112,9 +112,9 @@ func main() {
 		fmt.Println("  Find more information and examples at: https://github.com/eksrvb/awesome-ci")
 		fmt.Println()
 		fmt.Println("Available commands:")
-		fmt.Println("  pullrequest")
 		fmt.Println("  release")
 		fmt.Println("  parse")
+		fmt.Println("  pr")
 		fmt.Println("")
 		fmt.Println("Use \"awesome-ci <command> --help\" for more information about a given command.")
 	}
@@ -128,11 +128,11 @@ func main() {
 	returnHelpIfEmpty(flag.Args(), flag.Usage)
 
 	// distribute environment settings
-	environment := service.EvaluateEnvironment()
-	service.CiEnvironment = environment
+	/* environment := service.EvaluateEnvironment()
+	service.CiEnvironment = environment */
 
 	switch flag.Arg(0) {
-	case "pullrequest":
+	case "pr":
 		pullrequestSet.Fs.Parse(flag.Args()[1:])
 		returnHelpIfEmpty(flag.Args()[1:], pullrequestSet.Fs.Usage)
 		switch flag.Arg(1) {
@@ -160,12 +160,10 @@ func main() {
 			if err != nil {
 				log.Fatalln(err)
 			}
+			service.ReleasePublish(&releaseSet.Publish)
 		default:
 			printNoValidCommand(releaseSet.Fs.Usage)
 		}
-	case "getBuildInfos":
-		// getBuildInfos.fs.Parse(flag.Args()[1:])
-		// service.GetBuildInfos(cienv, &getBuildInfos.version, &getBuildInfos.patchLevel, &getBuildInfos.format)
 	case "parse":
 		parseSet.Fs.Parse(flag.Args()[1:])
 		returnHelpIfEmpty(flag.Args()[1:], parseSet.Fs.Usage)

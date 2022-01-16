@@ -11,8 +11,27 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE.md"
 
 jobs:
+  generate_infos:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          fetch-depth: 0
+      - id: tag
+        shell: bash
+        run: |
+          echo "Tag: $(git describe --abbrev=0)"
+          echo "::set-output name=tag::$(git describe --abbrev=0)"
+
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -33,23 +52,16 @@ jobs:
         run: ./awesome-ci getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build amd64
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci
+
+      - name: Build "${{ matrix.arch }}"
+        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci_${$ACI_NEXT_VERSION"}_${{ matrix.arch }}
         env:
           GOOS: linux
-          GOARCH: amd64
-      - name: Build arm64
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci-arm64
-        env:
-          GOOS: linux
-          GOARCH: arm64
-      - name: Print version of awesome-ci
-        run: ./out/awesome-ci -version
+          GOARCH: "${{ matrix.arch }}"
+
+      - name: get generated artifacts
+        run: ls -la
       - name: Integration testing
-        run: ./tools/test.sh ./out/awesome-ci
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Test writing dummy Release
-        run: ./out/awesome-ci createRelease -patchLevel bugfix -dry-run
+        run: ./tools/test.sh ./out/awesome-ci_${$ACI_NEXT_VERSION"}_${{ matrix.arch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

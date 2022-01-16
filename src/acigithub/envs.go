@@ -1,4 +1,4 @@
-package controlEnvs
+package acigithub
 
 import (
 	"bufio"
@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+)
+
+var (
+	envVars                EnvVariables
+	githubEnv, isgithubEnv = os.LookupEnv("GITHUB_ENV")
 )
 
 type EnvVariables struct {
@@ -18,20 +23,21 @@ type EnvVariable struct {
 	Value *string
 }
 
-func OpenEnvFile(name string) (envVariables EnvVariables, err error) {
-	envFile, err := os.Open(name)
-	if err != nil {
-		err = errors.New(fmt.Sprintln("Error at opening ENV file:", err))
-		return
-	}
-	envVariables.fileName = &name
+func OpenEnvFile() (envVariables *EnvVariables, err error) {
+	if isgithubEnv {
+		envFile, err := os.Open(githubEnv)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintln("Error at opening ENV file:", err))
+		}
+		envVars.fileName = &githubEnv
 
-	scanner := bufio.NewScanner(envFile)
-	for scanner.Scan() {
-		s := scanner.Text()
-		envVariables.Set(s[:strings.Index(s, "=")], s[strings.Index(s, "=")+1:])
+		scanner := bufio.NewScanner(envFile)
+		for scanner.Scan() {
+			s := scanner.Text()
+			envVars.Set(s[:strings.Index(s, "=")], s[strings.Index(s, "=")+1:])
+		}
 	}
-	return
+	return &envVars, nil
 }
 
 func (envs *EnvVariables) SaveEnvFile() (err error) {
@@ -54,13 +60,17 @@ func (envs *EnvVariables) SaveEnvFile() (err error) {
 }
 
 func (envs *EnvVariables) Set(name string, value string) {
+	var envFound bool = false
 	for _, env := range envs.envs {
 		if *env.Name == name {
-			env.Value = &value
+			*env.Value = value
+			envFound = true
 			return
 		}
 	}
-	envs.envs = append(envs.envs, EnvVariable{Name: &name, Value: &value})
+	if !envFound {
+		envs.envs = append(envs.envs, EnvVariable{Name: &name, Value: &value})
+	}
 }
 
 func (envs *EnvVariables) Get(name string) (envVariable *EnvVariable) {
