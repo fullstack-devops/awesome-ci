@@ -40,7 +40,7 @@ The `-format` option can put out your needed information about your current git 
 
   Hint: use a seperatoa as you like, the below values would be replaced!
 
-Possible infos are: `patchLevel`, `pr`, `version`, `nextVersion`
+Possible infos are: `patchLevel`, `pr`, `version`, `latest_version`
 
 #### Examples
 
