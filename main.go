@@ -67,7 +67,7 @@ func init() {
 	releaseSet.Publish.Fs.IntVar(&releaseSet.Publish.PrNumber, "prnumber", 0, "overwrite the issue number")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Version, "version", "", "override version to Update")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.PatchLevel, "patchLevel", "", "predefine version to Update")
-	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.UploadArtifacts, "upload", "", "upload assets to release. eg.: \"file:\"")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.UploadArtifacts, "upload", "", "upload assets to release. eg.: \"file=awesome-ci\"")
 	releaseSet.Publish.Fs.Int64Var(&releaseSet.Publish.ReleaseId, "releaseid", 0, "publish an early defined release")
 	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
 
