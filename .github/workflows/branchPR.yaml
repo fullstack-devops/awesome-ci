@@ -60,14 +60,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
+        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
 
       - name: rename buildable
         working-directory: out
-        run: mv awesome-ci awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
+        run: mv awesome-ci awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
 
       - uses: actions/cache@v2
         with:
