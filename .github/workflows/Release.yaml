@@ -24,8 +24,10 @@ jobs:
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
-      - name: Create release
-        run: awesome-ci release create
+      - name: collect infos and create release
+        run: |
+          awesome-ci pr info
+          awesome-ci release create
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -33,12 +35,9 @@ jobs:
         id: tag
         shell: bash
         run: |
-          awesome-ci pr info
-          echo "::set-output name=version::$(awesome-ci pr info -format 'version')"
-          echo "::set-output name=pr::$(awesome-ci pr info -format 'pr')"
+          echo "::set-output name=version::$ACI_VERSION"
+          echo "::set-output name=pr::$ACI_PR"
           echo "::set-output name=releaseid::$ACI_RELEASE_ID"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
@@ -92,8 +91,9 @@ jobs:
           key: awesome-ci-${{ github.sha }}
       
       - name: Create Release
-        run: awesome-ci release publish -releaseid ${{ needs.generate_infos.outputs.releaseid }} -upload "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
+        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -upload "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACI_RELEASE_ID: ${{ needs.generate_infos.outputs.releaseid }}
           ARTIFACT1: awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64
           ARTIFACT2: awesome-ci_${{ needs.generate_infos.outputs.version }}_arm64
