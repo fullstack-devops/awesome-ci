@@ -11,19 +11,46 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE.md"
 
 jobs:
+  generate_infos:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.version }}
+      pr: ${{ steps.tag.outputs.pr }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Set up awesome-ci
+        run: |
+          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
+          chmod +x awesome-ci
+      - id: tag
+        shell: bash
+        run: |
+          echo "Building version: $(awesome-ci getBuildInfos -format 'version')"
+          echo "::set-output name=version::$(awesome-ci getBuildInfos -format 'version')"
+          echo "::set-output name=pr::$(awesome-ci getBuildInfos -format 'pr')"
+
   build:
     runs-on: ubuntu-latest
+    needs: generate_infos
+    strategy:
+      matrix:
+        arch: ["amd64", "arm64"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.17
       - name: Set up awesome-ci
         run: |
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
           chmod +x awesome-ci
+
       - name: debugging git
         run: |
           echo "git name-rev HEAD: $(git name-rev HEAD)"
@@ -33,23 +60,53 @@ jobs:
         run: ./awesome-ci getBuildInfos
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build amd64
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci
+
+      - name: Build "${{ matrix.arch }}"
+        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/
         env:
           GOOS: linux
-          GOARCH: amd64
-      - name: Build arm64
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/awesome-ci-arm64
+          GOARCH: "${{ matrix.arch }}"
+
+      - name: rename buildable
+        working-directory: out
+        run: mv awesome-ci awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
+
+      - name: Cache build outputs
+        uses: actions/cache@v2
         env:
-          GOOS: linux
-          GOARCH: arm64
-      - name: Print version of awesome-ci
-        run: ./out/awesome-ci -version
-      - name: Integration testing
-        run: ./tools/test.sh ./out/awesome-ci
+          cache-name: cache-outputs-modules
+        with:
+          path: out/
+          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}-${{ hashFiles('out/awesome-ci*') }}
+          restore-keys: |
+            awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
+
+      #- name: Integration testing
+      #  run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create_release_test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up awesome-ci
+        run: |
+          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
+          chmod +x awesome-ci
+
+      - name: Cache build outputs
+        uses: actions/cache@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Test writing dummy Release
-        run: ./out/awesome-ci createRelease -patchLevel bugfix -dry-run
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          cache-name: cache-outputs-modules
+        with:
+          path: out/
+          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
+          restore-keys: |
+            awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
+
+      - name: get generated artifacts
+        working-directory: out
+        run: ls -la

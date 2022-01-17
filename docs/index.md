@@ -34,7 +34,7 @@ The patching of the version only takes effect if the merged branch begins with t
 
 ![awesome-ci workflow](aci-workflow.drawio.png "awesome-ci workflow")
 
-> Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and __GitLab CI__
+> Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and ~~GitLab CI~~
 
 ### Major specialties
 
