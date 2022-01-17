@@ -33,7 +33,7 @@ jobs:
         id: tag
         shell: bash
         run: |
-          echo "Building version: $(awesome-ci pr info -format 'version')"
+          awesome-ci pr info
           echo "::set-output name=version::$(awesome-ci pr info -format 'version')"
           echo "::set-output name=pr::$(awesome-ci pr info -format 'pr')"
           echo "::set-output name=releaseid::$ACI_RELEASE_ID"
@@ -92,8 +92,8 @@ jobs:
           key: awesome-ci-${{ github.sha }}
       
       - name: Create Release
-        run: awesome-ci release publish -releaseid ${{ needs.generate_tag.outputs.releaseid }} -upload "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
+        run: awesome-ci release publish -releaseid ${{ needs.generate_infos.outputs.releaseid }} -upload "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARTIFACT1: awesome-ci_${{ needs.generate_tag.outputs.version }}_amd64
-          ARTIFACT2: awesome-ci_${{ needs.generate_tag.outputs.version }}_arm64
+          ARTIFACT1: awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64
+          ARTIFACT2: awesome-ci_${{ needs.generate_infos.outputs.version }}_arm64
