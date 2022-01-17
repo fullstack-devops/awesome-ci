@@ -14,7 +14,7 @@ jobs:
   generate_infos:
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.tag.outputs.version }}
+      version: ${{ steps.tag.outputs.version }}
       pr: ${{ steps.tag.outputs.pr }}
     steps:
       - name: Check out the repo
