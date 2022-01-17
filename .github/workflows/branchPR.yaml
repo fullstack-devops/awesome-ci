@@ -22,16 +22,15 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action
+
       - id: tag
         shell: bash
         run: |
-          echo "Building version: $(awesome-ci getBuildInfos -format 'version')"
-          echo "::set-output name=version::$(awesome-ci getBuildInfos -format 'version')"
-          echo "::set-output name=pr::$(awesome-ci getBuildInfos -format 'pr')"
+          echo "Building version: $(awesome-ci pr infos -number ${{ github.event.pull_request.number }} -format 'version')"
+          echo "::set-output name=version::$(awesome-ci pr infos -number ${{ github.event.pull_request.number }} -format 'version')"
+          echo "::set-output name=pr::$(awesome-ci pr infos -number ${{ github.event.pull_request.number }} -format 'pr')"
 
   build:
     runs-on: ubuntu-latest
@@ -46,10 +45,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action
 
       - name: debugging git
         run: |
@@ -57,19 +54,15 @@ jobs:
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: set build Infos
-        run: ./awesome-ci getBuildInfos
+        run: awesome-ci pr infos -number ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/
+        run: go build -v -ldflags "-X main.version="${{ needs.generate_tag.outputs.version }}" -o out/awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
-
-      - name: rename buildable
-        working-directory: out
-        run: mv awesome-ci awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
 
       - name: Cache build outputs
         uses: actions/cache@v2
@@ -92,10 +85,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action
 
       - name: Cache build outputs
         uses: actions/cache@v2
