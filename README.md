@@ -6,9 +6,9 @@
 - **Status**: Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
 - **Requests and Issues**: Please feel free to open an question or feature request in the Issue Board.
 
-## Usage
+ > Hint: GitLab is currently not supported
 
-This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of SemVer. The required version number is created with the correct naming of the branch prefix.
+## Usage
 
 You can use this tool in your CI pipeline or locally on your command line. Just [download](https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci) the most recently released version and get started. You can find out how to integrate this into your respective pipeline in the following document. There are also several examples in the [examples section](https://eksrvb.github.io/awesome-ci/docs/examples) of the documentation. If an example is not included, please feel free to inquire about a related [issue](https://github.com/eksrvb/awesome-ci/issues/new/choose).
 
