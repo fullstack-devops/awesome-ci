@@ -7,7 +7,12 @@ import (
 	"strings"
 )
 
-func GetFilesAndInfos(uploadArtifacts *string) (files []os.File, err error) {
+type UploadArtifact struct {
+	File os.File
+	Name string
+}
+
+func GetFilesAndInfos(uploadArtifacts *string) (artifacts []UploadArtifact, err error) {
 	artifactsToUpload := strings.Split(*uploadArtifacts, ",")
 	for _, artifact := range artifactsToUpload {
 		var sanFilename string
@@ -18,7 +23,11 @@ func GetFilesAndInfos(uploadArtifacts *string) (files []os.File, err error) {
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, *file)
+		info, _ := file.Stat()
+		artifacts = append(artifacts, UploadArtifact{
+			File: *file,
+			Name: info.Name(),
+		})
 	}
 	return
 }
