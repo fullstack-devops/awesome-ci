@@ -28,9 +28,9 @@ jobs:
       - id: tag
         shell: bash
         run: |
-          echo "Building version: $(awesome-ci pr infos -number ${{ github.event.pull_request.number }} -format 'version')"
-          echo "::set-output name=version::$(awesome-ci pr infos -number ${{ github.event.pull_request.number }} -format 'version')"
-          echo "::set-output name=pr::$(awesome-ci pr infos -number ${{ github.event.pull_request.number }} -format 'pr')"
+          echo "Building version: $(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
+          echo "::set-output name=version::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
+          echo "::set-output name=pr::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'pr')"
 
   build:
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: set build Infos
-        run: awesome-ci pr infos -number ${{ github.event.pull_request.number }}
+        run: awesome-ci pr info -number ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
