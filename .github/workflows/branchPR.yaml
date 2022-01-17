@@ -23,16 +23,15 @@ jobs:
         uses: fullstack-devops/awesome-ci-action@main
 
       - name: collect infos
+        run: awesome-ci pr info -number ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: export infos
         id: tag
         shell: bash
         run: |
-          awesome-ci pr info -number ${{ github.event.pull_request.number }}
-          export
-          echo "::set-output name=releaseid::$ACI_RELEASE_ID"
           echo "::set-output name=version::$ACI_VERSION"
           echo "::set-output name=pr::$ACI_PR"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
