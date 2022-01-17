@@ -31,6 +31,8 @@ jobs:
           echo "Building version: $(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
           echo "::set-output name=version::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
           echo "::set-output name=pr::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'pr')"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
@@ -59,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version="${{ needs.generate_tag.outputs.version }}" -o out/awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
+        run: go build -v -ldflags "-X main.version=${{ needs.generate_tag.outputs.version }}" -o out/awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
