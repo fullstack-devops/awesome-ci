@@ -1,45 +1,50 @@
 ---
 layout: default
-title: getBuildInfos
+title: pr
 parent: Commands
 nav_order: 2
 ---
 
-# Creating a release
+- [Overview](#overview)
+- [Subcommands](#subcommands)
+  - [-number](#-number)
+  - [-format](#-format)
+- [Examples](#examples)
+- [Special to github actions](#special-to-github-actions)
+
+## Overview
 
 ```bash
-awesome-ci createRelease [subcommand-option]
+awesome-ci pr <subcommand> [subcommand-option]
 ```
+
+## Subcommands
+
+| Subcommand          | Description                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `info`              | creates an release, but doesn't publish it                                  |
+
 
 | Subcommand option | Description                                                                   |
 | ----------------- | ----------------------------------------------------------------------------- |
-| `-version`        | overrides any version from git and patches the given string.                  |
-| `-patchLevel`     | overrides the patchLevel. make shure our following the alias definition.      |
+| `-number`         | overwrite the issue number                                                    |
 | `-format`         | pastes the required output to the console. This can be extracted to variables |
 
-### -version
+### -number
 
-The `-version` option can overwrite the evaluated version.
-This can be useful in connection with `-patchLevel` when creating a manual release.
-
-### -patchLevel
-
-The `-patchLevel` option can overwrite the evaluated patchLevel.
-This can be useful in connection with `-version` when creating a manual release.
+By default, awesome-ci recognizes the number of the PullRequest being built. To speed up this process and make it more stable, the `-number` can optionally be specified if known. This brings additional stability to the workflow.
 
 ### -format
 
 The `-format` option can put out your needed information about your current git status.
 
-Hint: use a seperatoa as you like, the below values would be replaced!
+  Hint: use a seperatoa as you like, the below values would be replaced!
 
-Possible infos are: `patchLevel`, `pr`, `version`, `nextVersion`
+Possible infos are: `patchLevel`, `pr`, `version`, `latest_version`
 
 #### Examples
 
 ```bash
-awesome-ci getBuildInfos -patchLevel feature -version 1.0.0
-
 #### Info output:
 Pull Request: 17
 Current release version: 1.0.0
@@ -48,7 +53,7 @@ Possible new release version: 1.1.0
 ```
 
 ```bash
-awesome-ci getBuildInfos -patchLevel feature -version 1.0.0 -format "pr,next_version"
+awesome-ci getBuildInfos -format "pr,next_version"
 # Output:
 17,1.1.0
 ```
