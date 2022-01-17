@@ -23,7 +23,7 @@ jobs:
           ref: main
           fetch-depth: 0
       - name: Setup awesome-ci
-        uses: fullstack-devops/awesome-ci-action
+        uses: fullstack-devops/awesome-ci-action@main
 
       - id: tag
         shell: bash
@@ -46,7 +46,7 @@ jobs:
         with:
           go-version: 1.17
       - name: Setup awesome-ci
-        uses: fullstack-devops/awesome-ci-action
+        uses: fullstack-devops/awesome-ci-action@main
 
       - name: debugging git
         run: |
@@ -86,7 +86,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Setup awesome-ci
-        uses: fullstack-devops/awesome-ci-action
+        uses: fullstack-devops/awesome-ci-action@main
 
       - name: Cache build outputs
         uses: actions/cache@v2
