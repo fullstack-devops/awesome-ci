@@ -26,9 +26,11 @@ jobs:
         id: tag
         shell: bash
         run: |
-          echo "Building version: $(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
-          echo "::set-output name=version::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
-          echo "::set-output name=pr::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'pr')"
+          awesome-ci pr info
+          export
+          echo "::set-output name=releaseid::$ACI_RELEASE_ID"
+          echo "::set-output name=version::$ACI_VERSION"
+          echo "::set-output name=pr::$ACI_PR"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
