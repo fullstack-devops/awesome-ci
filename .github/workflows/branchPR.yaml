@@ -14,24 +14,23 @@ jobs:
   generate_infos:
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.tag.outputs.version }}
+      version: ${{ steps.tag.outputs.version }}
       pr: ${{ steps.tag.outputs.pr }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          ref: main
-          fetch-depth: 0
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
-      - id: tag
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action@main
+
+      - name: collect infos
+        id: tag
         shell: bash
         run: |
-          echo "Building version: $(awesome-ci getBuildInfos -format 'version')"
-          echo "::set-output name=version::$(awesome-ci getBuildInfos -format 'version')"
-          echo "::set-output name=pr::$(awesome-ci getBuildInfos -format 'pr')"
+          echo "Building version: $(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
+          echo "::set-output name=version::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'version')"
+          echo "::set-output name=pr::$(awesome-ci pr info -number ${{ github.event.pull_request.number }} -format 'pr')"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
@@ -46,10 +45,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action@main
 
       - name: debugging git
         run: |
@@ -57,19 +54,15 @@ jobs:
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: set build Infos
-        run: ./awesome-ci getBuildInfos
+        run: awesome-ci pr info -number ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version=$ACI_NEXT_VERSION" -o out/
+        run: go build -v -ldflags "-X main.version=${{ needs.generate_infos.outputs.version }}" -o out/awesome-ci_${{ needs.generate_infos.outputs.version }}_${{ matrix.arch }}
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
-
-      - name: rename buildable
-        working-directory: out
-        run: mv awesome-ci awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
 
       - name: Cache build outputs
         uses: actions/cache@v2
@@ -77,9 +70,9 @@ jobs:
           cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}-${{ hashFiles('out/awesome-ci*') }}
+          key: awesome-ci-${{ github.event.pull_request.head.sha }}-${{ hashFiles('out/awesome-ci*') }}
           restore-keys: |
-            awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
+            awesome-ci-${{ github.event.pull_request.head.sha }}
 
       #- name: Integration testing
       #  run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
@@ -92,20 +85,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set up awesome-ci
-        run: |
-          wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
-          chmod +x awesome-ci
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action@main
 
-      - name: Cache build outputs
+      - name: get cached build outputs
         uses: actions/cache@v2
         env:
           cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
-          restore-keys: |
-            awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
+          key: awesome-ci-${{ github.event.pull_request.head.sha }}
 
       - name: get generated artifacts
         working-directory: out
