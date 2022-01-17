@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.version }}
+      pr: ${{ steps.tag.outputs.pr }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -28,8 +29,9 @@ jobs:
       - id: tag
         shell: bash
         run: |
-          echo "Building version: $(awesome-ci pr info -format 'version')"
-          echo "::set-output name=version::$(awesome-ci pr info -format 'version')"
+          echo "Building version: $(awesome-ci getBuildInfos -format 'version')"
+          echo "::set-output name=version::$(awesome-ci getBuildInfos -format 'version')"
+          echo "::set-output name=pr::$(awesome-ci getBuildInfos -format 'pr')"
 
   build:
     runs-on: ubuntu-latest
@@ -69,10 +71,15 @@ jobs:
         working-directory: out
         run: mv awesome-ci awesome-ci_${{ needs.generate_tag.outputs.version }}_${{ matrix.arch }}
 
-      - uses: actions/cache@v2
+      - name: Cache build outputs
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr
+          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}-${{ hashFiles('out/awesome-ci*') }}
+          restore-keys: |
+            awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
 
       #- name: Integration testing
       #  run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
@@ -90,10 +97,15 @@ jobs:
           wget https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci
           chmod +x awesome-ci
 
-      - uses: actions/cache@v2
+      - name: Cache build outputs
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr
+          key: awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
+          restore-keys: |
+            awesome-ci-${{ needs.generate_tag.outputs.version }}-pr-${{ needs.generate_tag.outputs.pr }}
 
       - name: get generated artifacts
         working-directory: out
