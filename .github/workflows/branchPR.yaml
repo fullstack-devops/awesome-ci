@@ -72,9 +72,9 @@ jobs:
           cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-${{ needs.generate_infos.outputs.version }}-pr-${{ needs.generate_infos.outputs.pr }}-${{ hashFiles('out/awesome-ci*') }}
+          key: awesome-ci-${{ github.event.pull_request.head.sha }}-${{ hashFiles('out/awesome-ci*') }}
           restore-keys: |
-            awesome-ci-${{ needs.generate_infos.outputs.version }}-pr-${{ needs.generate_infos.outputs.pr }}
+            awesome-ci-${{ github.event.pull_request.head.sha }}
 
       #- name: Integration testing
       #  run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
@@ -96,9 +96,7 @@ jobs:
           cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-${{ needs.generate_infos.outputs.version }}-pr-${{ needs.generate_infos.outputs.pr }}
-          restore-keys: |
-            awesome-ci-${{ needs.generate_infos.outputs.version }}-pr-${{ needs.generate_infos.outputs.pr }}
+          key: awesome-ci-${{ github.event.pull_request.head.sha }}
 
       - name: get generated artifacts
         working-directory: out
