@@ -112,7 +112,7 @@ jobs:
         run: ls -la
       
       - name: Create Release
-        run: awesome-ci createRelease -uploadArtifacts "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
+        run: ./awesome-ci createRelease -uploadArtifacts "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ARTIFACT1: awesome-ci_${{ needs.generate_tag.outputs.version }}_amd64
