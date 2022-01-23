@@ -2,9 +2,9 @@ tbd ;)
 
 ## Installation
 
-The installation is needed only for contirbuting.
+git clone <this-repo>
 
-Go to your GOPATH under `src/` and run: `go get https://gitlab.com/eksrvb/awesome-ci-semver`
+to test against github-actions source the env-template `. ./tests/.env-template-github`
 
 ## How to test the software
 
