@@ -31,7 +31,7 @@ You can find out more about the subcommands by clicking on the relevant one in t
 
 | Subcommand                                                                         | Description                                             |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [release](https://eksrvb.github.io/awesome-ci/commands/createRelease.html)         | creates a release at GitHub or GitLab                   |
-| [pr](https://eksrvb.github.io/awesome-ci/commands/getBuildInfos.html)              | prints out any git information and can manipulate these |
-| [parseJSON](https://eksrvb.github.io/awesome-ci/commands/parseJSON.html)           | can parse simple JSON files                             |
-| [parseYAML](https://eksrvb.github.io/awesome-ci/commands/parseYAML.html)           | can parse simple YAML files                             |
+| [release](https://fullstack-devops.github.io/awesome-ci/commands/createRelease.html)         | creates a release at GitHub or GitLab                   |
+| [pr](https://fullstack-devops.github.io/awesome-ci/commands/getBuildInfos.html)              | prints out any git information and can manipulate these |
+| [parseJSON](https://fullstack-devops.github.io/awesome-ci/commands/parseJSON.html)           | can parse simple JSON files                             |
+| [parseYAML](https://fullstack-devops.github.io/awesome-ci/commands/parseYAML.html)           | can parse simple YAML files                             |

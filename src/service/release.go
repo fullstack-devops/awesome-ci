@@ -26,13 +26,13 @@ type ReleaseCreateSet struct {
 }
 
 type ReleasePublishSet struct {
-	Fs              *flag.FlagSet
-	Version         string
-	PatchLevel      string
-	ReleaseId       int64
-	UploadArtifacts string
-	PrNumber        int
-	DryRun          bool
+	Fs         *flag.FlagSet
+	Version    string
+	PatchLevel string
+	ReleaseId  int64
+	Assets     string
+	PrNumber   int
+	DryRun     bool
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) {
@@ -109,7 +109,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 		fmt.Printf("Would publishing release: %s\n", version)
 	} else {
 		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
-		acigithub.PublishRelease(version, args.ReleaseId, &args.UploadArtifacts)
+		acigithub.PublishRelease(version, args.ReleaseId, &args.Assets)
 	}
 }
 

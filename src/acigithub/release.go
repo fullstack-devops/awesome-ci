@@ -56,13 +56,18 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 	if releaseId == 0 {
 		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
 		if !releaseIdBool {
-			log.Fatalln("Not release found creating one...")
-			CreateRelease(version, draftFalse)
-		}
-		releaseId, err = strconv.ParseInt(releaseIdStr, 10, 64)
-		if err != nil {
-			fmt.Printf("%s of type %T", releaseIdStr, releaseIdStr)
-			os.Exit(2)
+			log.Println("No release found, creating one...")
+			release, err := CreateRelease(version, false)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			releaseId = *release.ID
+		} else {
+			releaseId, err = strconv.ParseInt(releaseIdStr, 10, 64)
+			if err != nil {
+				fmt.Printf("%s of type %T", releaseIdStr, releaseIdStr)
+				os.Exit(2)
+			}
 		}
 	}
 
@@ -92,10 +97,10 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 			return err
 		}
 
-		for _, fileAndInfo := range filesAndInfos {
-			fmt.Printf("uploading %s as asset to release", fileAndInfo.Name)
+		for i, fileAndInfo := range filesAndInfos {
+			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
 			// Upload assets to GitHub Release
-			_, _, err := GithubClient.Repositories.UploadReleaseAsset(
+			relAsset, _, err := GithubClient.Repositories.UploadReleaseAsset(
 				ctx,
 				owner,
 				repo,
@@ -106,6 +111,17 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 				&fileAndInfo.File)
 			if err != nil {
 				log.Println("error at uploading asset to release: ", err)
+			} else {
+				// export Download URL to env. See: #53
+				envVars, err := OpenEnvFile()
+				if err != nil {
+					log.Println("could open envs:", err)
+				}
+				envVars.Set(fmt.Sprintf("ACI_ARTIFACT_%d_URL", i+1), *relAsset.BrowserDownloadURL)
+				err = envVars.SaveEnvFile()
+				if err != nil {
+					log.Println("could not export atrifact url:", err)
+				}
 			}
 		}
 	}

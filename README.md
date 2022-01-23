@@ -10,15 +10,15 @@
 
 ## Usage
 
-You can use this tool in your CI pipeline or locally on your command line. Just [download](https://github.com/eksrvb/awesome-ci/releases/latest/download/awesome-ci) the most recently released version and get started. You can find out how to integrate this into your respective pipeline in the following document. There are also several examples in the [examples section](https://eksrvb.github.io/awesome-ci/docs/examples) of the documentation. If an example is not included, please feel free to inquire about a related [issue](https://github.com/eksrvb/awesome-ci/issues/new/choose).
+You can use this tool in your CI pipeline or locally on your command line. Just [download](https://github.com/fullstack-devops/awesome-ci/releases/latest/download/awesome-ci) the most recently released version and get started. You can find out how to integrate this into your respective pipeline in the following document. There are also several examples in the [examples section](https://fullstack-devops.github.io/awesome-ci/docs/examples) of the documentation. If an example is not included, please feel free to inquire about a related [issue](https://github.com/fullstack-devops/awesome-ci/issues/new/choose).
 
-If more functionality is needed you can just open a problem in this project and of course bugs can be fixed in the same way by filing a [bug report](https://github.com/eksrvb/awesome-ci/issues/new/choose).
+If more functionality is needed you can just open a problem in this project and of course bugs can be fixed in the same way by filing a [bug report](https://github.com/fullstack-devops/awesome-ci/issues/new/choose).
 
-If you have any questions, you can find a form on the issue board. First, make sure your question is already in the [Questions and Answers](https://eksrvb.github.io/awesome-ci/docs/questions_and_answers) section before asking a question. You can find frequently asked questions there too.
+If you have any questions, you can find a form on the issue board. First, make sure your question is already in the [Questions and Answers](https://fullstack-devops.github.io/awesome-ci/docs/questions_and_answers) section before asking a question. You can find frequently asked questions there too.
 
 ## Documentation
 
-[See the manual](https://eksrvb.github.io/awesome-ci/) for setup, usage instructions and a lot more. (the documentation is still rising)
+[See the manual](https://fullstack-devops.github.io/awesome-ci/) for setup, usage instructions and a lot more. (the documentation is still rising)
 
 ## Getting help
 
