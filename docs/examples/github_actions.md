@@ -112,7 +112,7 @@ jobs:
           key: awesome-ci-$\{\{ github.sha \}\}
       
       - name: Publish Release
-        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -upload "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
+        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:
           GITHUB_TOKEN: $\{\{ secrets.GITHUB_TOKEN \}\}
           ACI_RELEASE_ID: $\{\{ needs.generate_infos.outputs.releaseid \}\}

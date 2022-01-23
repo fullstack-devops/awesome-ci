@@ -98,7 +98,7 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 		}
 
 		for i, fileAndInfo := range filesAndInfos {
-			fmt.Printf("uploading %s as asset to release", fileAndInfo.Name)
+			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
 			// Upload assets to GitHub Release
 			relAsset, _, err := GithubClient.Repositories.UploadReleaseAsset(
 				ctx,
