@@ -26,6 +26,8 @@ jobs:
           sed -i "s/$OLD_VERSION/$NEW_VERSION/g" action.yml README.md
 
           git status
-          git push
+          git commit -a -m "update to version $NEW_VERSION"
+          git tag $NEW_VERSION -m "update to version $NEW_VERSION"
+          git push --follow-tags
         env:
           NEW_VERSION: ${{ github.event.release.tag_name }}
