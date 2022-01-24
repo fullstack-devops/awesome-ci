@@ -1,9 +1,8 @@
 package semver
 
 import (
-	"errors"
 	"fmt"
-	"os"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -12,61 +11,54 @@ import (
 func IncreaseVersion(patchLevel string, version string) (incresedVersion string, err error) {
 	incresedVersion = version
 
-	if strings.HasPrefix(patchLevel, "major") {
-		incresedVersion = major(version)
-	} else if strings.HasPrefix(patchLevel, "feature") {
-		incresedVersion = minor(version)
-	} else if strings.HasPrefix(patchLevel, "bugfix") {
-		incresedVersion = patch(version)
-	} else {
-		err = errors.New("could not determan witch version to set. given first string does'n start with release, feature or bugfix")
+	switch patchLevel {
+	case "fix", "bugfix", "dependabot":
+		incresedVersion, err = patch(version)
+	case "feature", "feat":
+		incresedVersion, err = minor(version)
+	case "major":
+		incresedVersion, err = major(version)
+	default:
+		incresedVersion, err = patch(version)
+		log.Println("could not determan witch version to set. given first string does'n start with release, feature or bugfix")
+		log.Println("used minimal patch version!")
 	}
-
 	return
 }
 
-func major(version string) string {
-	var newVersion string
+func major(version string) (newVersion string, err error) {
 	splitedVersion := strings.Split(version, ".")
 
 	major, err := strconv.Atoi(splitedVersion[0])
 	if err != nil {
-		// handle error
-		fmt.Println(err)
-		os.Exit(2)
+		return
 	}
 	newMajor := (major + 1)
 
 	newVersion = fmt.Sprintf("%d.0.0", newMajor)
-	return newVersion
+	return
 }
-func minor(version string) string {
-	var newVersion string
+func minor(version string) (newVersion string, err error) {
 	splitedVersion := strings.Split(version, ".")
 
 	minor, err := strconv.Atoi(splitedVersion[1])
 	if err != nil {
-		// handle error
-		fmt.Println(err)
-		os.Exit(2)
+		return
 	}
 	newMinor := (minor + 1)
 
 	newVersion = fmt.Sprintf("%s.%d.0", splitedVersion[0], newMinor)
-	return newVersion
+	return
 }
-func patch(version string) string {
-	var newVersion string
+func patch(version string) (newVersion string, err error) {
 	splitedVersion := strings.Split(version, ".")
 
 	patch, err := strconv.Atoi(splitedVersion[2])
 	if err != nil {
-		// handle error
-		fmt.Println(err)
-		os.Exit(2)
+		return
 	}
 	newPatch := (patch + 1)
 
 	newVersion = fmt.Sprintf("%s.%s.%d", splitedVersion[0], splitedVersion[1], newPatch)
-	return newVersion
+	return
 }

@@ -1,0 +1,33 @@
+name: Release awesome-ci action
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  update_action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out awesome-ci-action
+        uses: actions/checkout@v2
+        with:
+          repository: fullstack-devops/awesome-ci-action
+          token: ${{ secrets.ACI_REPO_TOKEN }}
+          persist-credentials: true
+      
+      - name: Update version and push
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+          OLD_VERSION=$(echo "$(git describe --tags)" | tr -d '\n')
+
+          sed -i "s/$OLD_VERSION/$NEW_VERSION/g" action.yml README.md
+
+          git status
+          git commit -a -m "update to version $NEW_VERSION"
+          git tag $NEW_VERSION -m "update to version $NEW_VERSION"
+          git push --follow-tags
+        env:
+          NEW_VERSION: ${{ github.event.release.tag_name }}
