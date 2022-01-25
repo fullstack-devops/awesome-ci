@@ -4,12 +4,12 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - "README.md"
-      - 'docs/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.github/PULL_REQUEST_TEMPLATE.md'
-
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "go.**"
+      - "**.go"
+      - "Makefile"
 
 jobs:
   generate_infos:
@@ -89,7 +89,7 @@ jobs:
         with:
           path: out/
           key: awesome-ci-${{ github.sha }}
-      
+
       - name: Publish Release
         run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:
