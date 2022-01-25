@@ -32,6 +32,7 @@ The patching of the version only takes effect if the merged branch begins with t
 | MINOR  | `feature`, `feat`                            | 1.2.3 => 1.3.0  |
 | PATCH  | `fix`, `bugfix`, `dependabot`                | 1.2.3 => 1.2.4  |
 
+![awesome-ci release process](release-process.drawio.svg "awesome-ci release process")
 ![awesome-ci workflow](aci-workflow.drawio.png "awesome-ci workflow")
 
 > Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and ~~GitLab CI~~
