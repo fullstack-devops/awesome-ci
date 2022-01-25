@@ -28,7 +28,7 @@ The patching of the version only takes effect if the merged branch begins with t
 
 | SemVer | supported aliases                            | version example |
 | ------ | -------------------------------------------- | --------------- |
-| MAJOR  | [comment PR`](#major-specialties) or `major` | 1.2.3 => 2.0.0  |
+| MAJOR  | [comment PR](#major-specialties) or `major`  | 1.2.3 => 2.0.0  |
 | MINOR  | `feature`, `feat`                            | 1.2.3 => 1.3.0  |
 | PATCH  | `fix`, `bugfix`, `dependabot`                | 1.2.3 => 1.2.4  |
 

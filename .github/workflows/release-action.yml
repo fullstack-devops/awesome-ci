@@ -3,7 +3,7 @@ name: Release awesome-ci action
 on:
   release:
     types:
-      - published
+      - released
 
 jobs:
   update_action:
