@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: 'Found a Bug: '
+title: 'Bug: '
 labels: 'bug'
 assignees: ''
 
@@ -23,7 +23,7 @@ How is this tool installed
 - Bare Metal
 - Virtual machine
 
-Are alle environment variables set? See README.md
+Are all environment variables set? See README.md
 
 - yes
 - no
@@ -39,9 +39,6 @@ Paste your Pipeline log (this is optional, make shure no secrets are visable):
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
-
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.

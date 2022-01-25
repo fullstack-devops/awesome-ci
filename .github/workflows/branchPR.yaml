@@ -4,11 +4,12 @@ on:
   pull_request:
     branches-ignore:
       - "docu/**"
-    paths-ignore:
-      - "README.md"
-      - "docu/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE.md"
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "go.**"
+      - "**.go"
+      - "Makefile"
 
 jobs:
   generate_infos:
