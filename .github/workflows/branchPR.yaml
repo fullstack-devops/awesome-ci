@@ -2,14 +2,6 @@ name: Build PR
 
 on:
   pull_request:
-    branches-ignore:
-      - "docu/**"
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "go.**"
-      - "**.go"
-      - "Makefile"
 
 jobs:
   generate_infos:
