@@ -97,3 +97,30 @@ jobs:
           ACI_RELEASE_ID: ${{ needs.generate_infos.outputs.releaseid }}
           ARTIFACT1: awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64
           ARTIFACT2: awesome-ci_${{ needs.generate_infos.outputs.version }}_arm64
+
+  update_action:
+    runs-on: ubuntu-latest
+    needs: [generate_infos, publish_release]
+    steps:
+      - name: Check out awesome-ci-action
+        uses: actions/checkout@v2
+        with:
+          repository: fullstack-devops/awesome-ci-action
+          token: ${{ secrets.ACI_REPO_TOKEN }}
+          persist-credentials: true
+
+      - name: Update version and push
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+          OLD_VERSION=$(echo "$(git describe --tags)" | tr -d '\n')
+
+          sed -i "s/$OLD_VERSION/$NEW_VERSION/g" action.yml README.md
+
+          git status
+          git commit -a -m "update to version v$NEW_VERSION"
+          git tag v$NEW_VERSION -m "update to version v$NEW_VERSION"
+          git push --follow-tags
+        env:
+          NEW_VERSION: ${{ needs.generate_infos.outputs.version }}
