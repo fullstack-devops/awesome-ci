@@ -91,6 +91,10 @@ jobs:
           path: out/
           key: awesome-ci-${{ github.sha }}
 
+      - name: list generated artifacts
+        working-directory: out
+        run: ls -la
+
       - name: Publish Release
         run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:
