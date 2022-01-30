@@ -77,9 +77,7 @@ jobs:
         working-directory: out
         run: ls -la
 
-      - run: rm out/awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64
-
-      - name: Check coverage tolerance
+      - name: Check available assets
         if: hashFiles('out/awesome-ci_${{ needs.generate_infos.outputs.version }}_arm64') != '' || hashFiles('out/awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64') != ''
         uses: actions/github-script@v3
         with:
