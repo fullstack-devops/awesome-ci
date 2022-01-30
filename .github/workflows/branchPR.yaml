@@ -76,3 +76,12 @@ jobs:
       - name: get generated artifacts
         working-directory: out
         run: ls -la
+
+      - run: rm 'out/awesome-ci_*_amd64'
+
+      - name: Check coverage tolerance
+        if: hashFiles('out/awesome-ci_*_arm64') != '' || hashFiles('out/awesome-ci_*_amd64') != ''
+        uses: actions/github-script@v3
+        with:
+          script: |
+              core.setFailed('Not all files provided')
