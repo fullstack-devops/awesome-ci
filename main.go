@@ -57,6 +57,7 @@ func init() {
 	releaseSet.Create.Fs = flag.NewFlagSet("release create", flag.ExitOnError)
 	releaseSet.Create.Fs.IntVar(&releaseSet.Create.PrNumber, "prnumber", 0, "overwrite the issue number")
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.Version, "version", "", "override version to Update")
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.Body, "body", "", "custom release message (markdow string or file)")
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.PatchLevel, "patchLevel", "", "predefine version to Update")
 	releaseSet.Create.Fs.BoolVar(&releaseSet.Create.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
 	releaseSet.Create.Fs.Usage = func() {
@@ -66,6 +67,7 @@ func init() {
 	releaseSet.Publish.Fs = flag.NewFlagSet("release publish", flag.ExitOnError)
 	releaseSet.Publish.Fs.IntVar(&releaseSet.Publish.PrNumber, "prnumber", 0, "overwrite the issue number")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Version, "version", "", "override version to Update")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Body, "body", "", "custom release message (markdow string or file)")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.PatchLevel, "patchLevel", "", "predefine version to Update")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Assets, "assets", "", "upload assets to release. eg.: \"file=awesome-ci\"")
 	releaseSet.Publish.Fs.Int64Var(&releaseSet.Publish.ReleaseId, "releaseid", 0, "publish an early defined release")

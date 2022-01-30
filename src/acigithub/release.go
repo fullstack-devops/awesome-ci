@@ -11,7 +11,7 @@ import (
 )
 
 // CreateRelease
-func CreateRelease(version string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
+func CreateRelease(version string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
 	}
@@ -20,11 +20,20 @@ func CreateRelease(version string, draft bool) (createdRelease *github.Repositor
 	relName := "Release " + version
 	defaultBranch := tools.GetDefaultBranch()
 
+	// get body for release
+	if body != "" {
+		bodyFile, err := tools.CheckIsFile(body)
+		if err == nil {
+			body = bodyFile
+		}
+	}
+
 	releaseObject := github.RepositoryRelease{
 		TargetCommitish: &defaultBranch,
 		TagName:         &version,
 		Name:            &relName,
 		Draft:           &draft,
+		Body:            &body,
 	}
 	createdRelease, _, err = GithubClient.Repositories.CreateRelease(
 		ctx,
@@ -46,7 +55,7 @@ func CreateRelease(version string, draft bool) (createdRelease *github.Repositor
 }
 
 // PublishRelease
-func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (err error) {
+func PublishRelease(version string, body string, releaseId int64, uploadArtifacts *string) (err error) {
 	draftFalse := false
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
@@ -57,7 +66,7 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
 		if !releaseIdBool {
 			log.Println("No release found, creating one...")
-			release, err := CreateRelease(version, false)
+			release, err := CreateRelease(version, body, false)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -92,7 +101,7 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 	}
 
 	if uploadArtifacts != nil {
-		filesAndInfos, err := tools.GetFilesAndInfos(uploadArtifacts)
+		filesAndInfos, err := tools.GetAsstes(uploadArtifacts, false)
 		if err != nil {
 			return err
 		}

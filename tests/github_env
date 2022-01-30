@@ -8,6 +8,6 @@ ACI_VERSION=0.7.7
 ACI_LATEST_VERSION=0.7.6
 ACI_OWNER=fullstack-devops
 ACI_REPO=awesome-ci
-ACI_RELEASE_ID=58283687
+ACI_RELEASE_ID=58286218
 ACI_ARTIFACT_0_URL=https://github.com/eksrha/playground/releases/download/2.0.0/awesome-ci
 ACI_ARTIFACT_1_URL=https://github.com/eksrha/playground/releases/download/4.0.0/awesome-ci
