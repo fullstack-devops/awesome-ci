@@ -16,3 +16,4 @@
 out
 *.env
 awesome-ci
+tests/github_env
