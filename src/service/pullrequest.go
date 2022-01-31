@@ -21,22 +21,17 @@ type PullRequestInfoSet struct {
 }
 
 func PrintPRInfos(args *PullRequestInfoSet) {
-	var prNumber int
 	_, err := acigithub.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if args.Number == 0 {
-		prNumber, err = evalPrNumber(&args.Number)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	} else {
-		prNumber = args.Number
+	err = evalPrNumber(&args.Number)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	prInfos, _, err := acigithub.GetPrInfos(prNumber)
+	prInfos, _, err := acigithub.GetPrInfos(args.Number, "")
 	if err != nil {
 		log.Fatalln(err)
 	}
