@@ -29,7 +29,9 @@ awesome-ci release <subcommand> [subcommand-option]
 | `-version`          | overrides any version from git and, or patches the given string             |
 | `-patchLevel`       | overrides the patchLevel. make shure your following the alias definition.   |
 | `-dry-run`          | doesn't create a release. Prints out what it would do and check permissions |
-| `-body`             | add a text (markdown) to the release body                                   |
+| `-body`             | add a text (markdown) to the release body eg.: `./release-template-md`      |
+| `-merge-sha`        | specify the merge sha                                                       |
+| `-release-branch`   | set release branch (default: git default)                                   |
 | `-assets`           | (only available in publish) uploads the given Artifacts to a release. Eg.: `file=out/awesome-ci` |
 | `-releaseid`        | (only available in publish) publishes an early defined release              |
 

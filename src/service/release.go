@@ -19,23 +19,27 @@ type ReleaseSet struct {
 }
 
 type ReleaseCreateSet struct {
-	Fs         *flag.FlagSet
-	Version    string
-	PatchLevel string
-	PrNumber   int
-	DryRun     bool
-	Body       string
+	Fs             *flag.FlagSet
+	Version        string
+	PatchLevel     string
+	PrNumber       int
+	MergeCommitSHA string
+	ReleaseBranch  string
+	DryRun         bool
+	Body           string
 }
 
 type ReleasePublishSet struct {
-	Fs         *flag.FlagSet
-	Version    string
-	PatchLevel string
-	ReleaseId  int64
-	Assets     string
-	PrNumber   int
-	DryRun     bool
-	Body       string
+	Fs             *flag.FlagSet
+	Version        string
+	PatchLevel     string
+	ReleaseId      int64
+	Assets         string
+	PrNumber       int
+	MergeCommitSHA string
+	ReleaseBranch  string
+	DryRun         bool
+	Body           string
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) {
@@ -53,22 +57,28 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 	} else if args.Version != "" && args.PatchLevel == "" {
 		version = args.Version
 	} else {
-		prNumber, err := evalPrNumber(&args.PrNumber)
-		if err != nil {
-			log.Fatalln(err)
+		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
+		if args.MergeCommitSHA == "" {
+			err := evalPrNumber(&args.PrNumber)
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
-		prInfos, _, err := acigithub.GetPrInfos(prNumber)
+		prInfos, _, err := acigithub.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		version = prInfos.NextVersion
+		if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
+			log.Fatalln(errEnvs)
+		}
 	}
 
 	if args.DryRun {
 		fmt.Printf("Would create new release with version: %s\n", version)
 	} else {
 		fmt.Printf("Writing new release: %s\n", version)
-		createdRelease, err := acigithub.CreateRelease(version, args.Body, true)
+		createdRelease, err := acigithub.CreateRelease(version, args.ReleaseBranch, args.Body, true)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -91,15 +101,21 @@ func ReleasePublish(args *ReleasePublishSet) {
 	} else if args.Version != "" && args.PatchLevel == "" {
 		version = args.Version
 	} else if args.ReleaseId == 0 {
-		prNumber, err := evalPrNumber(&args.PrNumber)
-		if err != nil {
-			log.Fatalln(err)
+		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
+		if args.MergeCommitSHA == "" {
+			err := evalPrNumber(&args.PrNumber)
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
-		prInfos, _, err := acigithub.GetPrInfos(prNumber)
+		prInfos, _, err := acigithub.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		version = prInfos.NextVersion
+		if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
+			log.Fatalln(errEnvs)
+		}
 	}
 
 	if args.Assets != "" {
@@ -113,26 +129,22 @@ func ReleasePublish(args *ReleasePublishSet) {
 		fmt.Printf("Would publishing release: %s\n", version)
 	} else {
 		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
-		err = acigithub.PublishRelease(version, args.Body, args.ReleaseId, &args.Assets)
+		err = acigithub.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
 		if err != nil {
 			log.Fatalln(err)
 		}
 	}
 }
 
-func evalPrNumber(override *int) (prNumber int, err error) {
+func evalPrNumber(override *int) (err error) {
 	if *override != 0 {
-		return *override, nil
+		return nil
 	}
 
-	prNumber, err = getPrFromMergeMessage()
+	*override, err = getPrFromMergeMessage()
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
-
-	/* if prNumber == 0 {
-		// tags, _, _ := CiEnvironment.Clients.GithubClient.Repositories.ListTags()
-	} */
 	return
 }
 
@@ -146,6 +158,7 @@ func getPrFromMergeMessage() (pr int, err error) {
 	} else {
 		return 0, errors.New("No PR found in merge message pls make shure this regex matches: " + regex +
 			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
-			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)")
+			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)" +
+			"\nOr use the -merge-sha option!")
 	}
 }

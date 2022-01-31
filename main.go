@@ -56,6 +56,8 @@ func init() {
 	}
 	releaseSet.Create.Fs = flag.NewFlagSet("release create", flag.ExitOnError)
 	releaseSet.Create.Fs.IntVar(&releaseSet.Create.PrNumber, "prnumber", 0, "overwrite the issue number")
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.MergeCommitSHA, "merge-sha", "", "set the merge sha")
+	releaseSet.Create.Fs.StringVar(&releaseSet.Create.ReleaseBranch, "release-branch", "", "set release branch (default: git default)")
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.Version, "version", "", "override version to Update")
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.Body, "body", "", "custom release message (markdow string or file)")
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.PatchLevel, "patchLevel", "", "predefine version to Update")
@@ -66,6 +68,8 @@ func init() {
 	}
 	releaseSet.Publish.Fs = flag.NewFlagSet("release publish", flag.ExitOnError)
 	releaseSet.Publish.Fs.IntVar(&releaseSet.Publish.PrNumber, "prnumber", 0, "overwrite the issue number")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.MergeCommitSHA, "merge-sha", "", "set the merge sha")
+	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.ReleaseBranch, "release-branch", "", "set release branch (default: git default)")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Version, "version", "", "override version to Update")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Body, "body", "", "custom release message (markdow string or file)")
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.PatchLevel, "patchLevel", "", "predefine version to Update")
@@ -114,7 +118,7 @@ func printNoValidCommand(usage func()) {
 func main() {
 	flag.Usage = func() {
 		fmt.Println("awesome-ci makes your CI easy.")
-		fmt.Println("  Find more information and examples at: https://github.com/eksrvb/awesome-ci")
+		fmt.Println("  Find more information and examples at: https://github.com/fullstack-devops/awesome-ci")
 		fmt.Println()
 		fmt.Println("Available commands:")
 		fmt.Println("  release")
