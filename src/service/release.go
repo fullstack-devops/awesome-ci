@@ -102,9 +102,11 @@ func ReleasePublish(args *ReleasePublishSet) {
 		version = prInfos.NextVersion
 	}
 
-	_, err = tools.GetAsstes(&args.Assets, true)
-	if err != nil {
-		log.Fatalln("not all specified asstes available, please check")
+	if args.Assets != "" {
+		_, err = tools.GetAsstes(&args.Assets, true)
+		if err != nil {
+			log.Fatalln("not all specified asstes available, please check")
+		}
 	}
 
 	if args.DryRun {

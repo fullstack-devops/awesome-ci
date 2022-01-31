@@ -29,9 +29,16 @@ awesome-ci <subcommand> [subcommand-option]
 
 You can find out more about the subcommands by clicking on the relevant one in the navigation.
 
-| Subcommand                                                                         | Description                                             |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [release](https://fullstack-devops.github.io/awesome-ci/commands/createRelease.html)         | creates a release at GitHub or GitLab                   |
-| [pr](https://fullstack-devops.github.io/awesome-ci/commands/getBuildInfos.html)              | prints out any git information and can manipulate these |
-| [parseJSON](https://fullstack-devops.github.io/awesome-ci/commands/parseJSON.html)           | can parse simple JSON files                             |
-| [parseYAML](https://fullstack-devops.github.io/awesome-ci/commands/parseYAML.html)           | can parse simple YAML files                             |
+| Subcommand                              | Description                               |
+| --------------------------------------- | ------------------------------------------|
+| [release](/commands/createRelease.html) | creates a release at GitHub or            |
+| [pr](/commands/getBuildInfos.html)      | prints out any git information and can manipulate |
+| [parseJSON](/commands/parseJSON.html)   | can parse simple JSON                     |
+| [parseYAML](/commands/parseYAML.html)   | can parse simple YAML files               |
+
+
+## Release Body updates
+
+Now available: Any string or any markdown file can now be attached in the release section. In addition, the release assets are attached as text to each release body with the associated sha256. More about that in the picture below and in the release section.
+
+![Release Body with Asstes](/pictures/release-assets-readme.png "Release Body with Asstes")

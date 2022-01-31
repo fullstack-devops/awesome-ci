@@ -77,9 +77,3 @@ jobs:
         working-directory: out
         run: ls -la
 
-      - name: Check available assets
-        if: hashFiles('out/awesome-ci_${{ needs.generate_infos.outputs.version }}_arm64') != '' || hashFiles('out/awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64') != ''
-        uses: actions/github-script@v3
-        with:
-          script: |
-              core.setFailed('Not all files provided')
