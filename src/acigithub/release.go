@@ -12,14 +12,16 @@ import (
 )
 
 // CreateRelease
-func CreateRelease(version string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
+func CreateRelease(version string, releaseBranch string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
 	}
 	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
 
 	relName := "Release " + version
-	defaultBranch := tools.GetDefaultBranch()
+	if releaseBranch == "" {
+		releaseBranch = tools.GetDefaultBranch()
+	}
 
 	// get body for release
 	if body != "" {
@@ -30,7 +32,7 @@ func CreateRelease(version string, body string, draft bool) (createdRelease *git
 	}
 
 	releaseObject := github.RepositoryRelease{
-		TargetCommitish: &defaultBranch,
+		TargetCommitish: &releaseBranch,
 		TagName:         &version,
 		Name:            &relName,
 		Draft:           &draft,
@@ -56,7 +58,7 @@ func CreateRelease(version string, body string, draft bool) (createdRelease *git
 }
 
 // PublishRelease
-func PublishRelease(version string, body string, releaseId int64, uploadArtifacts *string) (err error) {
+func PublishRelease(version string, releaseBranch string, body string, releaseId int64, uploadArtifacts *string) (err error) {
 	draftFalse := false
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
@@ -67,7 +69,7 @@ func PublishRelease(version string, body string, releaseId int64, uploadArtifact
 		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
 		if !releaseIdBool {
 			log.Println("No release found, creating one...")
-			release, err := CreateRelease(version, body, false)
+			release, err := CreateRelease(version, releaseBranch, body, true)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -92,7 +94,7 @@ func PublishRelease(version string, body string, releaseId int64, uploadArtifact
 
 	// upload any given artifacts
 	var releaseBodyAssets string = ""
-	if uploadArtifacts != nil {
+	if *uploadArtifacts != "" {
 		filesAndInfos, err := tools.GetAsstes(uploadArtifacts, false)
 		if err != nil {
 			return err
