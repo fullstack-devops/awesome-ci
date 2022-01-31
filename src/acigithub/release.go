@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/google/go-github/v39/github"
 )
@@ -89,22 +90,15 @@ func PublishRelease(version string, body string, releaseId int64, uploadArtifact
 		return err
 	}
 
-	*existingRelease.Draft = draftFalse
-	_, _, err = GithubClient.Repositories.EditRelease(
-		ctx,
-		owner,
-		repo,
-		releaseId,
-		existingRelease)
-	if err != nil {
-		return err
-	}
-
+	// upload any given artifacts
+	var releaseBodyAssets string = ""
 	if uploadArtifacts != nil {
 		filesAndInfos, err := tools.GetAsstes(uploadArtifacts, false)
 		if err != nil {
 			return err
 		}
+
+		releaseBodyAssets = "### Asstes\n"
 
 		for i, fileAndInfo := range filesAndInfos {
 			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
@@ -121,6 +115,9 @@ func PublishRelease(version string, body string, releaseId int64, uploadArtifact
 			if err != nil {
 				log.Println("error at uploading asset to release: ", err)
 			} else {
+				// add asset to release body
+				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, fileAndInfo.Name, *relAsset.BrowserDownloadURL, fileAndInfo.Infos.ModTime().Format(time.RFC3339), fileAndInfo.Hash)
+
 				// export Download URL to env. See: #53
 				envVars, err := OpenEnvFile()
 				if err != nil {
@@ -134,6 +131,22 @@ func PublishRelease(version string, body string, releaseId int64, uploadArtifact
 			}
 		}
 	}
+
+	newReleaseBody := fmt.Sprintf("%s\n\n%s", *existingRelease.Body, releaseBodyAssets)
+	existingRelease.Body = &newReleaseBody
+
+	// publishing release
+	*existingRelease.Draft = draftFalse
+	_, _, err = GithubClient.Repositories.EditRelease(
+		ctx,
+		owner,
+		repo,
+		releaseId,
+		existingRelease)
+	if err != nil {
+		return err
+	}
+
 	return
 }
 

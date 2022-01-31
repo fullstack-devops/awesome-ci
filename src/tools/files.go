@@ -1,7 +1,10 @@
 package tools
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"strings"
 )
@@ -14,9 +17,12 @@ type UploadArtifact struct {
 type UploadAsset struct {
 	File  os.File
 	Name  string
+	Infos fs.FileInfo
 	IsZip bool
+	Hash  []byte
 }
 
+// deprecated
 func GetFilesAndInfos(uploadArtifacts *string) (artifacts []UploadArtifact, err error) {
 	artifactsToUpload := strings.Split(*uploadArtifacts, ",")
 	for _, artifact := range artifactsToUpload {
@@ -56,10 +62,13 @@ func GetAsstes(uploadArtifacts *string, check bool) (asset []UploadAsset, err er
 			if check {
 				file.Close()
 			} else {
+				hash, _ := getHashFromFile(assetName[1])
 				asset = append(asset, UploadAsset{
 					File:  *file,
 					Name:  info.Name(),
+					Infos: info,
 					IsZip: false,
+					Hash:  hash,
 				})
 			}
 		case "files":
@@ -72,6 +81,21 @@ func GetAsstes(uploadArtifacts *string, check bool) (asset []UploadAsset, err er
 	}
 
 	return
+}
+
+func getHashFromFile(name string) (hash []byte, err error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err = io.Copy(h, f); err != nil {
+		return
+	}
+
+	return h.Sum(nil), nil
 }
 
 func CheckIsFile(name string) (body string, err error) {
