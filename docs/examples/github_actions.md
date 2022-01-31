@@ -52,7 +52,7 @@ jobs:
       - name: collect infos and create release
         run: |
           awesome-ci pr info
-          awesome-ci release create # making a draft
+          awesome-ci release create -merge-sha $\{\{ github.sha \}\}
         env:
           GITHUB_TOKEN: $\{\{ secrets.GITHUB_TOKEN \}\}
 

@@ -11,4 +11,5 @@ type StandardPrInfos struct {
 	Sha            string
 	ShaShort       string
 	BranchName     string
+	MergeCommitSha string
 }
