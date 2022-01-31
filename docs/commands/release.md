@@ -55,6 +55,6 @@ eg.: `-assets "file=path/to/file,file=path/to/second/file"`
 
 Send a custom release description. the input can be either a string or a path to a file.
 
-![Release Body with Asstes](/pictures/release-assets-readme.png "Release Body with Asstes")
+![Release Body with Asstes](../pictures/release-assets-readme.png "Release Body with Asstes")
 
 ... more documentation to be done ;)
