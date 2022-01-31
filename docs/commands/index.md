@@ -41,4 +41,4 @@ You can find out more about the subcommands by clicking on the relevant one in t
 
 Now available: Any string or any markdown file can now be attached in the release section. In addition, the release assets are attached as text to each release body with the associated sha256. More about that in the picture below and in the release section.
 
-![Release Body with Asstes](/pictures/release-assets-readme.png "Release Body with Asstes")
+![Release Body with Asstes](../pictures/release-assets-readme.png "Release Body with Asstes")
