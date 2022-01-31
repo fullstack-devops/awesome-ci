@@ -3,6 +3,7 @@ package service
 import (
 	"awesome-ci/src/acigithub"
 	"awesome-ci/src/semver"
+	"awesome-ci/src/tools"
 	"errors"
 	"flag"
 	"fmt"
@@ -23,6 +24,7 @@ type ReleaseCreateSet struct {
 	PatchLevel string
 	PrNumber   int
 	DryRun     bool
+	Body       string
 }
 
 type ReleasePublishSet struct {
@@ -33,6 +35,7 @@ type ReleasePublishSet struct {
 	Assets     string
 	PrNumber   int
 	DryRun     bool
+	Body       string
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) {
@@ -65,17 +68,11 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 		fmt.Printf("Would create new release with version: %s\n", version)
 	} else {
 		fmt.Printf("Writing new release: %s\n", version)
-		createdRelease, err := acigithub.CreateRelease(version, true)
+		createdRelease, err := acigithub.CreateRelease(version, args.Body, true)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		fmt.Println("Create release successful. ID:", *createdRelease.ID)
-		envVars, err := acigithub.OpenEnvFile()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		envVars.Set("ACI_RELEASE_ID", fmt.Sprint(*createdRelease.ID))
-		envVars.SaveEnvFile()
 	}
 }
 
@@ -105,11 +102,21 @@ func ReleasePublish(args *ReleasePublishSet) {
 		version = prInfos.NextVersion
 	}
 
+	if args.Assets != "" {
+		_, err = tools.GetAsstes(&args.Assets, true)
+		if err != nil {
+			log.Fatalln("not all specified asstes available, please check")
+		}
+	}
+
 	if args.DryRun {
 		fmt.Printf("Would publishing release: %s\n", version)
 	} else {
 		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
-		acigithub.PublishRelease(version, args.ReleaseId, &args.Assets)
+		err = acigithub.PublishRelease(version, args.Body, args.ReleaseId, &args.Assets)
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 }
 

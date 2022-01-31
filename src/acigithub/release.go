@@ -6,12 +6,13 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/google/go-github/v39/github"
 )
 
 // CreateRelease
-func CreateRelease(version string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
+func CreateRelease(version string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
 	}
@@ -20,11 +21,20 @@ func CreateRelease(version string, draft bool) (createdRelease *github.Repositor
 	relName := "Release " + version
 	defaultBranch := tools.GetDefaultBranch()
 
+	// get body for release
+	if body != "" {
+		bodyFile, err := tools.CheckIsFile(body)
+		if err == nil {
+			body = bodyFile
+		}
+	}
+
 	releaseObject := github.RepositoryRelease{
 		TargetCommitish: &defaultBranch,
 		TagName:         &version,
 		Name:            &relName,
 		Draft:           &draft,
+		Body:            &body,
 	}
 	createdRelease, _, err = GithubClient.Repositories.CreateRelease(
 		ctx,
@@ -46,7 +56,7 @@ func CreateRelease(version string, draft bool) (createdRelease *github.Repositor
 }
 
 // PublishRelease
-func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (err error) {
+func PublishRelease(version string, body string, releaseId int64, uploadArtifacts *string) (err error) {
 	draftFalse := false
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
@@ -57,7 +67,7 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
 		if !releaseIdBool {
 			log.Println("No release found, creating one...")
-			release, err := CreateRelease(version, false)
+			release, err := CreateRelease(version, body, false)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -80,22 +90,15 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 		return err
 	}
 
-	*existingRelease.Draft = draftFalse
-	_, _, err = GithubClient.Repositories.EditRelease(
-		ctx,
-		owner,
-		repo,
-		releaseId,
-		existingRelease)
-	if err != nil {
-		return err
-	}
-
+	// upload any given artifacts
+	var releaseBodyAssets string = ""
 	if uploadArtifacts != nil {
-		filesAndInfos, err := tools.GetFilesAndInfos(uploadArtifacts)
+		filesAndInfos, err := tools.GetAsstes(uploadArtifacts, false)
 		if err != nil {
 			return err
 		}
+
+		releaseBodyAssets = "### Asstes\n"
 
 		for i, fileAndInfo := range filesAndInfos {
 			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
@@ -112,6 +115,9 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 			if err != nil {
 				log.Println("error at uploading asset to release: ", err)
 			} else {
+				// add asset to release body
+				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, fileAndInfo.Name, *relAsset.BrowserDownloadURL, fileAndInfo.Infos.ModTime().Format(time.RFC3339), fileAndInfo.Hash)
+
 				// export Download URL to env. See: #53
 				envVars, err := OpenEnvFile()
 				if err != nil {
@@ -125,6 +131,22 @@ func PublishRelease(version string, releaseId int64, uploadArtifacts *string) (e
 			}
 		}
 	}
+
+	newReleaseBody := fmt.Sprintf("%s\n\n%s", *existingRelease.Body, releaseBodyAssets)
+	existingRelease.Body = &newReleaseBody
+
+	// publishing release
+	*existingRelease.Draft = draftFalse
+	_, _, err = GithubClient.Repositories.EditRelease(
+		ctx,
+		owner,
+		repo,
+		releaseId,
+		existingRelease)
+	if err != nil {
+		return err
+	}
+
 	return
 }
 
