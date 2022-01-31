@@ -1,5 +1,7 @@
 # Awesome CI
 
+[![Publish Release](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml)
+
 **Description**: This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of [SemVer](https://semver.org/). The required version number is created with the correct naming of the branch prefix.
 
 - **Technology stack**: This tool is written in golang
