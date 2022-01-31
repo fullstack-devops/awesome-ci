@@ -2,35 +2,9 @@ package tools
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 )
-
-type UploadArtifact struct {
-	File os.File
-	Name string
-}
-
-func GetFilesAndInfos(uploadArtifacts *string) (artifacts []UploadArtifact, err error) {
-	artifactsToUpload := strings.Split(*uploadArtifacts, ",")
-	for _, artifact := range artifactsToUpload {
-		var sanFilename string
-		if strings.HasPrefix(artifact, "file=") {
-			sanFilename = artifact[5:]
-		}
-		file, err := os.OpenFile(sanFilename, os.O_RDWR, 0644)
-		if err != nil {
-			return nil, err
-		}
-		info, _ := file.Stat()
-		artifacts = append(artifacts, UploadArtifact{
-			File: *file,
-			Name: info.Name(),
-		})
-	}
-	return
-}
 
 func GetDefaultBranch() string {
 	branch := runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)

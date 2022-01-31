@@ -29,6 +29,7 @@ awesome-ci release <subcommand> [subcommand-option]
 | `-version`          | overrides any version from git and, or patches the given string             |
 | `-patchLevel`       | overrides the patchLevel. make shure your following the alias definition.   |
 | `-dry-run`          | doesn't create a release. Prints out what it would do and check permissions |
+| `-body`             | add a text (markdown) to the release body                                   |
 | `-assets`           | (only available in publish) uploads the given Artifacts to a release. Eg.: `file=out/awesome-ci` |
 | `-releaseid`        | (only available in publish) publishes an early defined release              |
 
@@ -42,15 +43,6 @@ This can be useful in connection with `-patchLevel` when creating a manual relea
 awesome-ci createRelease -version 0.1.0
 ```
 
-#### -patchLevel
-
-The `-patchLevel` option can overwrite the evaluated patchLevel.
-This can be useful in connection with `-version` when creating a manual release.
-
-```bash
-awesome-ci createRelease -patchLevel feature
-```
-
 #### -assets
 
 The `-assets` option can updload a single or multiple artifacts.
@@ -59,5 +51,10 @@ However, you must choose the format of the artefacts.
 
 eg.: `-assets "file=path/to/file,file=path/to/second/file"`
 
+#### -body
+
+Send a custom release description. the input can be either a string or a path to a file.
+
+![Release Body with Asstes](/pictures/release-assets-readme.png "Release Body with Asstes")
 
 ... more documentation to be done ;)

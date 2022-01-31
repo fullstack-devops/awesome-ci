@@ -33,11 +33,11 @@ fi
 
 echo -e "\nTesting output for getBuildInfos ..."
 
-$1 getBuildInfos
+$1 pr info
 
 
 echo -e "\nTesting output for createRelease -dry-run ..."
 
-$1 createRelease -dry-run -patchLevel bugfix
+$1 release create -dry-run -patchLevel bugfix
 
 exit $exit_status
