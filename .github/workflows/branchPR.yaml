@@ -32,7 +32,7 @@ jobs:
           GOARCH: "${{ matrix.arch }}"
 
       - name: debugging git
-        if: ${{ matrix.arch }} == "amd64"
+        if: matrix.arch ==  == 'amd64'
         run: |
           echo "git name-rev HEAD: $(git name-rev HEAD)"
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"

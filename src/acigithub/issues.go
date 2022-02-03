@@ -45,7 +45,7 @@ func CommentHelpToPullRequest(number int) (err error) {
 	}
 
 	body := `<details><summary>Possible awesome-ci commands for this Pull Request</summary>` +
-		`</br>aci: major</br>aci_version_override: 2.1.0` +
+		`</br>aci_patch_level: major</br>aci_version_override: 2.1.0` +
 		`</br></br>Need more help?</br>Have a look at <a href="https://github.com/fullstack-devops/awesome-ci" target="_blank">my repo</a></details>`
 
 	var myCommand *github.IssueComment
