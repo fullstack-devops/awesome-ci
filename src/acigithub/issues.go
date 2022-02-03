@@ -4,6 +4,7 @@ import (
 	"awesome-ci/src/tools"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/google/go-github/v39/github"
 )
@@ -46,21 +47,30 @@ func CommentHelpToPullRequest(number int) (err error) {
 
 	body := `<details><summary>Possible awesome-ci commands for this Pull Request</summary>` +
 		`</br>aci_patch_level: major</br>aci_version_override: 2.1.0` +
-		`</br></br>Need more help?</br>Have a look at <a href="https://github.com/fullstack-devops/awesome-ci" target="_blank">my repo</a></details>`
+		`</br></br>Need more help?</br>Have a look at <a href="https://github.com/fullstack-devops/awesome-ci" target="_blank">my repo</a>` +
+		`</br>This message was created by awesome-ci and can be disabled by the env variable <code>ACI_SILENT=true</code></details>`
 
-	var myCommand *github.IssueComment
+	var prComment *github.IssueComment
 	for _, prc := range comments {
-		if body == *prc.Body {
-			myCommand = prc
+		if strings.HasPrefix(*prc.Body, `<details><summary>Possible awesome-ci commands for this Pull Request</summary>`) {
+			prComment = prc
 		}
 	}
 
-	if myCommand == nil {
+	if prComment == nil {
 		var prComment = &github.IssueComment{
 			Body: &body,
 		}
 
 		err = CommentPullRequest(number, prComment)
+	} else {
+		// edit command if newer version deployed and commands changed
+		if *prComment.Body != body {
+			editedComment := &github.IssueComment{
+				Body: &body,
+			}
+			_, _, err = GithubClient.Issues.EditComment(ctx, owner, repo, *prComment.ID, editedComment)
+		}
 	}
 	return
 }
