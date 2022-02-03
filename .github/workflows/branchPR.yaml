@@ -32,13 +32,13 @@ jobs:
           GOARCH: "${{ matrix.arch }}"
 
       - name: debugging git
-        if: matrix.arch ==  == 'amd64'
+        if: matrix.arch == 'amd64'
         run: |
           echo "git name-rev HEAD: $(git name-rev HEAD)"
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: test build Infos
-        if: matrix.arch ==  == 'amd64'
+        if: matrix.arch == 'amd64'
         run: out/awesome-ci_${{ needs.generate_infos.outputs.version }}_${{ matrix.arch }} pr info -number ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
