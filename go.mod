@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/google/go-github/v39 v39.2.0
-	github.com/xanzy/go-gitlab v0.54.4
+	github.com/xanzy/go-gitlab v0.55.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gopkg.in/yaml.v2 v2.4.0
 )
