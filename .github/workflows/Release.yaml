@@ -13,35 +13,14 @@ on:
       - "Makefile"
 
 jobs:
-  generate_infos:
-    runs-on: ubuntu-latest
-    outputs:
-      releaseid: ${{ steps.tag.outputs.releaseid }}
-      version: ${{ steps.tag.outputs.version }}
-      pr: ${{ steps.tag.outputs.pr }}
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      - name: Setup awesome-ci
-        uses: fullstack-devops/awesome-ci-action@main
-
-      - name: collect infos and create release
-        run: |
-          awesome-ci release create -merge-sha ${{ github.sha }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: collect infos
-        id: tag
-        shell: bash
-        run: |
-          echo "::set-output name=version::$ACI_VERSION"
-          echo "::set-output name=pr::$ACI_PR"
-          echo "::set-output name=releaseid::$ACI_RELEASE_ID"
+  create_release:
+    uses: fullstack-devops/actions/.github/workflows/create-release.yml@main
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
-    needs: generate_infos
+    needs: create_release
     strategy:
       matrix:
         arch: ["amd64", "arm64"]
@@ -54,7 +33,7 @@ jobs:
           go-version: 1.17
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version=${{ needs.generate_infos.outputs.version }}" -o out/awesome-ci_${{ needs.generate_infos.outputs.version }}_${{ matrix.arch }}
+        run: go build -v -ldflags "-X main.version=${{ needs.create_release.outputs.version }}" -o out/awesome-ci_${{ needs.generate_infos.outputs.version }}_${{ matrix.arch }}
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
@@ -75,7 +54,7 @@ jobs:
 
   publish_release:
     runs-on: ubuntu-latest
-    needs: [generate_infos, build]
+    needs: [create_release, build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -98,13 +77,13 @@ jobs:
         run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=out/$ARTIFACT1,file=out/$ARTIFACT2" -body "release-template.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ACI_RELEASE_ID: ${{ needs.generate_infos.outputs.releaseid }}
-          ARTIFACT1: awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64
-          ARTIFACT2: awesome-ci_${{ needs.generate_infos.outputs.version }}_arm64
+          ACI_RELEASE_ID: ${{ needs.create_release.outputs.releaseid }}
+          ARTIFACT1: awesome-ci_${{ needs.create_release.outputs.version }}_amd64
+          ARTIFACT2: awesome-ci_${{ needs.create_release.outputs.version }}_arm64
 
   update_action:
     runs-on: ubuntu-latest
-    needs: [generate_infos, publish_release]
+    needs: [create_release, publish_release]
     steps:
       - name: Check out awesome-ci-action
         uses: actions/checkout@v2
@@ -127,4 +106,4 @@ jobs:
           git tag v$NEW_VERSION -m "update to version v$NEW_VERSION"
           git push --follow-tags
         env:
-          NEW_VERSION: ${{ needs.generate_infos.outputs.version }}
+          NEW_VERSION: ${{ needs.create_release.outputs.version }}
