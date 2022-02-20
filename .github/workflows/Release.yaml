@@ -33,7 +33,7 @@ jobs:
           go-version: 1.17
 
       - name: Build "${{ matrix.arch }}"
-        run: go build -v -ldflags "-X main.version=${{ needs.create_release.outputs.version }}" -o out/awesome-ci_${{ needs.generate_infos.outputs.version }}_${{ matrix.arch }}
+        run: go build -v -ldflags "-X main.version=${{ needs.create_release.outputs.version }}" -o out/awesome-ci_${{ needs.create_release.outputs.version }}_${{ matrix.arch }}
         env:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
