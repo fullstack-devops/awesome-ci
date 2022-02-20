@@ -40,7 +40,6 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 		}
 		var found int = 0
 		for _, pr := range pullRequests {
-			fmt.Println(*pr.MergeCommitSHA == mergeCommitSha, *pr.MergeCommitSHA)
 			if *pr.MergeCommitSHA == mergeCommitSha {
 				prInfos = pr
 				found = found + 1
