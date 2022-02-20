@@ -19,7 +19,7 @@ func NewGitHubClient() (gitlabClient *gitlab.Client, err error) {
 	if isgitlabCiToken {
 		gitlabClient, err = gitlab.NewClient(gitlabCiToken)
 		if err != nil {
-			fmt.Errorf("error at initializing gitlab client: %v", err)
+			return nil, fmt.Errorf("error at initializing gitlab client: %v", err)
 		}
 	} else {
 		panic("Not running in GitLab CI?!")

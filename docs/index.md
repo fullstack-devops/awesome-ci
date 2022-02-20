@@ -28,18 +28,20 @@ The patching of the version only takes effect if the merged branch begins with t
 
 | SemVer | supported aliases                            | version example |
 | ------ | -------------------------------------------- | --------------- |
-| MAJOR  | [comment PR](#major-specialties) or `major`  | 1.2.3 => 2.0.0  |
+| MAJOR  | `major`                                      | 1.2.3 => 2.0.0  |
 | MINOR  | `feature`, `feat`                            | 1.2.3 => 1.3.0  |
 | PATCH  | `fix`, `bugfix`, `dependabot`                | 1.2.3 => 1.2.4  |
+
+> see also [override specialties](#override-specialties)
 
 ![awesome-ci release process](release-process.drawio.svg "awesome-ci release process")
 ![awesome-ci workflow](aci-workflow.drawio.png "awesome-ci workflow")
 
 > Hint: this tool automatically detects your environment. Supported are __Jenkins__, __GitHub Actions__ and ~~GitLab CI~~
 
-### Major specialties
+### Override specialties
 
-To create a major release, a member of the repos with write permissions must write a comment with the content `aci=major`. awesome-ci then creates a major release.
+To set some attributes during developement you can comment a pullrequest.
 
 ### Requiered and optional environment variables
 
