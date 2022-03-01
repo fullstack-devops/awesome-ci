@@ -44,7 +44,7 @@ func standardPrInfosToEnv(prInfos *models.StandardPrInfos) (err error) {
 		envVars.Set("ACI_PR_BRANCH", prInfos.BranchName)
 		envVars.Set("ACI_OWNER", prInfos.Owner)
 		envVars.Set("ACI_REPO", prInfos.Repo)
-		envVars.Set("ACI_PATCH_LEVEL", prInfos.PatchLevel)
+		envVars.Set("ACI_PATCH_LEVEL", string(prInfos.PatchLevel))
 		envVars.Set("ACI_VERSION", prInfos.NextVersion)
 		envVars.Set("ACI_LATEST_VERSION", prInfos.LatestVersion)
 		envVars.Set("ACI_MERGE_COMMIT_SHA", prInfos.MergeCommitSha)
