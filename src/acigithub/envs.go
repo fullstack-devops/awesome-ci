@@ -26,6 +26,11 @@ type EnvVariable struct {
 func OpenEnvFile() (envVariables *EnvVariables, err error) {
 	if isgithubEnv {
 		envFile, err := os.Open(githubEnv)
+
+		if errors.Is(err, os.ErrNotExist) {
+			envFile, err = os.Create(githubEnv)
+		}
+
 		if err != nil {
 			return nil, errors.New(fmt.Sprintln("Error at opening ENV file:", err))
 		}
