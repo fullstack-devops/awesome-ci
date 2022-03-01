@@ -67,9 +67,10 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 
 	prSHA := *prInfos.Head.SHA
 	branchName := *prInfos.Head.Ref
-	patchLevel := branchName[:strings.Index(branchName, "/")]
+	patchLevel := semver.ParsePatchLevel(branchName)
 
 	var version = ""
+	var latestVersion = ""
 	// if an comment exists with aci_patch_level=major, make a major version!
 	issueComments, err := GetIssueComments(prNumber, owner, repo)
 	if err != nil {
@@ -83,7 +84,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 			aciPatchLevel := regexp.MustCompile(`aci_patch_level: ([a-zA-Z]+)`)
 
 			if aciPatchLevel.MatchString(*comment.Body) {
-				patchLevel = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
+				patchLevel = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
 				break
 			}
 			if aciVersionOverride.MatchString(*comment.Body) {
@@ -93,13 +94,15 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 		}
 	}
 
-	repositoryRelease, err := GetLatestReleaseVersion(owner, repo)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	if version == "" {
-		version, err = semver.IncreaseVersion(patchLevel, *repositoryRelease.TagName)
+		repositoryRelease, err := GetLatestReleaseVersion(owner, repo)
+		if err == nil {
+			latestVersion = *repositoryRelease.TagName
+			version, err = semver.IncreaseVersion(patchLevel, latestVersion)
+		} else {
+			version, err = semver.IncreaseVersion(patchLevel, "0.0.0")
+		}
+
 		if err != nil {
 			return nil, nil, err
 		}
@@ -113,7 +116,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 		Sha:            prSHA,
 		ShaShort:       prSHA[:8],
 		PatchLevel:     patchLevel,
-		LatestVersion:  *repositoryRelease.TagName,
+		LatestVersion:  latestVersion,
 		CurrentVersion: "",
 		NextVersion:    version,
 		MergeCommitSha: *prInfos.MergeCommitSHA,

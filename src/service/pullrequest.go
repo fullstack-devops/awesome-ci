@@ -42,7 +42,7 @@ func PrintPRInfos(args *PullRequestInfoSet) {
 			"pr", fmt.Sprint(prInfos.PrNumber),
 			"version", prInfos.NextVersion,
 			"latest_version", prInfos.LatestVersion,
-			"patchLevel", prInfos.PatchLevel)
+			"patchLevel", string(prInfos.PatchLevel))
 		output := replacer.Replace(args.Format)
 		fmt.Print(output)
 	} else {

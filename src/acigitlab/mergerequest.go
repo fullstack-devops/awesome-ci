@@ -2,6 +2,7 @@ package acigitlab
 
 import (
 	"awesome-ci/src/models"
+	"awesome-ci/src/semver"
 	"context"
 	"errors"
 	"fmt"
@@ -31,7 +32,7 @@ func GetMrInfos(mrNumber int) (standardPrInfos *models.StandardPrInfos, prInfos 
 
 	prSHA := prInfos.SHA
 	branchName := prInfos.Reference
-	patchLevel := branchName[:strings.Index(branchName, "/")]
+	patchLevel := semver.ParsePatchLevel(branchName)
 
 	standardPrInfos = &models.StandardPrInfos{
 		PrNumber:   mrNumber,

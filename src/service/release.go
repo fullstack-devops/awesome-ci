@@ -50,7 +50,8 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 	}
 
 	if args.Version != "" && args.PatchLevel != "" {
-		version, err = semver.IncreaseVersion(args.PatchLevel, args.Version)
+		parsedPatchLevel := semver.ParsePatchLevel(args.PatchLevel)
+		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -94,7 +95,8 @@ func ReleasePublish(args *ReleasePublishSet) {
 	}
 
 	if args.Version != "" && args.PatchLevel != "" {
-		version, err = semver.IncreaseVersion(args.PatchLevel, args.Version)
+		parsedPatchLevel := semver.ParsePatchLevel(args.PatchLevel)
+		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -158,7 +160,6 @@ func getPrFromMergeMessage() (pr int, err error) {
 	} else {
 		return 0, errors.New("No PR found in merge message pls make shure this regex matches: " + regex +
 			"\nExample: Merge pull request #3 from some-orga/feature/awesome-feature" +
-			"\nIf you like to set your patch level manually by flag: -level (feautre|bugfix)" +
-			"\nOr use the -merge-sha option!")
+			"\nAlternativly provide the PR-Number by adding the argument -number <int>")
 	}
 }

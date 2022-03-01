@@ -7,16 +7,24 @@ import (
 	"strings"
 )
 
+type PatchLevel string
+
+const (
+	Bugfix  PatchLevel = "bugfix"
+	Feature PatchLevel = "feature"
+	Major   PatchLevel = "major"
+)
+
 // IncreaseSemVer increases a given version by naming, see docs
-func IncreaseVersion(patchLevel string, version string) (incresedVersion string, err error) {
+func IncreaseVersion(patchLevel PatchLevel, version string) (incresedVersion string, err error) {
 	incresedVersion = version
 
 	switch patchLevel {
-	case "fix", "bugfix", "dependabot":
+	case Bugfix:
 		incresedVersion, err = patch(version)
-	case "feature", "feat":
+	case Feature:
 		incresedVersion, err = minor(version)
-	case "major":
+	case Major:
 		incresedVersion, err = major(version)
 	default:
 		incresedVersion, err = patch(version)
@@ -61,4 +69,26 @@ func patch(version string) (newVersion string, err error) {
 
 	newVersion = fmt.Sprintf("%s.%s.%d", splitedVersion[0], splitedVersion[1], newPatch)
 	return
+}
+
+func ParsePatchLevel(branchName string) PatchLevel {
+	patchLevel := "bugfix"
+
+	if strings.Index(branchName, "/") > 0 {
+		patchLevel = branchName[:strings.Index(branchName, "/")]
+	}
+
+	switch patchLevel {
+	case "bugfix", "fix", "dependabot":
+		return Bugfix
+	case "feature", "feat":
+		return Feature
+	case "major":
+		return Major
+	default:
+		log.Println("could not determan witch version to set. given first string does'n start with major, feature or bugfix")
+		log.Println("using minimal patch version!")
+		return Bugfix
+	}
+
 }
