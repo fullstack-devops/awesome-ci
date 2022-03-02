@@ -2,12 +2,16 @@ package acigithub
 
 import (
 	"awesome-ci/src/tools"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/google/go-github/v39/github"
 )
 
@@ -154,6 +158,85 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 
 // GetLatestReleaseVersion
 func GetLatestReleaseVersion(owner string, repo string) (latestRelease *github.RepositoryRelease, err error) {
-	latestRelease, _, err = GithubClient.Repositories.GetLatestRelease(ctx, owner, repo)
-	return
+
+	var releaseMap = make(map[string]*github.RepositoryRelease)
+
+	var listOptions github.ListOptions = github.ListOptions{
+		PerPage: 100,
+		Page:    0,
+	}
+
+	for listOptions.Page >= 0 {
+		releases, response, err := GithubClient.Repositories.ListReleases(ctx, owner, repo, &listOptions)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, release := range releases {
+			releaseMap[*release.TagName] = release
+			fmt.Printf("Release %s %s\n", *release.TargetCommitish, *release.TagName)
+		}
+
+		if listOptions.Page == response.NextPage {
+			break
+		}
+
+		listOptions.Page = response.NextPage
+	}
+
+	return findLatestRelease(`/Users/tgr/workspace/daimler/awesome-ci`, releaseMap)
+}
+
+func findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
+	gitRepo, err := git.PlainOpen(directory)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tagMap, err := getGitTagMap(gitRepo)
+
+	if err != nil {
+		return nil, err
+	}
+
+	headRef, _ := gitRepo.Head()
+
+	iter, _ := gitRepo.Log(&git.LogOptions{
+		From:  headRef.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
+
+	var commit *object.Commit
+	for commit, err = iter.Next(); commit != nil && err == nil; commit, err = iter.Next() {
+		fmt.Printf("Lookup %s ", commit.Hash.String())
+		if tagName, found := tagMap[commit.Hash.String()]; found {
+			fmt.Println(tagName)
+			if latestRelease, found := githubReleaseMap[tagName]; found {
+				return latestRelease, nil
+			}
+		}
+
+	}
+
+	return nil, errors.New("could not find latest release")
+}
+
+func getGitTagMap(gitRepo *git.Repository) (tagMap map[string]string, err error) {
+	tagMap = make(map[string]string)
+
+	tags, err := gitRepo.Tags()
+
+	if err != nil {
+		return nil, err
+	}
+
+	tags.ForEach(func(r *plumbing.Reference) error {
+		tagMap[r.Hash().String()] = r.Name().Short()
+		fmt.Printf("Tag %s %s\n", r.Hash().String(), r.Name().Short())
+		return nil
+	})
+
+	return tagMap, nil
 }
