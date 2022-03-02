@@ -2,6 +2,7 @@ package main
 
 import (
 	"awesome-ci/src/service"
+	"awesome-ci/src/tools"
 	"flag"
 	"fmt"
 	"log"
@@ -116,6 +117,9 @@ func printNoValidCommand(usage func()) {
 }
 
 func main() {
+
+	tools.DoGit(`.`)
+
 	flag.Usage = func() {
 		fmt.Println("awesome-ci makes your CI easy.")
 		fmt.Println("  Find more information and examples at: https://github.com/fullstack-devops/awesome-ci")
