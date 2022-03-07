@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/google/go-github/v39/github"
 )
@@ -185,7 +184,7 @@ func GetLatestReleaseVersion(owner string, repo string) (latestRelease *github.R
 		listOptions.Page = response.NextPage
 	}
 
-	return findLatestRelease(`/Users/tgr/workspace/daimler/awesome-ci`, releaseMap)
+	return findLatestRelease(`.`, releaseMap)
 }
 
 func findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
@@ -195,7 +194,7 @@ func findLatestRelease(directory string, githubReleaseMap map[string]*github.Rep
 		return nil, err
 	}
 
-	tagMap, err := getGitTagMap(gitRepo)
+	commitToTagMap, _, err := tools.GetGitTagMaps(gitRepo)
 
 	if err != nil {
 		return nil, err
@@ -211,9 +210,10 @@ func findLatestRelease(directory string, githubReleaseMap map[string]*github.Rep
 	var commit *object.Commit
 	for commit, err = iter.Next(); commit != nil && err == nil; commit, err = iter.Next() {
 		fmt.Printf("Lookup %s ", commit.Hash.String())
-		if tagName, found := tagMap[commit.Hash.String()]; found {
+		if tagName, found := commitToTagMap[commit.Hash.String()]; found {
 			fmt.Println(tagName)
-			if latestRelease, found := githubReleaseMap[tagName]; found {
+			//TODO it's possible to have more then one Tag on a Commit
+			if latestRelease, found := githubReleaseMap[tagName[0]]; found {
 				return latestRelease, nil
 			}
 		}
@@ -221,22 +221,4 @@ func findLatestRelease(directory string, githubReleaseMap map[string]*github.Rep
 	}
 
 	return nil, errors.New("could not find latest release")
-}
-
-func getGitTagMap(gitRepo *git.Repository) (tagMap map[string]string, err error) {
-	tagMap = make(map[string]string)
-
-	tags, err := gitRepo.Tags()
-
-	if err != nil {
-		return nil, err
-	}
-
-	tags.ForEach(func(r *plumbing.Reference) error {
-		tagMap[r.Hash().String()] = r.Name().Short()
-		fmt.Printf("Tag %s %s\n", r.Hash().String(), r.Name().Short())
-		return nil
-	})
-
-	return tagMap, nil
 }
