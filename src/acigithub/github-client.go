@@ -19,6 +19,10 @@ var (
 	githubToken, isgithubToken           = os.LookupEnv("GITHUB_TOKEN")
 )
 
+func SetGithubRepo(repo string) {
+	githubRepository = repo
+}
+
 // NewGitHubClient Creates a new GitHub Client
 // Needs the Environment Variables: GITHUB_TOKEN
 // Needs the optional Environment Variables: GITHUB_ENTERPRISE_SERVER_URL
