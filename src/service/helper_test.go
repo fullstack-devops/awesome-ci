@@ -34,11 +34,6 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 		t.FailNow()
 	}
 
-	if !ok {
-		t.Errorf("env var ACI_TEST_FORK not set")
-		t.FailNow()
-	}
-
 	testEnv = &TestEnvironment{
 		ctx:       context.Background(),
 		testOwner: strings.Split(testRepo, "/")[0],
@@ -71,7 +66,6 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 			Username: "notneeded", // yes, this can be anything except an empty string
 			Password: os.Getenv("GITHUB_TOKEN"),
 		},
-		Progress: os.Stdout,
 	})
 
 	if err != nil {
@@ -94,27 +88,37 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 }
 
 func prepareReleases(tagNames *[]string, testEnv *TestEnvironment, t *testing.T) (cleanup func(), err error) {
-	_, tagToCommitMap, err := tools.GetGitTagMaps(testEnv.localGitRep)
+	//_, tagToCommitMap, err := tools.GetGitTagMaps(testEnv.localGitRep)
+
+	tagIter, err := testEnv.localGitRep.Tags()
 
 	if err != nil {
 		return func() {}, err
 	}
 
-	for _, tagName := range *tagNames {
+	tagIter.ForEach(func(r *plumbing.Reference) error {
+		rName := r.Name().Short()
 
-		commit := tagToCommitMap[tagName]
-		_, _, err := acigithub.GithubClient.Repositories.CreateRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, &github.RepositoryRelease{
-			TagName:         &tagName,
-			TargetCommitish: &commit,
-			Name:            &tagName,
-		})
+		for _, tagName := range *tagNames {
+			if rName == tagName {
 
-		waitingForRelease(tagName, testEnv, t)
+				commit := r.Hash().String()
 
-		if err != nil {
-			return func() {}, err
+				_, _, err := acigithub.GithubClient.Repositories.CreateRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, &github.RepositoryRelease{
+					TagName:         &tagName,
+					TargetCommitish: &commit,
+					Name:            &tagName,
+				})
+
+				waitingForRelease(tagName, testEnv, t)
+
+				if err != nil {
+					return err
+				}
+			}
 		}
-	}
+		return nil
+	})
 
 	return func() {
 		deleteReleases(tagNames, testEnv, t)
@@ -149,6 +153,7 @@ func deleteReleases(tagNames *[]string, testConfig *TestEnvironment, t *testing.
 
 func resetHeadToTag(tagName string, testEnv *TestEnvironment, t *testing.T) bool {
 	_, tagToCommitMap, err := tools.GetGitTagMaps(testEnv.localGitRep)
+
 	if checkError(err, t) {
 		return false
 	}
@@ -159,7 +164,7 @@ func resetHeadToTag(tagName string, testEnv *TestEnvironment, t *testing.T) bool
 	}
 
 	worktree.Reset(&git.ResetOptions{
-		Commit: plumbing.NewHash(tagToCommitMap["1.1.0"]),
+		Commit: plumbing.NewHash(tagToCommitMap[tagName]),
 		Mode:   git.HardReset,
 	})
 	return true
