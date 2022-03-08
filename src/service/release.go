@@ -26,6 +26,7 @@ type ReleaseCreateSet struct {
 	MergeCommitSHA string
 	ReleaseBranch  string
 	DryRun         bool
+	Hotfix         bool
 	Body           string
 }
 
@@ -39,6 +40,7 @@ type ReleasePublishSet struct {
 	MergeCommitSHA string
 	ReleaseBranch  string
 	DryRun         bool
+	Hotfix         bool
 	Body           string
 }
 
@@ -65,10 +67,12 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 				log.Fatalln(err)
 			}
 		}
+
 		prInfos, _, err := acigithub.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
+
 		version = prInfos.NextVersion
 		if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
 			log.Fatalln(errEnvs)
@@ -102,6 +106,19 @@ func ReleasePublish(args *ReleasePublishSet) {
 		}
 	} else if args.Version != "" && args.PatchLevel == "" {
 		version = args.Version
+	} else if args.Hotfix {
+
+		release, err := acigithub.GetLatestReleaseVersion()
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		version, err = semver.IncreaseVersion(semver.Bugfix, *release.TagName)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
 	} else if args.ReleaseId == 0 {
 		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
 		if args.MergeCommitSHA == "" {

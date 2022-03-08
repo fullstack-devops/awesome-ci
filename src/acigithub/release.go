@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/google/go-github/v39/github"
 )
 
@@ -156,8 +155,8 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 }
 
 // GetLatestReleaseVersion
-func GetLatestReleaseVersion(owner string, repo string) (latestRelease *github.RepositoryRelease, err error) {
-
+func GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
+	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
 	var releaseMap = make(map[string]*github.RepositoryRelease)
 
 	var listOptions github.ListOptions = github.ListOptions{
@@ -174,7 +173,6 @@ func GetLatestReleaseVersion(owner string, repo string) (latestRelease *github.R
 
 		for _, release := range releases {
 			releaseMap[*release.TagName] = release
-			fmt.Printf("Release %s %s\n", *release.TargetCommitish, *release.TagName)
 		}
 
 		if listOptions.Page == response.NextPage {
@@ -194,30 +192,16 @@ func findLatestRelease(directory string, githubReleaseMap map[string]*github.Rep
 		return nil, err
 	}
 
-	commitToTagMap, _, err := tools.GetGitTagMaps(gitRepo)
+	tags, err := tools.GetGitTagsUpToHead(gitRepo)
 
 	if err != nil {
 		return nil, err
 	}
 
-	headRef, _ := gitRepo.Head()
-
-	iter, _ := gitRepo.Log(&git.LogOptions{
-		From:  headRef.Hash(),
-		Order: git.LogOrderCommitterTime,
-	})
-
-	var commit *object.Commit
-	for commit, err = iter.Next(); commit != nil && err == nil; commit, err = iter.Next() {
-		fmt.Printf("Lookup %s ", commit.Hash.String())
-		if tagName, found := commitToTagMap[commit.Hash.String()]; found {
-			fmt.Println(tagName)
-			//TODO it's possible to have more then one Tag on a Commit
-			if latestRelease, found := githubReleaseMap[tagName[0]]; found {
-				return latestRelease, nil
-			}
+	for i := len(tags) - 1; i >= 0; i-- {
+		if latestRelease, found := githubReleaseMap[tags[i].String()]; found {
+			return latestRelease, nil
 		}
-
 	}
 
 	return nil, errors.New("could not find latest release")
