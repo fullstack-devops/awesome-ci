@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCreateRelease_1_1_0(t *testing.T) {
+func TestPublishRelease_1_1_0(t *testing.T) {
 
 	preparedReleases := &[]string{"1.0.1"}
 
@@ -44,7 +44,7 @@ func TestCreateRelease_1_1_0(t *testing.T) {
 	}
 }
 
-func TestCreateRelease_1_2_2(t *testing.T) {
+func TestPublishRelease_1_2_2(t *testing.T) {
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.2.0", "1.2.1", "1.1.1", "1.1.2"}
 
@@ -83,7 +83,7 @@ func TestCreateRelease_1_2_2(t *testing.T) {
 	}
 }
 
-func TestCreateRelease_1_2_1(t *testing.T) {
+func TestPublishRelease_1_2_1(t *testing.T) {
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.2.0"}
 
@@ -122,7 +122,7 @@ func TestCreateRelease_1_2_1(t *testing.T) {
 	}
 }
 
-func TestCreateRelease_1_2_0(t *testing.T) {
+func TestPublishRelease_1_2_0(t *testing.T) {
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0"}
 
@@ -161,7 +161,7 @@ func TestCreateRelease_1_2_0(t *testing.T) {
 	}
 }
 
-func TestFirstRelease(t *testing.T) {
+func TestPublishFirstRelease(t *testing.T) {
 	preparedReleases := &[]string{}
 	testEnv, cleanup := getTestEnvironment(preparedReleases, t)
 
@@ -179,7 +179,7 @@ func TestFirstRelease(t *testing.T) {
 
 }
 
-func TestHotfixRelease_1_1_1(t *testing.T) {
+func TestPublishHotfixRelease_1_1_1(t *testing.T) {
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.2.0", "1.2.1"}
 
@@ -220,7 +220,7 @@ func TestHotfixRelease_1_1_1(t *testing.T) {
 	}
 }
 
-func TestHotfixRelease_1_1_2(t *testing.T) {
+func TestPublishHotfixRelease_1_1_2(t *testing.T) {
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.1.1", "1.2.0", "1.2.1"}
 
