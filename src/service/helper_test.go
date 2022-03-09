@@ -128,9 +128,10 @@ func prepareReleases(tagNames *[]string, testEnv *TestEnvironment, t *testing.T)
 func waitingForRelease(tagName string, testEnv *TestEnvironment, t *testing.T) {
 
 	for i := 1; i <= 10; i++ { //waiting for release becoming available
+
 		_, _, err := acigithub.GithubClient.Repositories.GetReleaseByTag(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, tagName)
 		if err != nil {
-			fmt.Printf("Waiting %sms for Release to become available", time.Duration(i*100)*time.Millisecond)
+			fmt.Printf("Waiting %sms for Release to become available\n", time.Duration(i*100)*time.Millisecond)
 
 			time.Sleep(time.Duration(i*100) * time.Millisecond)
 		}
