@@ -10,6 +10,8 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+
+	"github.com/google/go-github/v39/github"
 )
 
 type ReleaseSet struct {
@@ -26,6 +28,7 @@ type ReleaseCreateSet struct {
 	MergeCommitSHA string
 	ReleaseBranch  string
 	DryRun         bool
+	Hotfix         bool
 	Body           string
 }
 
@@ -39,10 +42,11 @@ type ReleasePublishSet struct {
 	MergeCommitSHA string
 	ReleaseBranch  string
 	DryRun         bool
+	Hotfix         bool
 	Body           string
 }
 
-func ReleaseCreate(args *ReleaseCreateSet) {
+func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 	var version string = ""
 	_, err := acigithub.NewGitHubClient()
 	if err != nil {
@@ -57,6 +61,19 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 		}
 	} else if args.Version != "" && args.PatchLevel == "" {
 		version = args.Version
+	} else if args.Hotfix {
+
+		release, err := acigithub.GetLatestReleaseVersion()
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		version, err = semver.IncreaseVersion(semver.Bugfix, *release.TagName)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
 	} else {
 		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
 		if args.MergeCommitSHA == "" {
@@ -65,10 +82,12 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 				log.Fatalln(err)
 			}
 		}
+
 		prInfos, _, err := acigithub.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
+
 		version = prInfos.NextVersion
 		if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
 			log.Fatalln(errEnvs)
@@ -84,7 +103,11 @@ func ReleaseCreate(args *ReleaseCreateSet) {
 			log.Fatalln(err)
 		}
 		fmt.Println("Create release successful. ID:", *createdRelease.ID)
+
+		return createdRelease
 	}
+
+	return nil
 }
 
 func ReleasePublish(args *ReleasePublishSet) {
@@ -102,6 +125,19 @@ func ReleasePublish(args *ReleasePublishSet) {
 		}
 	} else if args.Version != "" && args.PatchLevel == "" {
 		version = args.Version
+	} else if args.Hotfix {
+
+		release, err := acigithub.GetLatestReleaseVersion()
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		version, err = semver.IncreaseVersion(semver.Bugfix, *release.TagName)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
 	} else if args.ReleaseId == 0 {
 		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
 		if args.MergeCommitSHA == "" {

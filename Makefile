@@ -11,7 +11,8 @@ lint: ## Lint the files
 	@golint -set_exit_status ${PKG_LIST}
 
 test: ## Run unittests
-	@go test -short ${PKG_LIST}
+	export ACI_TEST_REPO=fullstack-devops/awesome-ci-test
+	@go test ./...
 
 race: dep ## Run data race detector
 	@go test -race -short -v main.go
