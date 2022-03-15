@@ -62,6 +62,7 @@ func init() {
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.Body, "body", "", "custom release message (markdow string or file)")
 	releaseSet.Create.Fs.StringVar(&releaseSet.Create.PatchLevel, "patchLevel", "", "predefine version to Update")
 	releaseSet.Create.Fs.BoolVar(&releaseSet.Create.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
+	releaseSet.Create.Fs.BoolVar(&releaseSet.Create.Hotfix, "hotfix", false, "create a hotfix release")
 	releaseSet.Create.Fs.Usage = func() {
 		fmt.Println("Available options:")
 		releaseSet.Create.Fs.PrintDefaults()
