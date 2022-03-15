@@ -72,7 +72,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	var version = ""
 	var latestVersion = ""
 	// if an comment exists with aci_patch_level=major, make a major version!
-	issueComments, err := GetIssueComments(prNumber, owner, repo)
+	issueComments, err := GetIssueComments(prNumber)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -95,7 +95,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	}
 
 	if version == "" {
-		repositoryRelease, err := GetLatestReleaseVersion(owner, repo)
+		repositoryRelease, err := GetLatestReleaseVersion()
 		if err == nil {
 			latestVersion = *repositoryRelease.TagName
 			version, err = semver.IncreaseVersion(patchLevel, latestVersion)

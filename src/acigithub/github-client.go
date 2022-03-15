@@ -1,6 +1,7 @@
 package acigithub
 
 import (
+	"awesome-ci/src/tools"
 	"context"
 	"fmt"
 	"log"
@@ -17,6 +18,7 @@ var (
 	githubServerUrl, isgithubServerUrl   = os.LookupEnv("GITHUB_ENTERPRISE_SERVER_URL")
 	githubRepository, isgithubRepository = os.LookupEnv("GITHUB_REPOSITORY")
 	githubToken, isgithubToken           = os.LookupEnv("GITHUB_TOKEN")
+	owner, repo                          string
 )
 
 // NewGitHubClient Creates a new GitHub Client
@@ -24,8 +26,9 @@ var (
 // Needs the optional Environment Variables: GITHUB_ENTERPRISE_SERVER_URL
 func NewGitHubClient() (githubClient *github.Client, err error) {
 	if !isgithubToken {
-		log.Fatalln("pleas set the GITHUB_TOKEN as environment variable!")
+		log.Fatalln("please set the GITHUB_TOKEN as environment variable!")
 	}
+
 	gitHubTs := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
@@ -44,6 +47,11 @@ func NewGitHubClient() (githubClient *github.Client, err error) {
 	} else {
 		githubClient = github.NewClient(githubTc)
 	}
+
+	if isgithubRepository {
+		owner, repo = tools.DevideOwnerAndRepo(githubRepository)
+	}
+
 	GithubClient = githubClient
 	return
 }

@@ -2,12 +2,14 @@ package acigithub
 
 import (
 	"awesome-ci/src/tools"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v39/github"
 )
 
@@ -153,7 +155,54 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 }
 
 // GetLatestReleaseVersion
-func GetLatestReleaseVersion(owner string, repo string) (latestRelease *github.RepositoryRelease, err error) {
-	latestRelease, _, err = GithubClient.Repositories.GetLatestRelease(ctx, owner, repo)
-	return
+func GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
+	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
+	var releaseMap = make(map[string]*github.RepositoryRelease)
+
+	var listOptions github.ListOptions = github.ListOptions{
+		PerPage: 100,
+		Page:    0,
+	}
+
+	for listOptions.Page >= 0 {
+		releases, response, err := GithubClient.Repositories.ListReleases(ctx, owner, repo, &listOptions)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, release := range releases {
+			releaseMap[*release.TagName] = release
+		}
+
+		if listOptions.Page == response.NextPage {
+			break
+		}
+
+		listOptions.Page = response.NextPage
+	}
+
+	return findLatestRelease(`.`, releaseMap)
+}
+
+func findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
+	gitRepo, err := git.PlainOpen(directory)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tags, err := tools.GetGitTagsUpToHead(gitRepo)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := len(tags) - 1; i >= 0; i-- {
+		if latestRelease, found := githubReleaseMap[tags[i].String()]; found {
+			return latestRelease, nil
+		}
+	}
+
+	return nil, errors.New("could not find latest release")
 }

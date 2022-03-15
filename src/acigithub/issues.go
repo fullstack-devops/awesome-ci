@@ -13,7 +13,7 @@ var (
 	direction, sort = "asc", "created"
 )
 
-func GetIssueComments(issueNumber int, owner string, repo string) (issueComments []*github.IssueComment, err error) {
+func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, err error) {
 	var commentOpts = &github.IssueListCommentsOptions{
 		Direction: &direction,
 		// Sort:      &sort,
@@ -30,7 +30,6 @@ func CommentHelpToPullRequest(number int) (err error) {
 	if !isgithubRepository {
 		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
 	}
-	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
 
 	var commentOpts = &github.IssueListCommentsOptions{
 		Direction: &direction,
