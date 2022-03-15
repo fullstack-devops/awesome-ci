@@ -76,6 +76,7 @@ func init() {
 	releaseSet.Publish.Fs.StringVar(&releaseSet.Publish.Assets, "assets", "", "upload assets to release. eg.: \"file=awesome-ci\"")
 	releaseSet.Publish.Fs.Int64Var(&releaseSet.Publish.ReleaseId, "releaseid", 0, "publish an early defined release")
 	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.DryRun, "dry-run", false, "make dry-run before writing version to Git by calling it")
+	releaseSet.Publish.Fs.BoolVar(&releaseSet.Publish.Hotfix, "hotfix", false, "create a hotfix release")
 
 	// parseJSON
 	parseSet.Fs = flag.NewFlagSet("parse", flag.ExitOnError)
