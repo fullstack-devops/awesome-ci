@@ -1,5 +1,9 @@
 name: Publish Release
 
+concurrency:
+  group: ci-${{ github.repository }}-release
+  cancel-in-progress: false
+
 on:
   push:
     branches:
