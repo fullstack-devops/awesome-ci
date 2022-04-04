@@ -26,11 +26,11 @@ The patching of the version only takes effect if the merged branch begins with t
 
 > The tailing `/` behind the alias is **always** requiered!
 
-| SemVer | supported aliases                            | version example |
-| ------ | -------------------------------------------- | --------------- |
-| MAJOR  | `major`                                      | 1.2.3 => 2.0.0  |
-| MINOR  | `feature`, `feat`                            | 1.2.3 => 1.3.0  |
-| PATCH  | `fix`, `bugfix`, `dependabot`                | 1.2.3 => 1.2.4  |
+| SemVer | supported aliases             | version example |
+|--------|-------------------------------|-----------------|
+| MAJOR  | `major`                       | 1.2.3 => 2.0.0  |
+| MINOR  | `feature`, `feat`             | 1.2.3 => 1.3.0  |
+| PATCH  | `fix`, `bugfix`, `dependabot` | 1.2.3 => 1.2.4  |
 
 > see also [override specialties](#override-specialties)
 
@@ -49,20 +49,20 @@ List of all environmental variables used per CI tool.
 
 #### GitHub Actions
 
-| Environment variable      | Description                                                     | requiered |
-| ------------------------- | --------------------------------------------------------------- |:---------:|
-| `GITHUB_API_URL`          | Returns the API URL. (Already set in runner)                    | true      |
-| `GITHUB_REPOSITORY`       | The owner and repository name. (Already set in runner)          | true      |
-| `GITHUB_TOKEN`            | Must provided in workflow as `env:` (see examples)              | true      |
-| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)             | false     |
+| Environment variable      | Description                                            | requiered |
+|---------------------------|--------------------------------------------------------|:---------:|
+| `GITHUB_SERVER_URL`       | The GitHub-Server URL. (Already set in runner)         |   true    |
+| `GITHUB_REPOSITORY`       | The owner and repository name. (Already set in runner) |   true    |
+| `GITHUB_TOKEN`            | Must provided in workflow as `env:` (see examples)     |   true    |
+| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)    |   false   |
 
 #### Jenkins Pipeline
 
-| Environment variable      | Description                                                     | requiered |
-| ------------------------- | --------------------------------------------------------------- |:---------:|
-| `JENKINS_URL`             | Returns the URL of your Jenkins instance. (Already set)         | true      |
-| `GIT_URL`                 | Will only be set by using the GitHub Plugin.                    | true      |
-| `GITHUB_TOKEN`            | Must provided in pipeline as `env.GITHUB_TOKEN` (see examples)  | true      |
-| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)             | false     |
+| Environment variable      | Description                                                    | requiered |
+|---------------------------|----------------------------------------------------------------|:---------:|
+| `JENKINS_URL`             | Returns the URL of your Jenkins instance. (Already set)        |   true    |
+| `GIT_URL`                 | Will only be set by using the GitHub Plugin.                   |   true    |
+| `GITHUB_TOKEN`            | Must provided in pipeline as `env.GITHUB_TOKEN` (see examples) |   true    |
+| `GIT_DEFAULT_BRANCH_NAME` | overrides the default branch name (default: `main`)            |   false   |
 
 > To see your Jenkins environment variables go to: `${YOUR_JENKINS_HOST}/env-vars.html`
