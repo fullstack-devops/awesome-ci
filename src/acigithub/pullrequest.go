@@ -79,9 +79,9 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	for _, comment := range issueComments {
 		// Must have permission in the repo to create a major version
 		// MANNEQUIN|NONE https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
-		log.Println(comment.AuthorAssociation)
-		log.Println(comment.Body)
-		log.Println(comment.User)
+		log.Println(*comment.AuthorAssociation)
+		log.Println(*comment.Body)
+		log.Println(*comment.User)
 		if strings.Contains("MEMBER|OWNER|CONTRIBUTOR|COLLABORATOR", *comment.AuthorAssociation) {
 			aciVersionOverride := regexp.MustCompile(`aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
 			aciPatchLevel := regexp.MustCompile(`aci_patch_level: ([a-zA-Z]+)`)
