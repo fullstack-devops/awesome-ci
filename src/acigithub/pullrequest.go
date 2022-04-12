@@ -89,7 +89,6 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 
 			if aciVersionOverride.MatchString(*comment.Body) {
 				version = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
-				log.Println("Found a veriosn override")
 				break
 			}
 
