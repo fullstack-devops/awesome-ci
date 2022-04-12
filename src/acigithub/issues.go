@@ -18,12 +18,9 @@ func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, er
 	//FIXME: currently the GitHub API ignores Direction and Sort
 	// so, we are using the default settings for the query and sorting the response afterwards
 	var commentOpts = &github.IssueListCommentsOptions{
-		Direction: &direction,
-		Sort:      &sort,
-		ListOptions: github.ListOptions{
-			PerPage: 100,
-			Page:    1,
-		},
+		Direction:   &direction,
+		Sort:        &sort,
+		ListOptions: standardListOptions,
 	}
 	issueComments, _, err = GithubClient.Issues.ListComments(ctx, owner, repo, issueNumber, commentOpts)
 
@@ -49,12 +46,9 @@ func CommentHelpToPullRequest(number int) (err error) {
 	}
 
 	var commentOpts = &github.IssueListCommentsOptions{
-		Direction: &direction,
-		Sort:      &sort,
-		ListOptions: github.ListOptions{
-			PerPage: 100,
-			Page:    1,
-		},
+		Direction:   &direction,
+		Sort:        &sort,
+		ListOptions: standardListOptions,
 	}
 	comments, _, err := GithubClient.Issues.ListComments(ctx, owner, repo, number, commentOpts)
 	if err != nil {
