@@ -18,6 +18,10 @@ var (
 	githubRepository, isgithubRepository = os.LookupEnv("GITHUB_REPOSITORY")
 	githubToken, isgithubToken           = os.LookupEnv("GITHUB_TOKEN")
 	owner, repo                          string
+	standardListOptions                  = github.ListOptions{
+		PerPage: 100,
+		Page:    1,
+	}
 )
 
 // NewGitHubClient Creates a new GitHub Client

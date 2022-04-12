@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 
 	"github.com/google/go-github/v39/github"
 )
@@ -76,13 +75,15 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	if err != nil {
 		return nil, nil, err
 	}
+
 	for _, comment := range issueComments {
-		// Must have permission in the repo to create a major version
-		// MANNEQUIN|NONE https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
-		log.Println(*comment.AuthorAssociation)
-		log.Println(*comment.Body)
-		log.Println(*comment.User)
-		if strings.Contains("MEMBER|OWNER|CONTRIBUTOR|COLLABORATOR", *comment.AuthorAssociation) {
+		// Must be a collaborator to have permission to create an override
+		isCollaborator, _, err := GithubClient.Repositories.IsCollaborator(ctx, owner, repo, *comment.User.Login)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if isCollaborator {
 			aciVersionOverride := regexp.MustCompile(`aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
 			aciPatchLevel := regexp.MustCompile(`aci_patch_level: ([a-zA-Z]+)`)
 
