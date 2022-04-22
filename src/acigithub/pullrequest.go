@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 
 	"github.com/google/go-github/v39/github"
 )
@@ -76,21 +75,34 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	if err != nil {
 		return nil, nil, err
 	}
+
 	for _, comment := range issueComments {
-		// Must have permission in the repo to create a major version
-		// MANNEQUIN|NONE https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
-		if strings.Contains("OWNER|CONTRIBUTOR|COLLABORATOR", *comment.AuthorAssociation) {
+		// FIXME: access must be restricted but GITHUB_TOKEN doesn't get informations.
+		// Refs: https://docs.github.com/en/rest/collaborators/collaborators#list-repository-collaborators
+		// Refs: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+
+		// Must be a collaborator to have permission to create an override
+		// isCollaborator, resp, err := GithubClient.Repositories.IsCollaborator(ctx, owner, repo, *comment.User.Login)
+		// if err != nil {
+		// 	return nil, nil, err
+		// }
+		// fmt.Println(resp.StatusCode)
+
+		// if isCollaborator {
+		if true {
 			aciVersionOverride := regexp.MustCompile(`aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
 			aciPatchLevel := regexp.MustCompile(`aci_patch_level: ([a-zA-Z]+)`)
+
+			if aciVersionOverride.MatchString(*comment.Body) {
+				version = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
+				break
+			}
 
 			if aciPatchLevel.MatchString(*comment.Body) {
 				patchLevel = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
 				break
 			}
-			if aciVersionOverride.MatchString(*comment.Body) {
-				version = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
-				break
-			}
+
 		}
 	}
 
