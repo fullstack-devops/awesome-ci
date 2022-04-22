@@ -77,13 +77,19 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	}
 
 	for _, comment := range issueComments {
-		// Must be a collaborator to have permission to create an override
-		isCollaborator, _, err := GithubClient.Repositories.IsCollaborator(ctx, owner, repo, *comment.User.Login)
-		if err != nil {
-			return nil, nil, err
-		}
+		// FIXME: access must be restricted but GITHUB_TOKEN doesn't get informations.
+		// Refs: https://docs.github.com/en/rest/collaborators/collaborators#list-repository-collaborators
+		// Refs: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 
-		if isCollaborator {
+		// Must be a collaborator to have permission to create an override
+		// isCollaborator, resp, err := GithubClient.Repositories.IsCollaborator(ctx, owner, repo, *comment.User.Login)
+		// if err != nil {
+		// 	return nil, nil, err
+		// }
+		// fmt.Println(resp.StatusCode)
+
+		// if isCollaborator {
+		if true {
 			aciVersionOverride := regexp.MustCompile(`aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
 			aciPatchLevel := regexp.MustCompile(`aci_patch_level: ([a-zA-Z]+)`)
 
