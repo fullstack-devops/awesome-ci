@@ -6,7 +6,7 @@ require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-github/v39 v39.2.0
-	github.com/xanzy/go-gitlab v0.61.0
+	github.com/xanzy/go-gitlab v0.64.0
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 	gopkg.in/yaml.v2 v2.4.0
 )
