@@ -9,7 +9,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v44/github"
 )
 
 // GetPrInfos need the PullRequest-Number

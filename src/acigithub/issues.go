@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v44/github"
 )
 
 var (

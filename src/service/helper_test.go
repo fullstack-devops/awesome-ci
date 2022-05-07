@@ -14,7 +14,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v44/github"
 )
 
 type TestEnvironment struct {
