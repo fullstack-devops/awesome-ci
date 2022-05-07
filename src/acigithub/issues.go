@@ -25,13 +25,19 @@ func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, er
 	issueComments, _, err = GithubClient.Issues.ListComments(ctx, owner, repo, issueNumber, commentOpts)
 
 	if err == nil {
-		icCount := len(issueComments)
+		var issueCommentsFiltered []*github.IssueComment
+		for _, issueComment := range issueComments {
+			if !strings.HasPrefix(*issueComment.Body, `<details><summary>Possible awesome-ci commands for this Pull Request</summary>`) {
+				issueCommentsFiltered = append(issueCommentsFiltered, issueComment)
+			}
+		}
+
+		icCount := len(issueCommentsFiltered)
 		issueCommentsSorted := make([]*github.IssueComment, icCount)
 
-		for i, n := range issueComments {
+		for i, issueComment := range issueCommentsFiltered {
 			j := icCount - i - 1
-
-			issueCommentsSorted[j] = n
+			issueCommentsSorted[j] = issueComment
 		}
 
 		return issueCommentsSorted, err
