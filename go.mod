@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/go-git/go-git/v5 v5.4.2
-	github.com/google/go-github/v44 v44.0.0
+	github.com/google/go-github/v44 v44.1.0
 	github.com/xanzy/go-gitlab v0.64.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	gopkg.in/yaml.v2 v2.4.0
@@ -20,7 +20,6 @@ require (
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.2.0 // indirect
