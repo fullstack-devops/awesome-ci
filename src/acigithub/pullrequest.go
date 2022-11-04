@@ -39,7 +39,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 		}
 		var found int = 0
 		for _, pr := range pullRequests {
-			if *pr.MergeCommitSHA == mergeCommitSha {
+			if pr.GetMergeCommitSHA() == mergeCommitSha {
 				prInfos = pr
 				found = found + 1
 			}
@@ -90,8 +90,8 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 
 		// if isCollaborator {
 		if true {
-			aciVersionOverride := regexp.MustCompile(`aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
-			aciPatchLevel := regexp.MustCompile(`aci_patch_level: ([a-zA-Z]+)`)
+			aciVersionOverride := regexp.MustCompile(`^aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
+			aciPatchLevel := regexp.MustCompile(`^aci_patch_level: ([a-zA-Z]+)`)
 
 			if aciVersionOverride.MatchString(*comment.Body) {
 				version = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
