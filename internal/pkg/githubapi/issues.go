@@ -1,7 +1,7 @@
-package acigithub
+package githubapi
 
 import (
-	"awesome-ci/internal/app/awesome-ci/tools"
+	"awesome-ci/internal/pkg/tools"
 	"fmt"
 	"log"
 	"strings"

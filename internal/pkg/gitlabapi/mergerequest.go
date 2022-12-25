@@ -1,8 +1,8 @@
-package acigitlab
+package gitlabapi
 
 import (
 	"awesome-ci/internal/app/awesome-ci/models"
-	"awesome-ci/internal/app/awesome-ci/semver"
+	"awesome-ci/internal/pkg/semver"
 	"context"
 	"errors"
 	"fmt"

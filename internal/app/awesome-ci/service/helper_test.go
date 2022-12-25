@@ -1,8 +1,8 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/acigithub"
-	"awesome-ci/internal/app/awesome-ci/tools"
+	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/pkg/tools"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -47,12 +47,12 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 		t.FailNow()
 	}
 
-	if _, err := acigithub.NewGitHubClient(); err != nil {
+	if _, err := githubapi.NewGitHubClient(); err != nil {
 		t.Errorf("Could not create GitHub client: %s", err)
 		t.FailNow()
 	}
 
-	repo, _, err := acigithub.GithubClient.Repositories.Get(testEnv.ctx, testEnv.testOwner, testEnv.testRepo)
+	repo, _, err := githubapi.GithubClient.Repositories.Get(testEnv.ctx, testEnv.testOwner, testEnv.testRepo)
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -104,7 +104,7 @@ func prepareReleases(tagNames *[]string, testEnv *TestEnvironment, t *testing.T)
 
 				commit := r.Hash().String()
 
-				_, _, err := acigithub.GithubClient.Repositories.CreateRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, &github.RepositoryRelease{
+				_, _, err := githubapi.GithubClient.Repositories.CreateRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, &github.RepositoryRelease{
 					TagName:         &tagName,
 					TargetCommitish: &commit,
 					Name:            &tagName,
@@ -129,7 +129,7 @@ func waitingForRelease(tagName string, testEnv *TestEnvironment, t *testing.T) {
 
 	for i := 1; i <= 10; i++ { //waiting for release becoming available
 
-		_, _, err := acigithub.GithubClient.Repositories.GetReleaseByTag(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, tagName)
+		_, _, err := githubapi.GithubClient.Repositories.GetReleaseByTag(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, tagName)
 		if err != nil {
 			fmt.Printf("Waiting %sms for Release to become available\n", time.Duration(i*100)*time.Millisecond)
 
@@ -142,10 +142,10 @@ func deleteReleases(tagNames *[]string, testConfig *TestEnvironment, t *testing.
 
 	for _, tagName := range *tagNames {
 
-		release, _, err := acigithub.GithubClient.Repositories.GetReleaseByTag(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, tagName)
+		release, _, err := githubapi.GithubClient.Repositories.GetReleaseByTag(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, tagName)
 
 		if !checkError(err, t) {
-			_, err = acigithub.GithubClient.Repositories.DeleteRelease(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, *release.ID)
+			_, err = githubapi.GithubClient.Repositories.DeleteRelease(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, *release.ID)
 			checkError(err, t)
 		}
 	}

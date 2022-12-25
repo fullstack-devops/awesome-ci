@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/acigithub"
+	"awesome-ci/internal/pkg/githubapi"
 	"flag"
 	"fmt"
 	"log"
@@ -21,7 +21,7 @@ type PullRequestInfoSet struct {
 }
 
 func PrintPRInfos(args *PullRequestInfoSet) {
-	_, err := acigithub.NewGitHubClient()
+	_, err := githubapi.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -31,7 +31,7 @@ func PrintPRInfos(args *PullRequestInfoSet) {
 		log.Fatalln(err)
 	}
 
-	prInfos, _, err := acigithub.GetPrInfos(args.Number, "")
+	prInfos, _, err := githubapi.GetPrInfos(args.Number, "")
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -23,6 +23,7 @@ go.work
 /docs/architecture/.asciidoctor/
 /build/docs/.asciidoctor/
 /build/coverage/
+/build/package/
 !/build/**/.keep
 /.idea
 

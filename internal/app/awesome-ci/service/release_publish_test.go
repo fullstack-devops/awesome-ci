@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/acigithub"
+	"awesome-ci/internal/pkg/githubapi"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func TestPublishRelease_1_1_0(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -33,7 +33,7 @@ func TestPublishRelease_1_1_0(t *testing.T) {
 
 	waitingForRelease("1.1.0", testEnv, t)
 
-	latestRelease, err = acigithub.GetLatestReleaseVersion()
+	latestRelease, err = githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -57,7 +57,7 @@ func TestPublishRelease_1_2_2(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -72,7 +72,7 @@ func TestPublishRelease_1_2_2(t *testing.T) {
 
 	waitingForRelease("1.2.2", testEnv, t)
 
-	latestRelease, err = acigithub.GetLatestReleaseVersion()
+	latestRelease, err = githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -96,7 +96,7 @@ func TestPublishRelease_1_2_1(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -111,7 +111,7 @@ func TestPublishRelease_1_2_1(t *testing.T) {
 
 	waitingForRelease("1.2.1", testEnv, t)
 
-	latestRelease, err = acigithub.GetLatestReleaseVersion()
+	latestRelease, err = githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -135,7 +135,7 @@ func TestPublishRelease_1_2_0(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -150,7 +150,7 @@ func TestPublishRelease_1_2_0(t *testing.T) {
 
 	waitingForRelease("1.2.0", testEnv, t)
 
-	latestRelease, err = acigithub.GetLatestReleaseVersion()
+	latestRelease, err = githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -171,7 +171,7 @@ func TestPublishFirstRelease(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if latestRelease != nil || err == nil {
 		t.Errorf("There should be no Relase")
@@ -192,7 +192,7 @@ func TestPublishHotfixRelease_1_1_1(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -209,7 +209,7 @@ func TestPublishHotfixRelease_1_1_1(t *testing.T) {
 
 	waitingForRelease("1.1.1", testEnv, t)
 
-	latestRelease, err = acigithub.GetLatestReleaseVersion()
+	latestRelease, err = githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -233,7 +233,7 @@ func TestPublishHotfixRelease_1_1_2(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := acigithub.GetLatestReleaseVersion()
+	latestRelease, err := githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -250,7 +250,7 @@ func TestPublishHotfixRelease_1_1_2(t *testing.T) {
 
 	waitingForRelease("1.1.2", testEnv, t)
 
-	latestRelease, err = acigithub.GetLatestReleaseVersion()
+	latestRelease, err = githubapi.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()

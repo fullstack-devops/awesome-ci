@@ -1,9 +1,9 @@
-package acigithub
+package githubapi
 
 import (
 	"awesome-ci/internal/app/awesome-ci/models"
-	"awesome-ci/internal/app/awesome-ci/semver"
-	"awesome-ci/internal/app/awesome-ci/tools"
+	"awesome-ci/internal/pkg/tools"
+	"awesome-ci/internal/pkg/semver"
 	"fmt"
 	"log"
 	"os"

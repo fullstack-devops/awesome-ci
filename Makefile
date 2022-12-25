@@ -10,13 +10,14 @@ BUILD_DATE ?= $(shell date +%FT%T%z)
 # remove debug info from the binary & make it smaller
 LDFLAGS += -s -w
 # inject build info
-LDFLAGS += -X ${PROJECT_PKG}/internal/app/build.Version=${VERSION} -X ${PROJECT_PKG}/internal/app/build.CommitHash=${COMMIT_HASH} -X ${PROJECT_PKG}/internal/app/build.BuildDate=${BUILD_DATE}
+LDFLAGS += -X awesome-ci/internal/app/build.Version=${VERSION} -X awesome-ci/internal/app/build.CommitHash=${COMMIT_HASH} -X awesome-ci/internal/app/build.BuildDate=${BUILD_DATE}
 
 #PLATFORMS := linux/amd64 windows/amd64
 
 .PHONY: docs clean
 
-all: dep awesome-ci coverage
+all: dep awesome-ci
+# coverage
 
 dep:
 	go get -t ./...
@@ -46,7 +47,7 @@ docspodman:
 	podman run --rm -it -v ./:/documents/ docker.io/asciidoctor/docker-asciidoctor asciidoctor-pdf -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
 
 coverage:
-	-go test -covermode=count -coverprofile "${BUILD_DIR}/coverage/awesome-ci.cov" "git.t3.daimlertruck.com/eMST/skipper/cmd/awesome-ci"
+	-go test -covermode=count -coverprofile "${BUILD_DIR}/coverage/awesome-ci.cov" "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
 	echo mode: count > "${BUILD_DIR}/coverage/coverage.cov"
 	tail -n +2 "${BUILD_DIR}/coverage/awesome-ci.cov" >> "${BUILD_DIR}/coverage/coverage.cov"
 	go tool cover -html="${BUILD_DIR}/coverage/coverage.cov" -o "${BUILD_DIR}/coverage/coverage.html"

@@ -1,4 +1,4 @@
-package acigitlab
+package gitlabapi
 
 import (
 	"fmt"

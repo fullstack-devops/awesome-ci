@@ -1,9 +1,9 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/acigithub"
-	"awesome-ci/internal/app/awesome-ci/semver"
-	"awesome-ci/internal/app/awesome-ci/tools"
+	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/pkg/semver"
+	"awesome-ci/internal/pkg/tools"
 	"errors"
 	"flag"
 	"fmt"
@@ -48,7 +48,7 @@ type ReleasePublishSet struct {
 
 func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 	var version string = ""
-	_, err := acigithub.NewGitHubClient()
+	_, err := githubapi.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -63,7 +63,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		version = args.Version
 	} else if args.Hotfix {
 
-		release, err := acigithub.GetLatestReleaseVersion()
+		release, err := githubapi.GetLatestReleaseVersion()
 
 		if err != nil {
 			log.Fatalln(err)
@@ -83,7 +83,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 			}
 		}
 
-		prInfos, _, err := acigithub.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		prInfos, _, err := githubapi.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -98,7 +98,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		fmt.Printf("Would create new release with version: %s\n", version)
 	} else {
 		fmt.Printf("Writing new release: %s\n", version)
-		createdRelease, err := acigithub.CreateRelease(version, args.ReleaseBranch, args.Body, true)
+		createdRelease, err := githubapi.CreateRelease(version, args.ReleaseBranch, args.Body, true)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -112,7 +112,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 
 func ReleasePublish(args *ReleasePublishSet) {
 	var version string = ""
-	_, err := acigithub.NewGitHubClient()
+	_, err := githubapi.NewGitHubClient()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -127,7 +127,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 		version = args.Version
 	} else if args.Hotfix {
 
-		release, err := acigithub.GetLatestReleaseVersion()
+		release, err := githubapi.GetLatestReleaseVersion()
 
 		if err != nil {
 			log.Fatalln(err)
@@ -146,7 +146,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 				log.Fatalln(err)
 			}
 		}
-		prInfos, _, err := acigithub.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		prInfos, _, err := githubapi.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -167,7 +167,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 		fmt.Printf("Would publishing release: %s\n", version)
 	} else {
 		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
-		err = acigithub.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
+		err = githubapi.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
 		if err != nil {
 			log.Fatalln(err)
 		}

@@ -1,4 +1,4 @@
-package acigithub
+package githubapi
 
 import (
 	"bufio"

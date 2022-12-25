@@ -1,8 +1,8 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/acigithub"
 	"awesome-ci/internal/app/awesome-ci/models"
+	"awesome-ci/internal/pkg/githubapi"
 	"fmt"
 	"log"
 	"os/exec"
@@ -34,7 +34,7 @@ func standardPrInfosToEnv(prInfos *models.StandardPrInfos) (err error) {
 	runnerType := "github_runner"
 	switch runnerType {
 	case "github_runner":
-		envVars, err := acigithub.OpenEnvFile()
+		envVars, err := githubapi.OpenEnvFile()
 		if err != nil {
 			return err
 		}
