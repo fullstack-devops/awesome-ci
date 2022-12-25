@@ -1,8 +1,8 @@
 package service
 
 import (
-	"awesome-ci/src/acigithub"
-	"awesome-ci/src/models"
+	"awesome-ci/internal/app/awesome-ci/acigithub"
+	"awesome-ci/internal/app/awesome-ci/models"
 	"fmt"
 	"log"
 	"os/exec"

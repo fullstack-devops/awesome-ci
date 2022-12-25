@@ -1,7 +1,8 @@
-package main
+package awesomeci
 
 import (
-	"awesome-ci/src/service"
+	"awesome-ci/internal/app/build"
+	"awesome-ci/internal/app/awesome-ci/service"
 	"flag"
 	"fmt"
 	"log"
@@ -117,7 +118,7 @@ func printNoValidCommand(usage func()) {
 	os.Exit(1)
 }
 
-func main() {
+func AwesomeCI() {
 
 	flag.Usage = func() {
 		fmt.Println("awesome-ci makes your CI easy.")
@@ -133,7 +134,9 @@ func main() {
 	flag.Parse()
 
 	if versionFlag {
-		fmt.Println(version)
+		fmt.Println("Version:\t", build.Version)
+		fmt.Println("Commit: \t", build.CommitHash)
+		fmt.Println("Date:   \t", build.BuildDate)
 		os.Exit(0)
 	}
 

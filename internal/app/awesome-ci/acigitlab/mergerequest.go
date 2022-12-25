@@ -1,8 +1,8 @@
 package acigitlab
 
 import (
-	"awesome-ci/src/models"
-	"awesome-ci/src/semver"
+	"awesome-ci/internal/app/awesome-ci/models"
+	"awesome-ci/internal/app/awesome-ci/semver"
 	"context"
 	"errors"
 	"fmt"

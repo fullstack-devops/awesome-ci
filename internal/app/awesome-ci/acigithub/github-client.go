@@ -1,7 +1,7 @@
 package acigithub
 
 import (
-	"awesome-ci/src/tools"
+	"awesome-ci/internal/app/awesome-ci/tools"
 	"context"
 	"fmt"
 	"log"

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/src/acigithub"
+	"awesome-ci/internal/app/awesome-ci/acigithub"
 	"flag"
 	"fmt"
 	"log"

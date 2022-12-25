@@ -1,9 +1,9 @@
 package acigithub
 
 import (
-	"awesome-ci/src/models"
-	"awesome-ci/src/semver"
-	"awesome-ci/src/tools"
+	"awesome-ci/internal/app/awesome-ci/models"
+	"awesome-ci/internal/app/awesome-ci/semver"
+	"awesome-ci/internal/app/awesome-ci/tools"
 	"fmt"
 	"log"
 	"os"

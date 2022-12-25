@@ -1,6 +1,6 @@
 package models
 
-import "awesome-ci/src/semver"
+import "awesome-ci/internal/app/awesome-ci/semver"
 
 type StandardPrInfos struct {
 	PrNumber       int
