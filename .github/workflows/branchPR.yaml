@@ -17,11 +17,11 @@ jobs:
         arch: ["amd64", "arm64"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.19
       - name: Setup awesome-ci
@@ -46,7 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache build outputs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-outputs-modules
         with:
@@ -65,12 +65,12 @@ jobs:
     needs: [generate_infos, build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
       - name: get cached build outputs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-outputs-modules
         with:
