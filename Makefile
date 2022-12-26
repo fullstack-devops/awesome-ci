@@ -3,9 +3,10 @@ PROJECT_PKG = github.com/fullstack-devops/awesome-ci
 PKG_LIST = "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
 BUILD_DIR = ./build
 
-VERSION ?=$(shell git describe --tags --exact-match 2>/dev/null || git symbolic-ref -q --short HEAD)
+VERSION ?=$(shell git describe --tags --exact-match 2>/dev/null || echo "dev-pr")
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date +%FT%T%z)
+PLATFORM ?= $(shell dpkg --print-architecture)
 
 # remove debug info from the binary & make it smaller
 LDFLAGS += -s -w
@@ -26,7 +27,7 @@ dep_update:
 	go get -t ./...
 
 awesome-ci: dep
-	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package ./cmd/awesome-ci
+	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_${PLATFORM} ./cmd/awesome-ci
 
 #frontend:
 #

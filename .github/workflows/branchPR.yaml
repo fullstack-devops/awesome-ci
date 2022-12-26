@@ -41,7 +41,7 @@ jobs:
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
       - name: test build Infos
         if: matrix.arch == 'amd64'
-        run: build/package/awesome-ci_${{ needs.generate_infos.outputs.version }}_${{ matrix.arch }} pr info -number ${{ github.event.pull_request.number }}
+        run: build/package/awesome-ci_* pr info -number ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
