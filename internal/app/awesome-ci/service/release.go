@@ -7,9 +7,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/google/go-github/v44/github"
 )

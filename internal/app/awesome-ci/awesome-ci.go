@@ -1,21 +1,19 @@
 package awesomeci
 
 import (
-	"awesome-ci/internal/app/build"
+	"awesome-ci/internal/app/awesome-ci/cmd"
 	"awesome-ci/internal/app/awesome-ci/service"
 	"flag"
 	"fmt"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
-	// cienv       string
 	releaseSet     service.ReleaseSet
 	pullrequestSet service.PullRequestSet
 	parseSet       ParseSet
-	version        string
-	versionFlag    bool
 )
 
 type ParseSet struct {
@@ -33,7 +31,10 @@ type ParseSet struct {
 }
 
 func init() {
-	flag.BoolVar(&versionFlag, "version", false, "print version by calling it")
+	// Log as JSON instead of the default ASCII formatter.
+	// log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.WarnLevel)
 
 	// PullRequestSet
 	pullrequestSet.Fs = flag.NewFlagSet("pr", flag.ExitOnError)
@@ -104,95 +105,62 @@ func init() {
 	}
 }
 
-func returnHelpIfEmpty(args []string, usage func()) {
-	if len(args) < 1 {
-		usage()
-		os.Exit(0)
-	}
-}
-
-func printNoValidCommand(usage func()) {
-	fmt.Println("The given command is not known!")
-	fmt.Println("")
-	usage()
-	os.Exit(1)
-}
-
 func AwesomeCI() {
-
-	flag.Usage = func() {
-		fmt.Println("awesome-ci makes your CI easy.")
-		fmt.Println("  Find more information and examples at: https://github.com/fullstack-devops/awesome-ci")
-		fmt.Println()
-		fmt.Println("Available commands:")
-		fmt.Println("  release")
-		fmt.Println("  parse")
-		fmt.Println("  pr")
-		fmt.Println("")
-		fmt.Println("Use \"awesome-ci <command> --help\" for more information about a given command.")
-	}
-	flag.Parse()
-
-	if versionFlag {
-		fmt.Println("Version:\t", build.Version)
-		fmt.Println("Commit: \t", build.CommitHash)
-		fmt.Println("Date:   \t", build.BuildDate)
-		os.Exit(0)
-	}
-
-	returnHelpIfEmpty(flag.Args(), flag.Usage)
+	cmd.Execute()
 
 	// distribute environment settings
 	/* environment := service.EvaluateEnvironment()
 	service.CiEnvironment = environment */
 
-	switch flag.Arg(0) {
-	case "pr":
-		pullrequestSet.Fs.Parse(flag.Args()[1:])
-		returnHelpIfEmpty(flag.Args()[1:], pullrequestSet.Fs.Usage)
-		switch flag.Arg(1) {
-		case "info":
-			err := pullrequestSet.Info.Fs.Parse(flag.Args()[2:])
-			if err != nil {
-				log.Fatalln(err)
+	
+	/*
+		switch flag.Arg(0) {
+		case "pr":
+			pullrequestSet.Fs.Parse(flag.Args()[1:])
+			returnHelpIfEmpty(flag.Args()[1:], pullrequestSet.Fs.Usage)
+			switch flag.Arg(1) {
+			case "info":
+				err := pullrequestSet.Info.Fs.Parse(flag.Args()[2:])
+				if err != nil {
+					log.Fatalln(err)
+				}
+				service.PrintPRInfos(&pullrequestSet.Info)
+			default:
+				printNoValidCommand(pullrequestSet.Fs.Usage)
 			}
-			service.PrintPRInfos(&pullrequestSet.Info)
-		default:
-			printNoValidCommand(pullrequestSet.Fs.Usage)
-		}
-	case "release":
-		releaseSet.Fs.Parse(flag.Args()[1:])
-		returnHelpIfEmpty(flag.Args()[1:], releaseSet.Fs.Usage)
-		switch flag.Arg(1) {
-		case "create":
-			err := releaseSet.Create.Fs.Parse(flag.Args()[2:])
-			if err != nil {
-				log.Fatalln(err)
+		case "release":
+			releaseSet.Fs.Parse(flag.Args()[1:])
+			returnHelpIfEmpty(flag.Args()[1:], releaseSet.Fs.Usage)
+			switch flag.Arg(1) {
+			case "create":
+				err := releaseSet.Create.Fs.Parse(flag.Args()[2:])
+				if err != nil {
+					log.Fatalln(err)
+				}
+				service.ReleaseCreate(&releaseSet.Create)
+			case "publish":
+				err := releaseSet.Publish.Fs.Parse(flag.Args()[2:])
+				if err != nil {
+					log.Fatalln(err)
+				}
+				service.ReleasePublish(&releaseSet.Publish)
+			default:
+				printNoValidCommand(releaseSet.Fs.Usage)
 			}
-			service.ReleaseCreate(&releaseSet.Create)
-		case "publish":
-			err := releaseSet.Publish.Fs.Parse(flag.Args()[2:])
-			if err != nil {
-				log.Fatalln(err)
+		case "parse":
+			parseSet.Fs.Parse(flag.Args()[1:])
+			returnHelpIfEmpty(flag.Args()[1:], parseSet.Fs.Usage)
+			switch flag.Arg(1) {
+			case "json":
+				parseSet.Json.Fs.Parse(flag.Args()[2:])
+				service.ParseJson(&parseSet.Json.file, &parseSet.Json.value)
+			case "yaml":
+				parseSet.Yaml.Fs.Parse(flag.Args()[2:])
+				service.ParseJson(&parseSet.Yaml.file, &parseSet.Yaml.value)
+			default:
+				printNoValidCommand(parseSet.Fs.Usage)
 			}
-			service.ReleasePublish(&releaseSet.Publish)
 		default:
-			printNoValidCommand(releaseSet.Fs.Usage)
-		}
-	case "parse":
-		parseSet.Fs.Parse(flag.Args()[1:])
-		returnHelpIfEmpty(flag.Args()[1:], parseSet.Fs.Usage)
-		switch flag.Arg(1) {
-		case "json":
-			parseSet.Json.Fs.Parse(flag.Args()[2:])
-			service.ParseJson(&parseSet.Json.file, &parseSet.Json.value)
-		case "yaml":
-			parseSet.Yaml.Fs.Parse(flag.Args()[2:])
-			service.ParseJson(&parseSet.Yaml.file, &parseSet.Yaml.value)
-		default:
-			printNoValidCommand(parseSet.Fs.Usage)
-		}
-	default:
-		printNoValidCommand(flag.Usage)
-	}
+			printNoValidCommand(flag.Usage)
+		} */
 }

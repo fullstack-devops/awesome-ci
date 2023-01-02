@@ -4,9 +4,10 @@ import (
 	"awesome-ci/internal/pkg/githubapi"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type PullRequestSet struct {

@@ -4,9 +4,10 @@ import (
 	"awesome-ci/internal/app/awesome-ci/models"
 	"awesome-ci/internal/pkg/githubapi"
 	"fmt"
-	"log"
 	"os/exec"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func check(e error) {
