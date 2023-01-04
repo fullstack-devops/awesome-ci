@@ -4,8 +4,10 @@ go 1.19
 
 require (
 	github.com/coreos/go-semver v0.3.0
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-git/v5 v5.5.1
 	github.com/google/go-github/v44 v44.1.0
+	github.com/itchyny/gojq v0.12.11
 	github.com/spf13/cobra v1.6.1
 	github.com/xanzy/go-gitlab v0.77.0
 	golang.org/x/oauth2 v0.3.0
@@ -13,8 +15,12 @@ require (
 )
 
 require (
+	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/itchyny/timefmt-go v0.1.5 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/app/awesome-ci/connect"
 	"awesome-ci/internal/pkg/tools"
 	"context"
 	"fmt"
@@ -47,12 +47,13 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 		t.FailNow()
 	}
 
-	if _, err := githubapi.NewGitHubClient(); err != nil {
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
 		t.Errorf("Could not create GitHub client: %s", err)
 		t.FailNow()
 	}
 
-	repo, _, err := githubapi.GithubClient.Repositories.Get(testEnv.ctx, testEnv.testOwner, testEnv.testRepo)
+	repo, _, err := ghrc.Client.Repositories.Get(testEnv.ctx, testEnv.testOwner, testEnv.testRepo)
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -96,6 +97,12 @@ func prepareReleases(tagNames *[]string, testEnv *TestEnvironment, t *testing.T)
 		return func() {}, err
 	}
 
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
 	tagIter.ForEach(func(r *plumbing.Reference) error {
 		rName := r.Name().Short()
 
@@ -104,7 +111,7 @@ func prepareReleases(tagNames *[]string, testEnv *TestEnvironment, t *testing.T)
 
 				commit := r.Hash().String()
 
-				_, _, err := githubapi.GithubClient.Repositories.CreateRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, &github.RepositoryRelease{
+				_, _, err := ghrc.Client.Repositories.CreateRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, &github.RepositoryRelease{
 					TagName:         &tagName,
 					TargetCommitish: &commit,
 					Name:            &tagName,
@@ -127,9 +134,15 @@ func prepareReleases(tagNames *[]string, testEnv *TestEnvironment, t *testing.T)
 
 func waitingForRelease(tagName string, testEnv *TestEnvironment, t *testing.T) {
 
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
 	for i := 1; i <= 10; i++ { //waiting for release becoming available
 
-		_, _, err := githubapi.GithubClient.Repositories.GetReleaseByTag(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, tagName)
+		_, _, err := ghrc.Client.Repositories.GetReleaseByTag(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, tagName)
 		if err != nil {
 			fmt.Printf("Waiting %sms for Release to become available\n", time.Duration(i*100)*time.Millisecond)
 
@@ -140,12 +153,18 @@ func waitingForRelease(tagName string, testEnv *TestEnvironment, t *testing.T) {
 
 func deleteReleases(tagNames *[]string, testConfig *TestEnvironment, t *testing.T) {
 
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
 	for _, tagName := range *tagNames {
 
-		release, _, err := githubapi.GithubClient.Repositories.GetReleaseByTag(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, tagName)
+		release, _, err := ghrc.Client.Repositories.GetReleaseByTag(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, tagName)
 
 		if !checkError(err, t) {
-			_, err = githubapi.GithubClient.Repositories.DeleteRelease(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, *release.ID)
+			_, err = ghrc.Client.Repositories.DeleteRelease(testConfig.ctx, testConfig.testOwner, testConfig.testRepo, *release.ID)
 			checkError(err, t)
 		}
 	}

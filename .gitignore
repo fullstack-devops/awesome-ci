@@ -29,3 +29,4 @@ go.work
 
 *.env
 tests/github_env
+.awesomerc.yaml

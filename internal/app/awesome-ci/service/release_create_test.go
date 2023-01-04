@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/app/awesome-ci/connect"
 	"strings"
 	"testing"
 )
@@ -24,7 +24,13 @@ func TestCreateFirstRelease(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")
@@ -47,7 +53,13 @@ func TestCreateRelease_1_1_0(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := githubapi.GetLatestReleaseVersion()
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	latestRelease, err := ghrc.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -64,7 +76,7 @@ func TestCreateRelease_1_1_0(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")
@@ -87,7 +99,13 @@ func TestCreateRelease_1_2_0(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := githubapi.GetLatestReleaseVersion()
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	latestRelease, err := ghrc.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -104,7 +122,7 @@ func TestCreateRelease_1_2_0(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")
@@ -127,7 +145,13 @@ func TestCreateRelease_1_2_1(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := githubapi.GetLatestReleaseVersion()
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	latestRelease, err := ghrc.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -144,7 +168,7 @@ func TestCreateRelease_1_2_1(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")
@@ -167,7 +191,13 @@ func TestCreateRelease_1_2_2(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := githubapi.GetLatestReleaseVersion()
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	latestRelease, err := ghrc.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -184,7 +214,7 @@ func TestCreateRelease_1_2_2(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")
@@ -207,7 +237,13 @@ func TestCreateHotfixRelease_1_1_1(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := githubapi.GetLatestReleaseVersion()
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	latestRelease, err := ghrc.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -226,7 +262,7 @@ func TestCreateHotfixRelease_1_1_1(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")
@@ -249,7 +285,13 @@ func TestCreateHotfixRelease_1_1_2(t *testing.T) {
 		t.FailNow()
 	}
 
-	latestRelease, err := githubapi.GetLatestReleaseVersion()
+	ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		t.Errorf("Could not create GitHub client: %s", err)
+		t.FailNow()
+	}
+
+	latestRelease, err := ghrc.GetLatestReleaseVersion()
 
 	if checkError(err, t) {
 		t.FailNow()
@@ -268,7 +310,7 @@ func TestCreateHotfixRelease_1_1_2(t *testing.T) {
 		t.Fatalf("Release Draft was not created")
 	}
 
-	defer githubapi.GithubClient.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
+	defer ghrc.Client.Repositories.DeleteRelease(testEnv.ctx, testEnv.testOwner, testEnv.testRepo, *draftedRelease.ID)
 
 	if !*draftedRelease.Draft {
 		t.Error("Release is not a Draft")

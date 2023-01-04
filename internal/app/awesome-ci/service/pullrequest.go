@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/app/awesome-ci/connect"
 	"flag"
 	"fmt"
 	"os"
@@ -22,7 +22,7 @@ type PullRequestInfoSet struct {
 }
 
 func PrintPRInfos(args *PullRequestInfoSet) {
-	_, err := githubapi.NewGitHubClient()
+	ghrc, err := connect.ConnectToGitHub()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -32,7 +32,7 @@ func PrintPRInfos(args *PullRequestInfoSet) {
 		log.Fatalln(err)
 	}
 
-	prInfos, _, err := githubapi.GetPrInfos(args.Number, "")
+	prInfos, _, err := ghrc.GetPrInfos(args.Number, "")
 	if err != nil {
 		log.Fatalln(err)
 	}

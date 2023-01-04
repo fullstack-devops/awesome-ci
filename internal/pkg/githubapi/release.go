@@ -14,11 +14,7 @@ import (
 )
 
 // CreateRelease
-func CreateRelease(version string, releaseBranch string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
-	if !isgithubRepository {
-		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
-	}
-	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
+func (ghrc *GitHubRichClient) CreateRelease(version string, releaseBranch string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
 
 	relName := "Release " + version
 	if releaseBranch == "" {
@@ -40,10 +36,10 @@ func CreateRelease(version string, releaseBranch string, body string, draft bool
 		Draft:           &draft,
 		Body:            &body,
 	}
-	createdRelease, _, err = GithubClient.Repositories.CreateRelease(
+	createdRelease, _, err = ghrc.Client.Repositories.CreateRelease(
 		ctx,
-		owner,
-		repo,
+		ghrc.Owner,
+		ghrc.Repository,
 		&releaseObject)
 	if err != nil {
 		err = fmt.Errorf("error at creating github release: %v", err)
@@ -60,18 +56,14 @@ func CreateRelease(version string, releaseBranch string, body string, draft bool
 }
 
 // PublishRelease
-func PublishRelease(version string, releaseBranch string, body string, releaseId int64, uploadArtifacts *string) (err error) {
+func (ghrc *GitHubRichClient) PublishRelease(version string, releaseBranch string, body string, releaseId int64, uploadArtifacts *string) (err error) {
 	draftFalse := false
-	if !isgithubRepository {
-		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
-	}
-	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
 
 	if releaseId == 0 {
 		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
 		if !releaseIdBool {
 			log.Println("No release found, creating one...")
-			release, err := CreateRelease(version, releaseBranch, body, true)
+			release, err := ghrc.CreateRelease(version, releaseBranch, body, true)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -85,10 +77,10 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 		}
 	}
 
-	existingRelease, _, err := GithubClient.Repositories.GetRelease(
+	existingRelease, _, err := ghrc.Client.Repositories.GetRelease(
 		ctx,
-		owner,
-		repo,
+		ghrc.Owner,
+		ghrc.Repository,
 		releaseId)
 	if err != nil {
 		return err
@@ -107,10 +99,10 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 		for i, fileAndInfo := range filesAndInfos {
 			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
 			// Upload assets to GitHub Release
-			relAsset, _, err := GithubClient.Repositories.UploadReleaseAsset(
+			relAsset, _, err := ghrc.Client.Repositories.UploadReleaseAsset(
 				ctx,
-				owner,
-				repo,
+				ghrc.Owner,
+				ghrc.Repository,
 				releaseId,
 				&github.UploadOptions{
 					Name: fileAndInfo.Name,
@@ -141,10 +133,10 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 
 	// publishing release
 	*existingRelease.Draft = draftFalse
-	_, _, err = GithubClient.Repositories.EditRelease(
+	_, _, err = ghrc.Client.Repositories.EditRelease(
 		ctx,
-		owner,
-		repo,
+		ghrc.Owner,
+		ghrc.Repository,
 		releaseId,
 		existingRelease)
 	if err != nil {
@@ -155,8 +147,7 @@ func PublishRelease(version string, releaseBranch string, body string, releaseId
 }
 
 // GetLatestReleaseVersion
-func GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
-	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
+func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
 	var releaseMap = make(map[string]*github.RepositoryRelease)
 
 	var listOptions github.ListOptions = github.ListOptions{
@@ -165,7 +156,7 @@ func GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err err
 	}
 
 	for listOptions.Page >= 0 {
-		releases, response, err := GithubClient.Repositories.ListReleases(ctx, owner, repo, &listOptions)
+		releases, response, err := ghrc.Client.Repositories.ListReleases(ctx, ghrc.Owner, ghrc.Repository, &listOptions)
 
 		if err != nil {
 			return nil, err
@@ -182,10 +173,10 @@ func GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err err
 		listOptions.Page = response.NextPage
 	}
 
-	return findLatestRelease(`.`, releaseMap)
+	return ghrc.findLatestRelease(`.`, releaseMap)
 }
 
-func findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
+func (ghrc *GitHubRichClient) findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
 	gitRepo, err := git.PlainOpen(directory)
 
 	if err != nil {

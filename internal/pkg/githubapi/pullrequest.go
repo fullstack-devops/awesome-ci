@@ -2,7 +2,6 @@ package githubapi
 
 import (
 	"awesome-ci/internal/app/awesome-ci/models"
-	"awesome-ci/internal/pkg/tools"
 	"awesome-ci/internal/pkg/semver"
 	"fmt"
 	"log"
@@ -13,13 +12,9 @@ import (
 )
 
 // GetPrInfos need the PullRequest-Number
-func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.StandardPrInfos, prInfos *github.PullRequest, err error) {
-	if !isgithubRepository {
-		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
-	}
-	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
+func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.StandardPrInfos, prInfos *github.PullRequest, err error) {
 	if prNumber != 0 {
-		prInfos, _, err = GithubClient.PullRequests.Get(ctx, owner, repo, prNumber)
+		prInfos, _, err = ghrc.Client.PullRequests.Get(ctx, ghrc.Owner, ghrc.Repository, prNumber)
 		if err != nil {
 			return nil, nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
 		}
@@ -33,7 +28,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 				PerPage: 10,
 			},
 		}
-		pullRequests, _, err := GithubClient.PullRequests.List(ctx, owner, repo, &prOpts)
+		pullRequests, _, err := ghrc.Client.PullRequests.List(ctx, ghrc.Owner, ghrc.Repository, &prOpts)
 		if err != nil {
 			return nil, nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
 		}
@@ -57,7 +52,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	_, isSilentBool := os.LookupEnv("ACI_SILENT")
 	if isCIBool && !isSilentBool {
 		if *prInfos.State == "open" && isCI == "true" {
-			err = CommentHelpToPullRequest(*prInfos.Number)
+			err = ghrc.CommentHelpToPullRequest(*prInfos.Number)
 			if err != nil {
 				log.Println(err)
 			}
@@ -71,7 +66,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	var version = ""
 	var latestVersion = ""
 	// if an comment exists with aci_patch_level=major, make a major version!
-	issueComments, err := GetIssueComments(prNumber)
+	issueComments, err := ghrc.GetIssueComments(prNumber)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -107,7 +102,7 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 	}
 
 	if version == "" {
-		repositoryRelease, err := GetLatestReleaseVersion()
+		repositoryRelease, err := ghrc.GetLatestReleaseVersion()
 		if err == nil {
 			latestVersion = *repositoryRelease.TagName
 			version, err = semver.IncreaseVersion(patchLevel, latestVersion)
@@ -122,8 +117,8 @@ func GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.St
 
 	standardPrInfos = &models.StandardPrInfos{
 		PrNumber:       prNumber,
-		Owner:          owner,
-		Repo:           repo,
+		Owner:          ghrc.Owner,
+		Repo:           ghrc.Repository,
 		BranchName:     branchName,
 		Sha:            prSHA,
 		ShaShort:       prSHA[:8],

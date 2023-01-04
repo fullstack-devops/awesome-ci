@@ -2,6 +2,7 @@ package tools
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -104,4 +105,10 @@ func CheckIsFile(name string) (body string, err error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+func CheckFileExists(filePath string) bool {
+	_, error := os.Stat(filePath)
+	//return !os.IsNotExist(err)
+	return !errors.Is(error, os.ErrNotExist)
 }

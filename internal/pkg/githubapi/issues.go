@@ -1,9 +1,7 @@
 package githubapi
 
 import (
-	"awesome-ci/internal/pkg/tools"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/google/go-github/v44/github"
@@ -13,7 +11,7 @@ var (
 	direction, sort = "asc", "created"
 )
 
-func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, err error) {
+func (ghrc *GitHubRichClient) GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, err error) {
 
 	//FIXME: currently the GitHub API ignores Direction and Sort
 	// so, we are using the default settings for the query and sorting the response afterwards
@@ -22,7 +20,7 @@ func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, er
 		Sort:        &sort,
 		ListOptions: standardListOptions,
 	}
-	issueComments, _, err = GithubClient.Issues.ListComments(ctx, owner, repo, issueNumber, commentOpts)
+	issueComments, _, err = ghrc.Client.Issues.ListComments(ctx, ghrc.Owner, ghrc.Repository, issueNumber, commentOpts)
 
 	if err == nil {
 		var issueCommentsFiltered []*github.IssueComment
@@ -46,17 +44,13 @@ func GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, er
 	return nil, err
 }
 
-func CommentHelpToPullRequest(number int) (err error) {
-	if !isgithubRepository {
-		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
-	}
-
+func (ghrc *GitHubRichClient) CommentHelpToPullRequest(number int) (err error) {
 	var commentOpts = &github.IssueListCommentsOptions{
 		Direction:   &direction,
 		Sort:        &sort,
 		ListOptions: standardListOptions,
 	}
-	comments, _, err := GithubClient.Issues.ListComments(ctx, owner, repo, number, commentOpts)
+	comments, _, err := ghrc.Client.Issues.ListComments(ctx, ghrc.Owner, ghrc.Repository, number, commentOpts)
 	if err != nil {
 		return fmt.Errorf("unable to list comments: %x", err)
 	}
@@ -78,25 +72,21 @@ func CommentHelpToPullRequest(number int) (err error) {
 			Body: &body,
 		}
 
-		err = CommentPullRequest(number, prComment)
+		_, _, err = ghrc.Client.Issues.CreateComment(ctx, ghrc.Owner, ghrc.Repository, number, prComment)
+		// err = CommentPullRequest(number, prComment)
 	} else {
 		// edit command if newer version deployed and commands changed
 		if *prComment.Body != body {
 			editedComment := &github.IssueComment{
 				Body: &body,
 			}
-			_, _, err = GithubClient.Issues.EditComment(ctx, owner, repo, *prComment.ID, editedComment)
+			_, _, err = ghrc.Client.Issues.EditComment(ctx, ghrc.Owner, ghrc.Repository, *prComment.ID, editedComment)
 		}
 	}
 	return
 }
 
-func CommentPullRequest(number int, comment *github.IssueComment) (err error) {
-	if !isgithubRepository {
-		log.Fatalln("make shure the GITHUB_REPOSITORY is available!")
-	}
-	owner, repo := tools.DevideOwnerAndRepo(githubRepository)
-
-	_, _, err = GithubClient.Issues.CreateComment(ctx, owner, repo, number, comment)
+/* func (ghrc *GitHubRichClient) CommentPullRequest(number int, comment *github.IssueComment) (err error) {
+	_, _, err = ghrc.Client.Issues.CreateComment(ctx, ghrc.Owner, ghrc.Repository, number, comment)
 	return
-}
+} */

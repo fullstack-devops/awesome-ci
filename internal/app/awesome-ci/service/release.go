@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/app/awesome-ci/connect"
 	"awesome-ci/internal/pkg/semver"
 	"awesome-ci/internal/pkg/tools"
 	"errors"
@@ -48,11 +48,12 @@ type ReleasePublishSet struct {
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
-	var version string = ""
-	_, err := githubapi.NewGitHubClient()
+	ghrc, err := connect.ConnectToGitHub()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	var version string = ""
 
 	if args.Version != "" && args.PatchLevel != "" {
 		parsedPatchLevel := semver.ParsePatchLevel(args.PatchLevel)
@@ -64,7 +65,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		version = args.Version
 	} else if args.Hotfix {
 
-		release, err := githubapi.GetLatestReleaseVersion()
+		release, err := ghrc.GetLatestReleaseVersion()
 
 		if err != nil {
 			log.Fatalln(err)
@@ -84,7 +85,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 			}
 		}
 
-		prInfos, _, err := githubapi.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		prInfos, _, err := ghrc.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -99,7 +100,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		fmt.Printf("Would create new release with version: %s\n", version)
 	} else {
 		fmt.Printf("Writing new release: %s\n", version)
-		createdRelease, err := githubapi.CreateRelease(version, args.ReleaseBranch, args.Body, true)
+		createdRelease, err := ghrc.CreateRelease(version, args.ReleaseBranch, args.Body, true)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -112,11 +113,12 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 }
 
 func ReleasePublish(args *ReleasePublishSet) {
-	var version string = ""
-	_, err := githubapi.NewGitHubClient()
+	ghrc, err := connect.ConnectToGitHub()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	var version string = ""
 
 	if args.Version != "" && args.PatchLevel != "" {
 		parsedPatchLevel := semver.ParsePatchLevel(args.PatchLevel)
@@ -128,7 +130,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 		version = args.Version
 	} else if args.Hotfix {
 
-		release, err := githubapi.GetLatestReleaseVersion()
+		release, err := ghrc.GetLatestReleaseVersion()
 
 		if err != nil {
 			log.Fatalln(err)
@@ -147,7 +149,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 				log.Fatalln(err)
 			}
 		}
-		prInfos, _, err := githubapi.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		prInfos, _, err := ghrc.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -168,7 +170,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 		fmt.Printf("Would publishing release: %s\n", version)
 	} else {
 		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
-		err = githubapi.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
+		err = ghrc.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
 		if err != nil {
 			log.Fatalln(err)
 		}
