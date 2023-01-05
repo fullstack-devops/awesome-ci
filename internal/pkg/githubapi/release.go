@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v44/github"
+	"github.com/google/go-github/v49/github"
 	log "github.com/sirupsen/logrus"
 )
 

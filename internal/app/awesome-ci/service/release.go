@@ -12,7 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/google/go-github/v44/github"
+	"github.com/google/go-github/v49/github"
 )
 
 type ReleaseCreateSet struct {
