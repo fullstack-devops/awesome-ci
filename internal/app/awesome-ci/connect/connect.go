@@ -2,6 +2,7 @@ package connect
 
 import (
 	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/tools"
 	"os"
 
@@ -55,12 +56,12 @@ func CheckConnection() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Tracef("Successfully decrypt string (github token %s)", decryptedToken[0:8])
+		log.Tracef("Successfully decrypt string (github token %s***)", decryptedToken[0:8])
 
 		// check if connection can be established
 		switch rcFile.Type {
 		case serverTypeGitHub:
-			_, err = githubapi.NewGitHubClient(githubapi.ConnectCredentials{
+			_, err = githubapi.NewGitHubClient(models.StandardConnectCredentials{
 				ServerUrl:  rcFile.Server,
 				Repository: rcFile.Repository,
 				Token:      string(decryptedToken),
@@ -71,7 +72,7 @@ func CheckConnection() {
 			log.Infof("Successfully connected to github %s", rcFile.Server)
 
 		case serverTypeGitLab:
-			log.Infof("gitlab not yet implemented")
+			log.Warnf("gitlab not yet implemented")
 
 		default:
 			log.Fatal("Type in rcFile not known")

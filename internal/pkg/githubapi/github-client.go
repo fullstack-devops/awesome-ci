@@ -1,6 +1,7 @@
 package githubapi
 
 import (
+	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/tools"
 	"context"
 	"fmt"
@@ -21,7 +22,7 @@ var (
 // NewGitHubClient Creates a new GitHub Client
 // Needs the Environment Variables: GITHUB_TOKEN
 // Needs the optional Environment Variables: GITHUB_ENTERPRISE_SERVER_URL
-func NewGitHubClient(creds ConnectCredentials) (githubRichClient *GitHubRichClient, err error) {
+func NewGitHubClient(creds models.StandardConnectCredentials) (githubRichClient *GitHubRichClient, err error) {
 	gitHubTs := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: creds.Token},
 	)
@@ -29,7 +30,7 @@ func NewGitHubClient(creds ConnectCredentials) (githubRichClient *GitHubRichClie
 
 	var githubClient *github.Client
 
-	if strings.HasPrefix(creds.ServerUrl, "https://github.com") {
+	if !strings.HasPrefix(creds.ServerUrl, "https://github.com") {
 		githubClient, err = github.NewEnterpriseClient(creds.ServerUrl, creds.ServerUrl, githubTc)
 		if err != nil {
 			return nil, fmt.Errorf("error at initializing github client: %v", err)

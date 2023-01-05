@@ -57,6 +57,7 @@ func GetGitTagsUpToHead(gitRepo *git.Repository) (tags []*semver.Version, err er
 	tagIter.ForEach(func(r *object.Commit) error {
 
 		if tagNames, exists := commitToTag[r.Hash.String()]; exists {
+
 			for _, tagName := range tagNames {
 				parsedVersion, err := semver.NewVersion(tagName)
 				if err == nil {

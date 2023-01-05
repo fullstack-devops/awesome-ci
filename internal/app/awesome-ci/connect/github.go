@@ -1,7 +1,9 @@
 package connect
 
 import (
+	"awesome-ci/internal/pkg/detect"
 	"awesome-ci/internal/pkg/githubapi"
+	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/tools"
 	"fmt"
 	"os"
@@ -12,15 +14,15 @@ import (
 
 func ConnectToGitHub() (githubRichClient *githubapi.GitHubRichClient, err error) {
 	if tools.CheckFileExists(rcFileName) {
-		log.Info("Connecting to Github via local %s file", rcFileName)
+		log.Infof("Connecting to Github via local %s file", rcFileName)
 		return ConnectWithRcFileToGithub()
 	} else {
-		isGithubActionsRunner, _, _ := CheckGitHubRunner()
+		isGithubActionsRunner, _, _ := detect.CheckGitHubActionsRunner()
 		if isGithubActionsRunner {
 			log.Info("Connecting to Github via GitHub actions runner")
 			return ConnectWithActionsToGitHub()
 		}
-		isJenkinsPipeline, _, _ := CheckJenkinkPipeline()
+		isJenkinsPipeline, _, _ := detect.CheckJenkinsPipeline()
 		if isJenkinsPipeline {
 			log.Info("Connecting to Github via Jenkins pipeline")
 			return ConnectWithJenkinsToGitHub()
@@ -49,9 +51,9 @@ func UpdateRcFileForGithub(server string, repo string, token string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Tracef("Successfully decrypt string (github token %s)", decryptedToken[0:8])
+		log.Tracef("Successfully decrypt string (github token %s***)", decryptedToken[0:8])
 
-		_, err = githubapi.NewGitHubClient(githubapi.ConnectCredentials{
+		_, err = githubapi.NewGitHubClient(models.StandardConnectCredentials{
 			ServerUrl:  rcFile.Server,
 			Repository: rcFile.Repository,
 			Token:      string(decryptedToken),
@@ -75,7 +77,7 @@ func UpdateRcFileForGithub(server string, repo string, token string) {
 		}
 
 		// check connection
-		_, err = githubapi.NewGitHubClient(githubapi.ConnectCredentials{
+		_, err = githubapi.NewGitHubClient(models.StandardConnectCredentials{
 			ServerUrl:  rcFile.Server,
 			Repository: rcFile.Repository,
 			Token:      string(encryptedToken),
@@ -84,16 +86,16 @@ func UpdateRcFileForGithub(server string, repo string, token string) {
 			log.Fatalf("connection to github could not be established please check. %v", err)
 		}
 	}
-
+	os.Truncate(rcFileName, 0)
 	yamlData, err := yaml.Marshal(&rcFile)
 	if err != nil {
 		log.Fatalf("Error while Marshaling. %v", err)
 	}
-
-	err = os.WriteFile(rcFileName, yamlData, 0600)
-	if err != nil {
+	if err := os.WriteFile(rcFileName, yamlData, 0666); err != nil {
 		log.Fatalf("Unable to write data into rc file")
 	}
+	log.Tracef("Successfully written config to %s", rcFileName)
+
 }
 
 func ConnectWithRcFileToGithub() (githubRichClient *githubapi.GitHubRichClient, err error) {
@@ -115,7 +117,7 @@ func ConnectWithRcFileToGithub() (githubRichClient *githubapi.GitHubRichClient, 
 			log.Fatal(err)
 		}
 
-		return githubapi.NewGitHubClient(githubapi.ConnectCredentials{
+		return githubapi.NewGitHubClient(models.StandardConnectCredentials{
 			ServerUrl:  rcFile.Server,
 			Repository: rcFile.Repository,
 			Token:      string(decryptedToken),
@@ -129,55 +131,22 @@ func ConnectWithRcFileToGithub() (githubRichClient *githubapi.GitHubRichClient, 
 
 // GitHub Actions
 func ConnectWithActionsToGitHub() (githubRichClient *githubapi.GitHubRichClient, err error) {
-	isRunner, creds, _ := CheckGitHubRunner()
+	isRunner, creds, _ := detect.CheckGitHubActionsRunner()
 	if isRunner {
 		return githubapi.NewGitHubClient(creds)
 	} else {
 		err = fmt.Errorf("")
 		return
-	}
-}
-func CheckGitHubRunner() (isRunner bool, connects githubapi.ConnectCredentials, err error) {
-	githubServerUrl, isgithubServerUrl := os.LookupEnv("GITHUB_SERVER_URL")
-	githubRepository, isgithubRepository := os.LookupEnv("GITHUB_REPOSITORY")
-	githubToken, isgithubToken := os.LookupEnv("GITHUB_TOKEN")
-
-	if isgithubServerUrl && isgithubRepository && isgithubToken {
-		return true, githubapi.ConnectCredentials{
-			ServerUrl:  githubServerUrl,
-			Repository: githubRepository,
-			Token:      githubToken,
-		}, nil
-
-	} else {
-		return false, githubapi.ConnectCredentials{}, fmt.Errorf("no github actions runner detected")
 	}
 }
 
 // GitHub Actions
 func ConnectWithJenkinsToGitHub() (githubRichClient *githubapi.GitHubRichClient, err error) {
-	isRunner, creds, _ := CheckJenkinkPipeline()
+	isRunner, creds, _ := detect.CheckJenkinsPipeline()
 	if isRunner {
 		return githubapi.NewGitHubClient(creds)
 	} else {
 		err = fmt.Errorf("")
 		return
-	}
-}
-func CheckJenkinkPipeline() (isJenkins bool, connects githubapi.ConnectCredentials, err error) {
-	_, isjenkinsUrl := os.LookupEnv("JENKINS_URL")
-	githubServerUrl, isgithubServerUrl := os.LookupEnv("GIT_URL")
-	githubRepository, isgithubRepository := os.LookupEnv("GITHUB_REPOSITORY")
-	githubToken, isgithubToken := os.LookupEnv("GITHUB_TOKEN")
-
-	if isjenkinsUrl && isgithubServerUrl && isgithubRepository && isgithubToken {
-		return true, githubapi.ConnectCredentials{
-			ServerUrl:  githubServerUrl,
-			Repository: githubRepository,
-			Token:      githubToken,
-		}, nil
-
-	} else {
-		return false, githubapi.ConnectCredentials{}, fmt.Errorf("no jenkins pipeline detected")
 	}
 }

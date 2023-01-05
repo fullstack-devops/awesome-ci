@@ -2,59 +2,46 @@ package service
 
 import (
 	"awesome-ci/internal/app/awesome-ci/connect"
-	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
 
-type PullRequestSet struct {
-	Fs   *flag.FlagSet
-	Info PullRequestInfoSet
-}
-
-type PullRequestInfoSet struct {
-	Fs     *flag.FlagSet
-	Number int
-	Format string
-}
-
-func PrintPRInfos(args *PullRequestInfoSet) {
+func PrintPRInfos(number int, format string) {
 	ghrc, err := connect.ConnectToGitHub()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = evalPrNumber(&args.Number)
+	if err = evalPrNumber(&number); err != nil {
+		log.Fatalln(err)
+	}
+
+	prInfos, _, err := ghrc.GetPrInfos(number, "")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	prInfos, _, err := ghrc.GetPrInfos(args.Number, "")
-	if err != nil {
-		log.Fatalln(err)
+	if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
+		log.Fatalln(errEnvs)
 	}
 
-	errEnvs := standardPrInfosToEnv(prInfos)
-	if args.Format != "" {
+	if format != "" {
 		replacer := strings.NewReplacer(
 			"pr", fmt.Sprint(prInfos.PrNumber),
 			"version", prInfos.NextVersion,
 			"latest_version", prInfos.LatestVersion,
 			"patchLevel", string(prInfos.PatchLevel))
-		output := replacer.Replace(args.Format)
+		output := replacer.Replace(format)
 		fmt.Print(output)
 	} else {
 		fmt.Println("#### Info output:")
 		fmt.Printf("Pull Request: %d\n", prInfos.PrNumber)
+		fmt.Printf("Current version: %s\n", prInfos.CurrentVersion)
 		fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
+		fmt.Printf("Next version: %s\n", prInfos.NextVersion)
 		fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
 		fmt.Printf("Possible new release version: %s\n", prInfos.NextVersion)
-		if errEnvs != nil {
-			log.Fatalln(errEnvs)
-		}
 	}
-	os.Exit(0)
 }

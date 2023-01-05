@@ -25,10 +25,7 @@ var infoCmd = &cobra.Command{
 	Short: "get pull request info",
 	Long:  `Print all infos about a pull request in GitHub.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		service.PrintPRInfos(&service.PullRequestInfoSet{
-			Number: number,
-			Format: format,
-		})
+		service.PrintPRInfos(number, format)
 	},
 }
 

@@ -1,7 +1,7 @@
 package gitlabapi
 
 import (
-	"awesome-ci/internal/app/awesome-ci/models"
+	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/semver"
 	"context"
 	"errors"

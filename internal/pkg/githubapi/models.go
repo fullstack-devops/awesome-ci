@@ -7,9 +7,3 @@ type GitHubRichClient struct {
 	Owner      string
 	Repository string
 }
-
-type ConnectCredentials struct {
-	ServerUrl  string
-	Repository string
-	Token      string
-}

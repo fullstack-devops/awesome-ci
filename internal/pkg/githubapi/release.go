@@ -4,13 +4,13 @@ import (
 	"awesome-ci/internal/pkg/tools"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v44/github"
+	log "github.com/sirupsen/logrus"
 )
 
 // CreateRelease
@@ -45,18 +45,16 @@ func (ghrc *GitHubRichClient) CreateRelease(version string, releaseBranch string
 		err = fmt.Errorf("error at creating github release: %v", err)
 		return
 	}
-
-	envVars, err := OpenEnvFile()
-	if err != nil {
-		return nil, err
-	}
-	envVars.Set("ACI_RELEASE_ID", fmt.Sprintf("%d", *createdRelease.ID))
-	err = envVars.SaveEnvFile()
 	return
 }
 
 // PublishRelease
-func (ghrc *GitHubRichClient) PublishRelease(version string, releaseBranch string, body string, releaseId int64, uploadArtifacts *string) (err error) {
+func (ghrc *GitHubRichClient) PublishRelease(
+	version string,
+	releaseBranch string,
+	body string,
+	releaseId int64,
+	uploadArtifacts *string) (releaseAssets []*github.ReleaseAsset, err error) {
 	draftFalse := false
 
 	if releaseId == 0 {
@@ -83,7 +81,7 @@ func (ghrc *GitHubRichClient) PublishRelease(version string, releaseBranch strin
 		ghrc.Repository,
 		releaseId)
 	if err != nil {
-		return err
+		return releaseAssets, err
 	}
 
 	// upload any given artifacts
@@ -91,12 +89,12 @@ func (ghrc *GitHubRichClient) PublishRelease(version string, releaseBranch strin
 	if *uploadArtifacts != "" {
 		filesAndInfos, err := tools.GetAsstes(uploadArtifacts, false)
 		if err != nil {
-			return err
+			return releaseAssets, err
 		}
 
 		releaseBodyAssets = "### Asstes\n"
 
-		for i, fileAndInfo := range filesAndInfos {
+		for _, fileAndInfo := range filesAndInfos {
 			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
 			// Upload assets to GitHub Release
 			relAsset, _, err := ghrc.Client.Repositories.UploadReleaseAsset(
@@ -114,16 +112,7 @@ func (ghrc *GitHubRichClient) PublishRelease(version string, releaseBranch strin
 				// add asset to release body
 				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, fileAndInfo.Name, *relAsset.BrowserDownloadURL, fileAndInfo.Infos.ModTime().Format(time.RFC3339), fileAndInfo.Hash)
 
-				// export Download URL to env. See: #53
-				envVars, err := OpenEnvFile()
-				if err != nil {
-					log.Println("could open envs:", err)
-				}
-				envVars.Set(fmt.Sprintf("ACI_ARTIFACT_%d_URL", i+1), *relAsset.BrowserDownloadURL)
-				err = envVars.SaveEnvFile()
-				if err != nil {
-					log.Println("could not export atrifact url:", err)
-				}
+				releaseAssets = append(releaseAssets, relAsset)
 			}
 		}
 	}
@@ -140,7 +129,7 @@ func (ghrc *GitHubRichClient) PublishRelease(version string, releaseBranch strin
 		releaseId,
 		existingRelease)
 	if err != nil {
-		return err
+		return releaseAssets, err
 	}
 
 	return
@@ -178,13 +167,13 @@ func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.R
 
 func (ghrc *GitHubRichClient) findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
 	gitRepo, err := git.PlainOpen(directory)
-
 	if err != nil {
 		return nil, err
 	}
 
 	tags, err := tools.GetGitTagsUpToHead(gitRepo)
 
+	log.Traceln(tags)
 	if err != nil {
 		return nil, err
 	}

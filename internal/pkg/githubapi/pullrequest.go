@@ -1,14 +1,14 @@
 package githubapi
 
 import (
-	"awesome-ci/internal/app/awesome-ci/models"
+	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/semver"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 
 	"github.com/google/go-github/v44/github"
+	log "github.com/sirupsen/logrus"
 )
 
 // GetPrInfos need the PullRequest-Number
@@ -48,6 +48,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 		return nil, nil, fmt.Errorf("no pull request found, please check if all resources are specified")
 	}
 
+	// comment if awesome ci is running in CI mode
 	isCI, isCIBool := os.LookupEnv("CI")
 	_, isSilentBool := os.LookupEnv("ACI_SILENT")
 	if isCIBool && !isSilentBool {
@@ -107,12 +108,15 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 			latestVersion = *repositoryRelease.TagName
 			version, err = semver.IncreaseVersion(patchLevel, latestVersion)
 		} else {
+			log.Traceln("no github release found")
 			version, err = semver.IncreaseVersion(patchLevel, "0.0.0")
 		}
 
 		if err != nil {
 			return nil, nil, err
 		}
+	} else {
+		log.Traceln("version override via pr comments specified")
 	}
 
 	standardPrInfos = &models.StandardPrInfos{

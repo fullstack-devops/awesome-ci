@@ -5,8 +5,8 @@ import (
 	"awesome-ci/internal/pkg/tools"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 	"testing"
 	"time"
@@ -40,8 +40,9 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 		testRepo:  strings.Split(testRepo, "/")[1],
 	}
 
-	if tmpDir, err := ioutil.TempDir("/tmp", "aci"); err == nil {
-		testEnv.repoPath = tmpDir
+	tempPath := path.Join(os.TempDir(), "tmp", "aci")
+	if err := os.MkdirAll(tempPath, 0644); err == nil {
+		testEnv.repoPath = tempPath
 	} else {
 		t.Errorf("Could not create tmp dir: %s", err)
 		t.FailNow()

@@ -2,10 +2,10 @@ package service
 
 import (
 	"awesome-ci/internal/app/awesome-ci/connect"
+	"awesome-ci/internal/pkg/detect"
 	"awesome-ci/internal/pkg/semver"
 	"awesome-ci/internal/pkg/tools"
 	"errors"
-	"flag"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -15,14 +15,7 @@ import (
 	"github.com/google/go-github/v44/github"
 )
 
-type ReleaseSet struct {
-	Fs      *flag.FlagSet
-	Create  ReleaseCreateSet
-	Publish ReleasePublishSet
-}
-
 type ReleaseCreateSet struct {
-	Fs             *flag.FlagSet
 	Version        string
 	PatchLevel     string
 	PrNumber       int
@@ -34,7 +27,6 @@ type ReleaseCreateSet struct {
 }
 
 type ReleasePublishSet struct {
-	Fs             *flag.FlagSet
 	Version        string
 	PatchLevel     string
 	ReleaseId      int64
@@ -97,14 +89,23 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 	}
 
 	if args.DryRun {
-		fmt.Printf("Would create new release with version: %s\n", version)
+		log.Infof("Would create new release with version: %s\n", version)
 	} else {
-		fmt.Printf("Writing new release: %s\n", version)
+		log.Infof("Writing new release: %s\n", version)
 		createdRelease, err := ghrc.CreateRelease(version, args.ReleaseBranch, args.Body, true)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Println("Create release successful. ID:", *createdRelease.ID)
+		log.Infof("Create release successful. ID: %s", *createdRelease.ID)
+
+		envs, err := detect.LoadEnvVars()
+		if err != nil {
+			log.Warnf("could load env variables: %v", err)
+		}
+		envs.Set("ACI_RELEASE_ID", fmt.Sprintf("%d", *createdRelease.ID))
+		if errEnvs := envs.SetEnvVars(); errEnvs != nil {
+			log.Warnf("could not export env variable ACI_RELEASE_ID: %v", err)
+		}
 
 		return createdRelease
 	}
@@ -167,12 +168,24 @@ func ReleasePublish(args *ReleasePublishSet) {
 	}
 
 	if args.DryRun {
-		fmt.Printf("Would publishing release: %s\n", version)
+		log.Infof("Would publishing release: %s\n", version)
 	} else {
-		fmt.Printf("Publishing release: %s - %d\n", version, args.ReleaseId)
-		err = ghrc.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
+		log.Infof("Publishing release: %s - %d\n", version, args.ReleaseId)
+		relAssets, err := ghrc.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
 		if err != nil {
 			log.Fatalln(err)
+		}
+		for i, ra := range relAssets {
+			// export Download URL to env. See: #53
+			envVars, err := detect.LoadEnvVars()
+			if err != nil {
+				log.Warnf("could load env variables: %v", err)
+			}
+			envVars.Set(fmt.Sprintf("ACI_ARTIFACT_%d_URL", i+1), *ra.BrowserDownloadURL)
+			err = envVars.SetEnvVars()
+			if err != nil {
+				log.Warnf("could not export env variable ACI_RELEASE_ID: %v", err)
+			}
 		}
 	}
 }
