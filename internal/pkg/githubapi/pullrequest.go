@@ -64,7 +64,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 	branchName := *prInfos.Head.Ref
 	patchLevel := semver.ParsePatchLevel(branchName)
 
-	var version = ""
+	var nextVersion = ""
 	var latestVersion = ""
 	// if an comment exists with aci_patch_level=major, make a major version!
 	issueComments, err := ghrc.GetIssueComments(prNumber)
@@ -90,7 +90,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 			aciPatchLevel := regexp.MustCompile(`^aci_patch_level: ([a-zA-Z]+)`)
 
 			if aciVersionOverride.MatchString(*comment.Body) {
-				version = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
+				nextVersion = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
 				break
 			}
 
@@ -102,14 +102,14 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 		}
 	}
 
-	if version == "" {
+	if nextVersion == "" {
 		repositoryRelease, err := ghrc.GetLatestReleaseVersion()
 		if err == nil {
 			latestVersion = *repositoryRelease.TagName
-			version, err = semver.IncreaseVersion(patchLevel, latestVersion)
+			nextVersion, err = semver.IncreaseVersion(patchLevel, latestVersion)
 		} else {
 			log.Traceln("no github release found")
-			version, err = semver.IncreaseVersion(patchLevel, "0.0.0")
+			nextVersion, err = semver.IncreaseVersion(patchLevel, "0.0.0")
 		}
 
 		if err != nil {
@@ -128,8 +128,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 		ShaShort:       prSHA[:8],
 		PatchLevel:     patchLevel,
 		LatestVersion:  latestVersion,
-		CurrentVersion: "",
-		NextVersion:    version,
+		NextVersion:    nextVersion,
 		MergeCommitSha: *prInfos.MergeCommitSHA,
 	}
 	return

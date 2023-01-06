@@ -7,7 +7,6 @@ type StandardPrInfos struct {
 	Owner          string
 	Repo           string
 	PatchLevel     semver.PatchLevel
-	CurrentVersion string
 	LatestVersion  string
 	NextVersion    string
 	Sha            string

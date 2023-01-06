@@ -38,9 +38,7 @@ func PrintPRInfos(number int, format string) {
 	} else {
 		fmt.Println("#### Info output:")
 		fmt.Printf("Pull Request: %d\n", prInfos.PrNumber)
-		fmt.Printf("Current version: %s\n", prInfos.CurrentVersion)
 		fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
-		fmt.Printf("Next version: %s\n", prInfos.NextVersion)
 		fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
 		fmt.Printf("Possible new release version: %s\n", prInfos.NextVersion)
 	}

@@ -1,7 +1,7 @@
 package connect
 
 import (
-	"awesome-ci/internal/app/awesome-ci/connect"
+	"awesome-ci/internal/pkg/connect"
 
 	"github.com/spf13/cobra"
 )
