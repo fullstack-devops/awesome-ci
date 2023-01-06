@@ -56,6 +56,8 @@ jobs:
           restore-keys: |
             awesome-ci-${{ github.event.pull_request.head.sha }}
 
+      - run: echo "This is the lead in sentence for the list" >> $GITHUB_STEP_SUMMARY
+
       #- name: Integration testing
       #  run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
       #  env:
