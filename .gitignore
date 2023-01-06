@@ -29,4 +29,8 @@ go.work
 
 *.env
 tests/github_env
+test.txt
+
+# awesome specialties
 .awesomerc.yaml
+awesome.env
