@@ -1,7 +1,6 @@
 package github
 
 import (
-	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/semver"
 	"fmt"
 	"os"
@@ -12,11 +11,11 @@ import (
 )
 
 // GetPrInfos need the PullRequest-Number
-func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (standardPrInfos *models.StandardPrInfos, prInfos *github.PullRequest, err error) {
+func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (prInfos *github.PullRequest, err error) {
 	if prNumber != 0 {
 		prInfos, _, err = ghrc.Client.PullRequests.Get(ctx, ghrc.Owner, ghrc.Repository, prNumber)
 		if err != nil {
-			return nil, nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
+			return nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
 		}
 	}
 	if mergeCommitSha != "" && prNumber == 0 {
@@ -30,7 +29,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 		}
 		pullRequests, _, err := ghrc.Client.PullRequests.List(ctx, ghrc.Owner, ghrc.Repository, &prOpts)
 		if err != nil {
-			return nil, nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
+			return nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
 		}
 		var found int = 0
 		for _, pr := range pullRequests {
@@ -40,12 +39,12 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 			}
 		}
 		if found > 1 {
-			return nil, nil, fmt.Errorf("found more than one pull request, this should not be possible. please open an issue with all log files")
+			return nil, fmt.Errorf("found more than one pull request, this should not be possible. please open an issue with all log files")
 		}
 	}
 
 	if prInfos == nil {
-		return nil, nil, fmt.Errorf("no pull request found, please check if all resources are specified")
+		return nil, fmt.Errorf("no pull request found, please check if all resources are specified")
 	}
 
 	// comment if awesome ci is running in CI mode
@@ -60,7 +59,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 		}
 	}
 
-	prSHA := *prInfos.Head.SHA
+	// prSHA := *prInfos.Head.SHA
 	branchName := *prInfos.Head.Ref
 	patchLevel := semver.ParsePatchLevel(branchName)
 
@@ -69,7 +68,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 	// if an comment exists with aci_patch_level=major, make a major version!
 	issueComments, err := ghrc.GetIssueComments(prNumber)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	for _, comment := range issueComments {
@@ -113,23 +112,11 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (s
 		}
 
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	} else {
 		log.Traceln("version override via pr comments specified")
 	}
 
-	standardPrInfos = &models.StandardPrInfos{
-		PrNumber:       prNumber,
-		Owner:          ghrc.Owner,
-		Repo:           ghrc.Repository,
-		BranchName:     branchName,
-		Sha:            prSHA,
-		ShaShort:       prSHA[:8],
-		PatchLevel:     patchLevel,
-		LatestVersion:  latestVersion,
-		NextVersion:    nextVersion,
-		MergeCommitSha: *prInfos.MergeCommitSHA,
-	}
 	return
 }

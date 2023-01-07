@@ -7,13 +7,29 @@ import (
 	"awesome-ci/internal/pkg/models"
 	"awesome-ci/internal/pkg/rcpersist"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // DetectCes detects the current "code execution side"
+// if DetectCes finds an .rc file, this will be used first
 func DetectCes() (cesType rcpersist.CESType,
 	scmPortalType rcpersist.SCMPortalType,
 	connCreds *models.ConnectCredentials,
 	err error) {
+
+	rcFile := rcpersist.NewRcInstance()
+
+	if creds, errRc := rcFile.Load(); errRc == nil {
+		cesType = rcFile.CESType
+		scmPortalType = rcFile.SCMPortalType
+		connCreds = &models.ConnectCredentials{
+			ServerUrl:  creds.ServerUrl,
+			Repository: creds.Repository,
+			Token:      *creds.TokenPlain,
+		}
+		return
+	}
 
 	// try github runner
 	if connCreds, _ = githubrunner.DetectGitHubActionsRunner(); connCreds != nil {
@@ -41,6 +57,7 @@ func DetectCes() (cesType rcpersist.CESType,
 
 	if !isCI {
 		cesType = rcpersist.CESTypeLoMa
+		log.Warnln(`no CI detected please use "awesome-ci connect [scm-portal]" to connect!`)
 		return
 	}
 

@@ -29,17 +29,17 @@ func (t Token) Encrypt() (string, error) {
 	}
 }
 
-func NewRcInstance() RcFile {
-	return RcFile{}
+func NewRcInstance() *RcFile {
+	return &RcFile{}
 }
 
-func (rc RcFile) Exists() bool {
+func (rc *RcFile) Exists() bool {
 	return tools.CheckFileExists(rcFileName)
 }
 
-func (rc RcFile) Load() (creds *ConnectCredentials, err error) {
+func (rc *RcFile) Load() (creds *ConnectCredentials, err error) {
 	if !rc.Exists() {
-		return nil, fmt.Errorf("rc file does not exist. please connect first")
+		return nil, ErrRcFileNotExists
 	}
 
 	// load rc file
@@ -54,27 +54,29 @@ func (rc RcFile) Load() (creds *ConnectCredentials, err error) {
 	}
 	log.Tracef("Successfully unmarshal file %s", rcFileName)
 
-	if rc.ConnectCreds.TokenPlain, err = rc.ConnectCreds.Token.Encrypt(); err != nil {
+	plainToken, err := rc.ConnectCreds.Token.Decrypt()
+	if err != nil {
 		return nil, err
 	}
-	return
+	rc.ConnectCreds.TokenPlain = &plainToken
+	return &rc.ConnectCreds, nil
 }
 
-func (rc RcFile) UpdateSCMPortalType(scmPortalType SCMPortalType) {
+func (rc *RcFile) UpdateSCMPortalType(scmPortalType SCMPortalType) {
 	rc.SCMPortalType = scmPortalType
 }
 
-func (rc RcFile) UpdateCESType(cesType CESType) {
+func (rc *RcFile) UpdateCESType(cesType CESType) {
 	rc.CESType = cesType
 }
 
-func (rc RcFile) UpdateCreds(server string, repo string, token string) error {
+func (rc *RcFile) UpdateCreds(server string, repo string, token string) error {
 	if rc.ConnectCreds.Token.ToString() != token {
-		rc.ConnectCreds.Token = Token(token)
-		if decryptedToken, err := Token(token).Decrypt(); err != nil {
+		rc.ConnectCreds.TokenPlain = &token
+		if encryptedToken, err := Token(token).Encrypt(); err != nil {
 			return err
 		} else {
-			rc.ConnectCreds.TokenPlain = decryptedToken
+			rc.ConnectCreds.Token = Token(encryptedToken)
 		}
 	}
 	if rc.ConnectCreds.ServerUrl != server {
@@ -86,10 +88,10 @@ func (rc RcFile) UpdateCreds(server string, repo string, token string) error {
 	return nil
 }
 
-func (rc RcFile) Save() (err error) {
-	rc.ConnectCreds.TokenPlain = ""
-
+func (rc *RcFile) Save() (err error) {
+	rc.ConnectCreds.TokenPlain = nil
 	os.Truncate(rcFileName, 0)
+
 	yamlData, err := yaml.Marshal(rc)
 	if err != nil {
 		return fmt.Errorf("error while Marshaling. %v", err)

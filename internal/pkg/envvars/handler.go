@@ -1,4 +1,4 @@
-package detect
+package envvars
 
 import (
 	"bufio"
@@ -7,8 +7,6 @@ import (
 	"os"
 	"strings"
 )
-
-const EnvFile = "awesome.env"
 
 func OpenEnvFile(otherEnvFile string) (envVars *EnvVariables, err error) {
 	envFile, err := os.Open(checkForEnvFileOverride(otherEnvFile))

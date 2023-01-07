@@ -3,8 +3,9 @@ package rcpersist
 import "fmt"
 
 var (
-	rcTokenKey        = []byte("TZPtSIacEJG18IpqQSkTE6luYmnCNKgR")
-	ErrNotInGitIgnore = fmt.Errorf("warn: please add %s to your %s or secrets may be exposed", rcFileName, ignoreFileName)
+	rcTokenKey         = []byte("TZPtSIacEJG18IpqQSkTE6luYmnCNKgR")
+	ErrRcFileNotExists = fmt.Errorf("rc file does not exist. please connect first")
+	ErrNotInGitIgnore  = fmt.Errorf("warn: please add %s to your %s or secrets may be exposed", rcFileName, ignoreFileName)
 )
 
 const (
@@ -29,8 +30,8 @@ type RcFile struct {
 }
 
 type ConnectCredentials struct {
-	ServerUrl  string
-	Repository string
-	Token      Token
-	TokenPlain string `yaml:"omitempty"`
+	ServerUrl  string  `yaml:"server_url"`
+	Repository string  `yaml:"repository"`
+	Token      Token   `yaml:"token"`
+	TokenPlain *string `yaml:"tplain,omitempty"`
 }

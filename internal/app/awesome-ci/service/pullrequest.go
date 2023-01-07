@@ -1,7 +1,7 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/connect"
+	scmportal "awesome-ci/internal/app/awesome-ci/scm-portal"
 	"fmt"
 	"strings"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func PrintPRInfos(number int, format string) {
-	ghrc, err := connect.ConnectToGitHub()
+	cesType, grc, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -18,18 +18,18 @@ func PrintPRInfos(number int, format string) {
 		log.Fatalln(err)
 	}
 
-	prInfos, _, err := ghrc.GetPrInfos(number, "")
+	prInfos, err := scmportal.GetPrInfos(cesType, grc, number, "")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
+	/* 	if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
 		log.Fatalln(errEnvs)
-	}
+	} */
 
 	if format != "" {
 		replacer := strings.NewReplacer(
-			"pr", fmt.Sprint(prInfos.PrNumber),
+			"pr", fmt.Sprint(prInfos.Number),
 			"version", prInfos.NextVersion,
 			"latest_version", prInfos.LatestVersion,
 			"patchLevel", string(prInfos.PatchLevel))
@@ -37,7 +37,7 @@ func PrintPRInfos(number int, format string) {
 		fmt.Print(output)
 	} else {
 		fmt.Println("#### Info output:")
-		fmt.Printf("Pull Request: %d\n", prInfos.PrNumber)
+		fmt.Printf("Pull Request: %d\n", prInfos.Number)
 		fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
 		fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
 		fmt.Printf("Possible new release version: %s\n", prInfos.NextVersion)

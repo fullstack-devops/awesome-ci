@@ -21,10 +21,8 @@ func checkGitIgnore() (err error) {
 		for fileScanner.Scan() {
 			if fileScanner.Text() == rcFileName {
 				return nil
-			} else {
-				return ErrNotInGitIgnore
 			}
 		}
 	}
-	return nil
+	return ErrNotInGitIgnore
 }

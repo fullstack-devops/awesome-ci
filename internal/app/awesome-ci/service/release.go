@@ -1,18 +1,18 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/connect"
-	"awesome-ci/internal/pkg/detect"
+	"awesome-ci/internal/app/awesome-ci/ces"
+	scmportal "awesome-ci/internal/app/awesome-ci/scm-portal"
 	"awesome-ci/internal/pkg/semver"
 	"awesome-ci/internal/pkg/tools"
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
+	gith "awesome-ci/internal/app/awesome-ci/scm-portal/github"
 
 	"github.com/google/go-github/v49/github"
+	log "github.com/sirupsen/logrus"
 )
 
 type ReleaseCreateSet struct {
@@ -40,10 +40,22 @@ type ReleasePublishSet struct {
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
-	ghrc, err := connect.ConnectToGitHub()
+	cesType, grc, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
+	_, _, connCreds, err := ces.DetectCes()
+	if err != nil {
+		// return
+	}
+
+	ghrc, err := gith.NewGitHubClient(&connCreds.ServerUrl, &connCreds.Repository, &connCreds.Token)
+	if err != nil {
+	}
+	/* ghrc, err := connect.ConnectToGitHub()
+	if err != nil {
+		log.Fatalln(err)
+	} */
 
 	var version string = ""
 
@@ -77,15 +89,15 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 			}
 		}
 
-		prInfos, _, err := ghrc.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		prInfos, err := scmportal.GetPrInfos(cesType, grc, args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
 
 		version = prInfos.NextVersion
-		if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
+		/* if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
 			log.Fatalln(errEnvs)
-		}
+		} */
 	}
 
 	if args.DryRun {
@@ -98,14 +110,14 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		}
 		log.Infof("Create release successful. ID: %s", *createdRelease.ID)
 
-		envs, err := detect.LoadEnvVars()
+		/* envs, err := detect.LoadEnvVars()
 		if err != nil {
 			log.Warnf("could load env variables: %v", err)
 		}
 		envs.Set("ACI_RELEASE_ID", fmt.Sprintf("%d", *createdRelease.ID))
 		if errEnvs := envs.SetEnvVars(); errEnvs != nil {
 			log.Warnf("could not export env variable ACI_RELEASE_ID: %v", err)
-		}
+		} */
 
 		return createdRelease
 	}
@@ -114,9 +126,17 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 }
 
 func ReleasePublish(args *ReleasePublishSet) {
-	ghrc, err := connect.ConnectToGitHub()
+	cesType, grc, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
+	}
+	_, _, connCreds, err := ces.DetectCes()
+	if err != nil {
+		// return
+	}
+
+	ghrc, err := gith.NewGitHubClient(&connCreds.ServerUrl, &connCreds.Repository, &connCreds.Token)
+	if err != nil {
 	}
 
 	var version string = ""
@@ -150,14 +170,14 @@ func ReleasePublish(args *ReleasePublishSet) {
 				log.Fatalln(err)
 			}
 		}
-		prInfos, _, err := ghrc.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		prInfos, err := scmportal.GetPrInfos(cesType, grc, args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		version = prInfos.NextVersion
-		if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
+		/* if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
 			log.Fatalln(errEnvs)
-		}
+		} */
 	}
 
 	if args.Assets != "" {
@@ -171,11 +191,11 @@ func ReleasePublish(args *ReleasePublishSet) {
 		log.Infof("Would publishing release: %s\n", version)
 	} else {
 		log.Infof("Publishing release: %s - %d\n", version, args.ReleaseId)
-		relAssets, err := ghrc.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
+		_, err := ghrc.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		for i, ra := range relAssets {
+		/* for i, ra := range relAssets {
 			// export Download URL to env. See: #53
 			envVars, err := detect.LoadEnvVars()
 			if err != nil {
@@ -186,7 +206,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 			if err != nil {
 				log.Warnf("could not export env variable ACI_RELEASE_ID: %v", err)
 			}
-		}
+		} */
 	}
 }
 

@@ -1,11 +1,8 @@
 package service
 
 import (
-	"awesome-ci/internal/pkg/detect"
-	"awesome-ci/internal/pkg/models"
 	"fmt"
 	"os/exec"
-	"strconv"
 )
 
 func runcmd(cmd string, shell bool) string {
@@ -23,7 +20,7 @@ func runcmd(cmd string, shell bool) string {
 	return string(out)
 }
 
-func standardPrInfosToEnv(prInfos *models.StandardPrInfos) (err error) {
+/* func standardPrInfosToEnv(prInfos *models.StandardPrInfos) (err error) {
 	envs, err := detect.LoadEnvVars()
 	if err != nil {
 		return err
@@ -43,4 +40,4 @@ func standardPrInfosToEnv(prInfos *models.StandardPrInfos) (err error) {
 	envs.SetEnvVars()
 
 	return nil
-}
+} */

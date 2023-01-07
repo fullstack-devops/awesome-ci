@@ -11,7 +11,7 @@ func UpdateRcFileForGitHub(server string, repo string, token string) {
 	rcFile := rcpersist.NewRcInstance()
 
 	_, err := rcFile.Load()
-	if err != nil {
+	if err != nil && err != rcpersist.ErrRcFileNotExists {
 		log.Fatalln(err)
 	}
 
