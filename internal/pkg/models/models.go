@@ -15,7 +15,7 @@ type StandardPrInfos struct {
 	MergeCommitSha string
 }
 
-type StandardConnectCredentials struct {
+type ConnectCredentials struct {
 	ServerUrl  string
 	Repository string
 	Token      string

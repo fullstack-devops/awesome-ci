@@ -16,3 +16,9 @@ type EnvVariable struct {
 	Name  *string
 	Value *string
 }
+
+type ConnectCredentials struct {
+	ServerUrl  string
+	Repository string
+	Token      string
+}

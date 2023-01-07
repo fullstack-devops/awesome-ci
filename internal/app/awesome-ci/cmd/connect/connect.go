@@ -1,7 +1,8 @@
 package connect
 
 import (
-	"awesome-ci/internal/pkg/connect"
+	"awesome-ci/internal/app/awesome-ci/connect"
+	"awesome-ci/internal/pkg/rcpersist"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +17,8 @@ var Cmd = &cobra.Command{
 	Use:   "connect",
 	Short: "connect persistent to github by creating an encrypted rc file",
 	Long: `connect initial to a GitHub or GitHub Enterprise
-				at some point you can also connect to GitLab`,
+				at some point you can also connect to GitLab (not yet implemented)
+				this is only useful without a runner or in an jenkins pipeline`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -26,7 +28,7 @@ var githubCmd = &cobra.Command{
 	Use:   "github",
 	Short: "connect initial to a GitHub or GitHub Enterprise",
 	Run: func(cmd *cobra.Command, args []string) {
-		connect.UpdateRcFileForGithub(Server, Repository, Token)
+		connect.UpdateRcFileForGitHub(Server, Repository, Token)
 	},
 }
 
@@ -34,7 +36,7 @@ var removeCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove all connection files and secrets",
 	Run: func(cmd *cobra.Command, args []string) {
-		connect.RemoveRcFile()
+		rcpersist.RemoveRcFile()
 	},
 }
 

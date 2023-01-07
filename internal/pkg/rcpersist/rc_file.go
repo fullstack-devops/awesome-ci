@@ -1,4 +1,4 @@
-package connect
+package rcpersist
 
 import (
 	"awesome-ci/internal/pkg/tools"
@@ -7,16 +7,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-)
-
-var (
-	rcTokenKey = []byte("TZPtSIacEJG18IpqQSkTE6luYmnCNKgR")
-)
-
-const (
-	rcFileName                  = ".awesomerc.yaml"
-	serverTypeGitHub ServerType = "github"
-	serverTypeGitLab ServerType = "gitlab"
 )
 
 func (t Token) ToString() string {
@@ -55,7 +45,7 @@ func (rc RcFile) Load() (creds *ConnectCredentials, err error) {
 	// load rc file
 	yamlFile, err := os.ReadFile(rcFileName)
 	if err != nil {
-		return nil, fmt.Errorf("Error while opening existing rc file. %v", err)
+		return nil, fmt.Errorf("error while opening existing rc file. %v", err)
 	}
 	log.Tracef("Successfully read file %s", rcFileName)
 
@@ -70,8 +60,12 @@ func (rc RcFile) Load() (creds *ConnectCredentials, err error) {
 	return
 }
 
-func (rc RcFile) UpdateServerType(serverType ServerType) {
-	rc.Type = serverType
+func (rc RcFile) UpdateSCMPortalType(scmPortalType SCMPortalType) {
+	rc.SCMPortalType = scmPortalType
+}
+
+func (rc RcFile) UpdateCESType(cesType CESType) {
+	rc.CESType = cesType
 }
 
 func (rc RcFile) UpdateCreds(server string, repo string, token string) error {
@@ -98,12 +92,19 @@ func (rc RcFile) Save() (err error) {
 	os.Truncate(rcFileName, 0)
 	yamlData, err := yaml.Marshal(rc)
 	if err != nil {
-		return fmt.Errorf("Error while Marshaling. %v", err)
+		return fmt.Errorf("error while Marshaling. %v", err)
 	}
 	if err := os.WriteFile(rcFileName, yamlData, 0600); err != nil {
-		return fmt.Errorf("Unable to write data into rc file")
+		return fmt.Errorf("unable to write data into rc file")
 	}
 	log.Tracef("Successfully written config to %s", rcFileName)
 
-	return nil
+	return checkGitIgnore()
+}
+
+func RemoveRcFile() {
+	err := os.Remove(rcFileName) // remove a single file
+	if err != nil {
+		log.Fatalf("error at removing %s: %v", rcFileName, err)
+	}
 }

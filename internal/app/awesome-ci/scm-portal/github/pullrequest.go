@@ -1,4 +1,4 @@
-package githubapi
+package github
 
 import (
 	"awesome-ci/internal/pkg/models"
