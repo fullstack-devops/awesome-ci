@@ -1,7 +1,9 @@
 package github
 
 import (
+	"awesome-ci/internal/pkg/semver"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/google/go-github/v49/github"
@@ -81,6 +83,45 @@ func (ghrc *GitHubRichClient) CommentHelpToPullRequest(number int) (err error) {
 				Body: &body,
 			}
 			_, _, err = ghrc.Client.Issues.EditComment(ctx, ghrc.Owner, ghrc.Repository, *prComment.ID, editedComment)
+		}
+	}
+	return
+}
+
+func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersion string, patchLevel string, err error) {
+	// if an comment exists with aci_patch_level=major, make a major version!
+	issueComments, err := ghrc.GetIssueComments(prNumber)
+	if err != nil {
+		return
+	}
+
+	for _, comment := range issueComments {
+		// FIXME: access must be restricted but GITHUB_TOKEN doesn't get informations.
+		// Refs: https://docs.github.com/en/rest/collaborators/collaborators#list-repository-collaborators
+		// Refs: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+
+		// Must be a collaborator to have permission to create an override
+		// isCollaborator, resp, err := GithubClient.Repositories.IsCollaborator(ctx, owner, repo, *comment.User.Login)
+		// if err != nil {
+		// 	return nil, nil, err
+		// }
+		// fmt.Println(resp.StatusCode)
+
+		// if isCollaborator {
+		if true {
+			aciVersionOverride := regexp.MustCompile(`^aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
+			aciPatchLevel := regexp.MustCompile(`^aci_patch_level: ([a-zA-Z]+)`)
+
+			if aciVersionOverride.MatchString(*comment.Body) {
+				nextVersion = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
+				break
+			}
+
+			if aciPatchLevel.MatchString(*comment.Body) {
+				patchLevel = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
+				break
+			}
+
 		}
 	}
 	return

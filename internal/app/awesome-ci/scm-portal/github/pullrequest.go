@@ -3,8 +3,6 @@ package github
 import (
 	"awesome-ci/internal/pkg/semver"
 	"fmt"
-	"os"
-	"regexp"
 
 	"github.com/google/go-github/v49/github"
 	log "github.com/sirupsen/logrus"
@@ -47,59 +45,12 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (p
 		return nil, fmt.Errorf("no pull request found, please check if all resources are specified")
 	}
 
-	// comment if awesome ci is running in CI mode
-	isCI, isCIBool := os.LookupEnv("CI")
-	_, isSilentBool := os.LookupEnv("ACI_SILENT")
-	if isCIBool && !isSilentBool {
-		if *prInfos.State == "open" && isCI == "true" {
-			err = ghrc.CommentHelpToPullRequest(*prInfos.Number)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-	}
-
 	// prSHA := *prInfos.Head.SHA
 	branchName := *prInfos.Head.Ref
 	patchLevel := semver.ParsePatchLevel(branchName)
 
 	var nextVersion = ""
 	var latestVersion = ""
-	// if an comment exists with aci_patch_level=major, make a major version!
-	issueComments, err := ghrc.GetIssueComments(prNumber)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, comment := range issueComments {
-		// FIXME: access must be restricted but GITHUB_TOKEN doesn't get informations.
-		// Refs: https://docs.github.com/en/rest/collaborators/collaborators#list-repository-collaborators
-		// Refs: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-
-		// Must be a collaborator to have permission to create an override
-		// isCollaborator, resp, err := GithubClient.Repositories.IsCollaborator(ctx, owner, repo, *comment.User.Login)
-		// if err != nil {
-		// 	return nil, nil, err
-		// }
-		// fmt.Println(resp.StatusCode)
-
-		// if isCollaborator {
-		if true {
-			aciVersionOverride := regexp.MustCompile(`^aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
-			aciPatchLevel := regexp.MustCompile(`^aci_patch_level: ([a-zA-Z]+)`)
-
-			if aciVersionOverride.MatchString(*comment.Body) {
-				nextVersion = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
-				break
-			}
-
-			if aciPatchLevel.MatchString(*comment.Body) {
-				patchLevel = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
-				break
-			}
-
-		}
-	}
 
 	if nextVersion == "" {
 		repositoryRelease, err := ghrc.GetLatestReleaseVersion()

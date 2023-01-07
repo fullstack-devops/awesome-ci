@@ -3,7 +3,6 @@ package scmportal
 import (
 	"awesome-ci/internal/app/awesome-ci/scm-portal/github"
 	"awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
-	"fmt"
 	"os"
 )
 
@@ -18,7 +17,6 @@ func CommentHelpToPullRequest(grcInter interface{}, number int) (err error) {
 		switch grc := grcInter.(type) {
 
 		case *github.GitHubRichClient:
-			fmt.Println("Debug!!! make help comment")
 			err := grc.CommentHelpToPullRequest(number)
 			if err != nil {
 				return err

@@ -5,6 +5,8 @@ import (
 	"awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
 	"awesome-ci/internal/pkg/rcpersist"
 	"awesome-ci/internal/pkg/semver"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func GetPrInfos(cesType rcpersist.CESType, grcInter interface{}, number int, mergeCommitSha string) (infos *PrMrRequestInfos, err error) {
@@ -16,6 +18,10 @@ func GetPrInfos(cesType rcpersist.CESType, grcInter interface{}, number int, mer
 			return nil, err
 		}
 
+		if errCommHelp := CommentHelpToPullRequest(grcInter, number); errCommHelp != nil {
+			log.Warnln(errCommHelp)
+		}
+
 		prSHA := *prInfos.Head.SHA
 		branchName := *prInfos.Head.Ref
 		patchLevel := semver.ParsePatchLevel(branchName)
@@ -24,7 +30,7 @@ func GetPrInfos(cesType rcpersist.CESType, grcInter interface{}, number int, mer
 		var latestVersion = ""
 
 		infos = &PrMrRequestInfos{
-			Number:         1,
+			Number:         number,
 			Owner:          grc.Owner,
 			Repo:           grc.Repository,
 			BranchName:     branchName,
