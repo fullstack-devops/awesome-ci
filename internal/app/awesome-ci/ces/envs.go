@@ -1,6 +1,10 @@
 package ces
 
-import "awesome-ci/internal/pkg/envvars"
+import (
+	"awesome-ci/internal/pkg/envvars"
+
+	log "github.com/sirupsen/logrus"
+)
 
 func (ces CES) ExportAsEnv(envVars []KeyValue) (err error) {
 	envFile, err := envvars.OpenEnvFile(ces.EnvFile)
@@ -18,8 +22,17 @@ func (ces CES) ExportAsEnv(envVars []KeyValue) (err error) {
 			outFile.Set(ev.Name, ev.Value)
 		}
 
-		envFile.CloseEnvFile(ces.EnvFile)
-		outFile.CloseEnvFile(ces.EnvFile)
+		if err := envFile.CloseEnvFile(ces.EnvFile); err != nil {
+			log.Warnln(err)
+			return err
+		}
+		log.Tracef("succfully written env variables to ", ces.EnvFile)
+
+		if err := outFile.CloseEnvFile(ces.EnvFile); err != nil {
+			log.Warnln(err)
+			return err
+		}
+		log.Tracef("succfully written env variables to ", ces.OutFile)
 
 	} else {
 
