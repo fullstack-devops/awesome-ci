@@ -8,10 +8,10 @@ import (
 )
 
 func LoadSCMPortalLayer() (scmLayer *SCMLayer, err error) {
-	cesType, scmPortalType, connCreds, err := ces.DetectCes()
+	ces, scmPortalType, connCreds, err := ces.DetectCes()
 	if err != nil {
 		return &SCMLayer{
-			CESType: cesType,
+			CES: ces,
 		}, err
 	}
 
@@ -22,8 +22,8 @@ func LoadSCMPortalLayer() (scmLayer *SCMLayer, err error) {
 			return nil, err
 		}
 		return &SCMLayer{
-			CESType: cesType,
-			Grc:     ghrc,
+			CES: ces,
+			Grc: ghrc,
 		}, err
 
 	case rcpersist.SCMPortalTypeGitLab:
@@ -32,8 +32,8 @@ func LoadSCMPortalLayer() (scmLayer *SCMLayer, err error) {
 			return nil, err
 		}
 		return &SCMLayer{
-			CESType: cesType,
-			Grc:     glrc,
+			CES: ces,
+			Grc: glrc,
 		}, err
 	}
 

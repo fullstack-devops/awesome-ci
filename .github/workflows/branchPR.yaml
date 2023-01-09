@@ -40,11 +40,17 @@ jobs:
           echo "git name-rev HEAD: $(git name-rev HEAD)"
           echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
+
       - name: test build Infos
+        id: test-build-infos
         if: matrix.arch == 'amd64'
         run: build/package/awesome-ci_* pr info -n ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: test env file
+        run: export | grep ACI_
+      - name: test step export function
+        run: echo ${{ steps.test-build-infos.outputs.ACI_PR_BRANCH }}
 
       - name: Cache build outputs
         uses: actions/cache@v3

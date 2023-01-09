@@ -1,14 +1,14 @@
 package scmportal
 
 import (
-	"awesome-ci/internal/pkg/rcpersist"
+	"awesome-ci/internal/app/awesome-ci/ces"
 	"awesome-ci/internal/pkg/semver"
 	"time"
 )
 
 type SCMLayer struct {
-	Grc     interface{}
-	CESType rcpersist.CESType
+	Grc interface{}
+	CES ces.CES
 }
 
 type PrMrRequestInfos struct {

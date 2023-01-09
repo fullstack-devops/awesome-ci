@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-func OpenEnvFile(otherEnvFile string) (envVars *EnvVariables, err error) {
-	envFile, err := os.Open(checkForEnvFileOverride(otherEnvFile))
+func OpenEnvFile(file string) (envVars *EnvVariables, err error) {
+	envFile, err := os.Open(file)
 	// ignore and create at write
-	if !errors.Is(err, os.ErrNotExist) {
-		return
+	if errors.Is(err, os.ErrNotExist) {
+		return &EnvVariables{}, nil
 	}
 
 	defer envFile.Close()
@@ -29,8 +29,8 @@ func OpenEnvFile(otherEnvFile string) (envVars *EnvVariables, err error) {
 	return
 }
 
-func (envVars *EnvVariables) CloseEnvFile(otherEnvFile string) (err error) {
-	envFile, err := os.OpenFile(checkForEnvFileOverride(otherEnvFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+func (envVars *EnvVariables) CloseEnvFile(file string) (err error) {
+	envFile, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("error at opening env file: %v", err)
 	}
@@ -81,12 +81,4 @@ func devideEnvStringToKeyAndValue(envString string) (env EnvVariable) {
 
 func (envVar EnvVariable) ToString() (envString string) {
 	return fmt.Sprintf("%s=%s", *envVar.Name, *envVar.Value)
-}
-
-func checkForEnvFileOverride(override string) string {
-	if override != "" {
-		return override
-	} else {
-		return EnvFile
-	}
 }

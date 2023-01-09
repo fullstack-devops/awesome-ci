@@ -13,15 +13,19 @@ import (
 
 // DetectCes detects the current "code execution side"
 // if DetectCes finds an .rc file, this will be used first
-func DetectCes() (cesType rcpersist.CESType,
+func DetectCes() (cesType CES,
 	scmPortalType rcpersist.SCMPortalType,
 	connCreds *models.ConnectCredentials,
 	err error) {
 
 	rcFile := rcpersist.NewRcInstance()
+	envFile := "awesomeci.env"
 
 	if creds, errRc := rcFile.Load(); errRc == nil {
-		cesType = rcFile.CESType
+		cesType = CES{
+			Type:    rcFile.CESType,
+			EnvFile: envFile,
+		}
 		scmPortalType = rcFile.SCMPortalType
 		connCreds = &models.ConnectCredentials{
 			ServerUrl:  creds.ServerUrl,
@@ -33,21 +37,32 @@ func DetectCes() (cesType rcpersist.CESType,
 
 	// try github runner
 	if connCreds, _ = githubrunner.DetectGitHubActionsRunner(); connCreds != nil {
-		cesType = rcpersist.CESTypeGitHubRunner
+		ghOutput := os.Getenv("GITHUB_OUTPUT")
+		cesType = CES{
+			Type:    rcpersist.CESTypeGitHubRunner,
+			EnvFile: os.Getenv("GITHUB_ENV"),
+			OutFile: &ghOutput,
+		}
 		scmPortalType = rcpersist.SCMPortalTypeGitHub
 		return
 	}
 
 	// try gitlab runner
 	if connCreds, _ = gitlabrunner.DetectGitLabActionsRunner(); connCreds != nil {
-		cesType = rcpersist.CESTypeGitLabRunner
+		cesType = CES{
+			Type:    rcpersist.CESTypeGitLabRunner,
+			EnvFile: envFile,
+		}
 		scmPortalType = rcpersist.SCMPortalTypeGitLab
 		return
 	}
 
 	// try jenkins pipeline
 	if connCreds, _ = jenkinspipeline.DetectJenkinsPipeline(); connCreds != nil {
-		cesType = rcpersist.CESTypeJenkinsPipeline
+		cesType = CES{
+			Type:    rcpersist.CESTypeJenkinsPipeline,
+			EnvFile: envFile,
+		}
 		scmPortalType = rcpersist.SCMPortalTypeGitHub
 		return
 	}
@@ -56,7 +71,10 @@ func DetectCes() (cesType rcpersist.CESType,
 	isCI := ci == "" && ciPresent
 
 	if !isCI {
-		cesType = rcpersist.CESTypeLoMa
+		cesType = CES{
+			Type:    rcpersist.CESTypeLoMa,
+			EnvFile: envFile,
+		}
 		log.Warnln(`no CI detected please use "awesome-ci connect [scm-portal]" to connect!`)
 		return
 	}

@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	number int
-	format string
+	number    int
+	formatOut string
 )
 
 var Cmd = &cobra.Command{
@@ -25,7 +25,7 @@ var infoCmd = &cobra.Command{
 	Short: "get pull request info",
 	Long:  `Print all infos about a pull request in GitHub.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		service.PrintPRInfos(number, format)
+		service.PrintPRInfos(number, formatOut)
 	},
 }
 
@@ -35,5 +35,5 @@ func init() {
 
 	// Flags
 	infoCmd.Flags().IntVarP(&number, "number", "n", 0, "overwrite the issue number")
-	infoCmd.Flags().StringVarP(&format, "format", "f", "", "define output by get")
+	infoCmd.Flags().StringVarP(&formatOut, "output", "o", "", "define output available: [json, yaml]")
 }
