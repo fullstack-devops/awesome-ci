@@ -11,8 +11,12 @@ type PatchLevel string
 
 const (
 	Bugfix  PatchLevel = "bugfix"
-	Feature PatchLevel = "feature"
+	Feature PatchLevel = "minor"
 	Major   PatchLevel = "major"
+)
+
+var (
+	ErrInvalidBranchName = fmt.Errorf("the branch name does not match the prescribed spelling")
 )
 
 // IncreaseSemVer increases a given version by naming, see docs
@@ -71,24 +75,31 @@ func patch(version string) (newVersion string, err error) {
 	return
 }
 
-func ParsePatchLevel(branchName string) PatchLevel {
-	patchLevel := "bugfix"
+func ParsePatchLevelFormBranch(branchName string) (patchLevel PatchLevel, err error) {
+	patchLevel = "bugfix"
 
 	if strings.Index(branchName, "/") > 0 {
-		patchLevel = branchName[:strings.Index(branchName, "/")]
+		return ParsePatchLevel(branchName[:strings.Index(branchName, "/")]), nil
+	} else {
+		return Bugfix, ErrInvalidBranchName
 	}
+}
 
-	switch patchLevel {
+func ParsePatchLevel(alias string) PatchLevel {
+	switch alias {
+
 	case "bugfix", "fix", "dependabot":
 		return Bugfix
-	case "feature", "feat":
+
+	case "minor", "feature", "feat":
 		return Feature
+
 	case "major":
 		return Major
+
 	default:
 		log.Println("could not determan witch version to set. given first string does'n start with major, feature or bugfix")
 		log.Println("using minimal patch version!")
 		return Bugfix
 	}
-
 }

@@ -8,29 +8,29 @@ import (
 	"github.com/itchyny/gojq"
 )
 
-type Format string
+type Syntax string
 
-const JsonSyntax Format = "JSON"
-const YamlSyntax Format = "YAML"
+const JsonSyntax Syntax = "JSON"
+const YamlSyntax Syntax = "YAML"
 
-func ParseFile(queryString string, file string, format Format) (err error) {
+func ParseFile(queryString string, file string, syntax Syntax) (err error) {
 	d, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
 
-	err = Parse(queryString, d, format)
+	err = Parse(queryString, d, syntax)
 
 	return
 }
 
-func Parse(queryString string, input []byte, format Format) (err error) {
+func Parse(queryString string, input []byte, syntax Syntax) (err error) {
 	query, err := gojq.Parse(queryString)
 	if err != nil {
 		return err
 	}
 
-	if format == YamlSyntax {
+	if syntax == YamlSyntax {
 		input, err = TransformYamlToJson(input)
 		if err != nil {
 			return err

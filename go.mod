@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-git/go-git/v5 v5.5.1
+	github.com/go-git/go-git/v5 v5.5.2
 	github.com/google/go-github/v49 v49.0.0
 	github.com/itchyny/gojq v0.12.11
 	github.com/spf13/cobra v1.6.1

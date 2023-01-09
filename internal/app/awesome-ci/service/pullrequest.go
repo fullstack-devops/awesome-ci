@@ -27,6 +27,8 @@ func PrintPRInfos(number int, format string) {
 		log.Fatalln(errEnvs)
 	} */
 
+	
+
 	if format != "" {
 		replacer := strings.NewReplacer(
 			"pr", fmt.Sprint(prInfos.Number),

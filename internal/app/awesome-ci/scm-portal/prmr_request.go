@@ -28,10 +28,13 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 		infos.Sha = *prInfos.Head.SHA
 		infos.ShaShort = infos.Sha[:8]
 		infos.BranchName = *prInfos.Head.Ref
-		infos.PatchLevel = semver.ParsePatchLevel(infos.BranchName)
 		infos.Owner = grc.Owner
 		infos.Repo = grc.Repository
 		infos.MergeCommitSha = *prInfos.MergeCommitSHA
+
+		if infos.PatchLevel, err = semver.ParsePatchLevelFormBranch(infos.BranchName); err != nil {
+			log.Warnln(err)
+		}
 
 	case *gitlab.GitLabRichClient:
 		// not implemented
@@ -58,17 +61,15 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 		infos.LatestVersion = repositoryRelease.TagName
 	}
 
-	// check if version override
+	// check if version override (3)
 	if version == nil {
 
 		if patchLevel != nil {
-			if infos.NextVersion, err = semver.IncreaseVersion(*patchLevel, infos.LatestVersion); err != nil {
-				return nil, err
-			}
-		} else {
-			if infos.NextVersion, err = semver.IncreaseVersion(infos.PatchLevel, infos.LatestVersion); err != nil {
-				return nil, err
-			}
+			infos.PatchLevel = *patchLevel
+			log.Infof("detected a patch level override to %s", infos.PatchLevel)
+		}
+		if infos.NextVersion, err = semver.IncreaseVersion(infos.PatchLevel, infos.LatestVersion); err != nil {
+			return nil, err
 		}
 
 		return infos, nil
