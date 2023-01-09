@@ -13,13 +13,12 @@ func OpenEnvFile(file string) (envVars *EnvVariables, err error) {
 	// ignore and create at write
 	if errors.Is(err, os.ErrNotExist) {
 		return &EnvVariables{}, nil
-	}
-
-	defer envFile.Close()
-
-	if err != nil {
+	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("error at opening env file %v", err)
 	}
+	defer envFile.Close()
+
+	envVars = &EnvVariables{}
 
 	scanner := bufio.NewScanner(envFile)
 	for scanner.Scan() {
