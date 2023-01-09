@@ -40,7 +40,7 @@ type ReleasePublishSet struct {
 }
 
 func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
-	cesType, grc, err := scmportal.LoadSCMPortalLayer()
+	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -89,7 +89,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 			}
 		}
 
-		prInfos, err := scmportal.GetPrInfos(cesType, grc, args.PrNumber, args.MergeCommitSHA)
+		prInfos, err := scmLayer.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -126,7 +126,7 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 }
 
 func ReleasePublish(args *ReleasePublishSet) {
-	cesType, grc, err := scmportal.LoadSCMPortalLayer()
+	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -170,7 +170,7 @@ func ReleasePublish(args *ReleasePublishSet) {
 				log.Fatalln(err)
 			}
 		}
-		prInfos, err := scmportal.GetPrInfos(cesType, grc, args.PrNumber, args.MergeCommitSHA)
+		prInfos, err := scmLayer.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
 		if err != nil {
 			log.Fatalln(err)
 		}

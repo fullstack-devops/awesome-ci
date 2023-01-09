@@ -9,7 +9,7 @@ import (
 )
 
 func PrintPRInfos(number int, format string) {
-	cesType, grc, err := scmportal.LoadSCMPortalLayer()
+	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -18,7 +18,7 @@ func PrintPRInfos(number int, format string) {
 		log.Fatalln(err)
 	}
 
-	prInfos, err := scmportal.GetPrInfos(cesType, grc, number, "")
+	prInfos, err := scmLayer.GetPrInfos(number, "")
 	if err != nil {
 		log.Fatalln(err)
 	}

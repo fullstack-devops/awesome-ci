@@ -88,7 +88,7 @@ func (ghrc *GitHubRichClient) CommentHelpToPullRequest(number int) (err error) {
 	return
 }
 
-func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersion string, patchLevel string, err error) {
+func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersion string, patchLevel semver.PatchLevel, err error) {
 	// if an comment exists with aci_patch_level=major, make a major version!
 	issueComments, err := ghrc.GetIssueComments(prNumber)
 	if err != nil {

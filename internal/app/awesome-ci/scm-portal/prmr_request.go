@@ -3,14 +3,21 @@ package scmportal
 import (
 	"awesome-ci/internal/app/awesome-ci/scm-portal/github"
 	"awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
-	"awesome-ci/internal/pkg/rcpersist"
 	"awesome-ci/internal/pkg/semver"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func GetPrInfos(cesType rcpersist.CESType, grcInter interface{}, number int, mergeCommitSha string) (infos *PrMrRequestInfos, err error) {
-	switch grc := grcInter.(type) {
+// GetPrInfos
+// 1. get pr/mr infos from github or gitlab
+// 2. comment help instructions to issue
+// 3. read comments from pr/mr and looking for overrides
+func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRequestInfos, err error) {
+	infos = &PrMrRequestInfos{}
+	infos.Number = number
+
+	// 1. get pr/mr infos from github or gitlab
+	switch grc := lay.Grc.(type) {
 
 	case *github.GitHubRichClient:
 		prInfos, err := grc.GetPrInfos(number, mergeCommitSha)
@@ -18,32 +25,57 @@ func GetPrInfos(cesType rcpersist.CESType, grcInter interface{}, number int, mer
 			return nil, err
 		}
 
-		if errCommHelp := CommentHelpToPullRequest(grcInter, number); errCommHelp != nil {
-			log.Warnln(errCommHelp)
-		}
-
-		prSHA := *prInfos.Head.SHA
-		branchName := *prInfos.Head.Ref
-		patchLevel := semver.ParsePatchLevel(branchName)
-
-		var nextVersion = ""
-		var latestVersion = ""
-
-		infos = &PrMrRequestInfos{
-			Number:         number,
-			Owner:          grc.Owner,
-			Repo:           grc.Repository,
-			BranchName:     branchName,
-			Sha:            prSHA,
-			ShaShort:       prSHA[:8],
-			PatchLevel:     patchLevel,
-			LatestVersion:  latestVersion,
-			NextVersion:    nextVersion,
-			MergeCommitSha: *prInfos.MergeCommitSHA,
-		}
+		infos.Sha = *prInfos.Head.SHA
+		infos.ShaShort = infos.Sha[:8]
+		infos.BranchName = *prInfos.Head.Ref
+		infos.PatchLevel = semver.ParsePatchLevel(infos.BranchName)
+		infos.Owner = grc.Owner
+		infos.Repo = grc.Repository
+		infos.MergeCommitSha = *prInfos.MergeCommitSHA
 
 	case *gitlab.GitLabRichClient:
 		// not implemented
+		log.Warnln("gitlab is not yet implemented")
+	}
+
+	// 2. comment help instructions to issue
+	if errCommHelp := lay.CommentHelpToPullRequest(number); errCommHelp != nil {
+		log.Warnln(errCommHelp)
+	}
+
+	// 3. read comments from pr/mr and looking for overrides
+	version, patchLevel, err := lay.SearchIssuesForOverrides(number)
+	if err != nil {
+		return nil, err
+	}
+
+	// get latest release, if any
+	repositoryRelease, err := lay.GetLatestReleaseVersion()
+	if err != nil {
+		log.Infoln("no github release found -> wirting default 0.0.0")
+		infos.LatestVersion = "0.0.0"
+	} else {
+		infos.LatestVersion = repositoryRelease.TagName
+	}
+
+	// check if version override
+	if version == nil {
+
+		if patchLevel != nil {
+			if infos.NextVersion, err = semver.IncreaseVersion(*patchLevel, infos.LatestVersion); err != nil {
+				return nil, err
+			}
+		} else {
+			if infos.NextVersion, err = semver.IncreaseVersion(infos.PatchLevel, infos.LatestVersion); err != nil {
+				return nil, err
+			}
+		}
+
+		return infos, nil
+
+	} else {
+		log.Traceln("version override via pr comments specified")
+		infos.NextVersion = *version
 	}
 
 	return

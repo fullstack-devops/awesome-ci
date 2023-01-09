@@ -26,4 +26,5 @@ func UpdateRcFileForGitHub(server string, repo string, token string) {
 	if _, err := github.NewGitHubClient(&server, &repo, &token); err != nil {
 		log.Fatalln(err)
 	}
+	log.Infof("successfully connected to github at %s", server)
 }

@@ -1,6 +1,15 @@
 package scmportal
 
-import "awesome-ci/internal/pkg/semver"
+import (
+	"awesome-ci/internal/pkg/rcpersist"
+	"awesome-ci/internal/pkg/semver"
+	"time"
+)
+
+type SCMLayer struct {
+	Grc     interface{}
+	CESType rcpersist.CESType
+}
 
 type PrMrRequestInfos struct {
 	Number         int
@@ -13,4 +22,12 @@ type PrMrRequestInfos struct {
 	ShaShort       string
 	BranchName     string
 	MergeCommitSha string
+}
+
+type Release struct {
+	TagName     string     `json:"tag_name"`               // GitHub: PublishedAt; GitLab: ReleasedAt
+	Name        string     `json:"name"`                   // equaly
+	Commit      string     `json:"commit"`                 // GitHub: TargetCommitish; GitLab: Commit
+	CreatedAt   *time.Time `json:"created_at"`             // equaly
+	PublishedAt *time.Time `json:"published_at,omitempty"` // GitHub: PublishedAt; GitLab: ReleasedAt
 }
