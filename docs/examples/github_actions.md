@@ -6,6 +6,7 @@ nav_order: 1
 ---
 
 # GitHub Actions examples
+
 {: .no_toc }
 
 <details open markdown="block">
@@ -16,7 +17,6 @@ nav_order: 1
 1. TOC
 {:toc}
 </details>
-
 
 ### Build a Release
 
@@ -110,7 +110,7 @@ jobs:
         with:
           path: out/
           key: awesome-ci-$\{\{ github.sha \}\}
-      
+
       - name: Publish Release
         run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
         env:

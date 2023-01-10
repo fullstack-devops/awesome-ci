@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -30,7 +29,7 @@ func npmPublish(pathToSource string, version string) {
 	}
 
 	// writing result to package.json
-	err = ioutil.WriteFile(pathToSource+"package.json", b, 0644)
+	err = os.WriteFile(pathToSource+"package.json", b, 0644)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)

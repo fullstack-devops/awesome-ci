@@ -3,20 +3,20 @@ layout: default
 nav_order: 2
 parent: CLI
 date: 2023-01-10T21:23:51Z
-title: " connect remove"
+title: " connect check"
 ---
-## awesome-ci connect remove
+## awesome-ci connect check
 
-remove all connection files and secrets
+check current connection
 
 ```
-awesome-ci connect remove [flags]
+awesome-ci connect check [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for remove
+  -h, --help   help for check
 ```
 
 ### Options inherited from parent commands
