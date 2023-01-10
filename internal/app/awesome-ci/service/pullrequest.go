@@ -41,7 +41,7 @@ func PrintPRInfos(number int, formatOut string) {
 		log.Fatalln("could not export env variables: %v", err)
 	}
 
-	fmt.Println("#### Info output:")
+	fmt.Println("### Info output:")
 	fmt.Printf("Pull Request: %d\n", prInfos.Number)
 	fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
 	fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
