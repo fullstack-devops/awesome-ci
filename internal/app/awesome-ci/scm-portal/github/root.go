@@ -41,7 +41,7 @@ func NewGitHubClient(serverUrl *string, repoUrl *string, token *string) (githubR
 	if rateLimit, _, err := githubClient.RateLimits(context.Background()); err != nil {
 		return nil, fmt.Errorf("connection to GitHub could not be etablished: %v", err)
 	} else {
-		log.Tracef("remaining rates %", rateLimit.Core.Remaining)
+		log.Tracef("remaining rates %d", rateLimit.Core.Remaining)
 	}
 
 	owner, repository := tools.DevideOwnerAndRepo(*repoUrl)
