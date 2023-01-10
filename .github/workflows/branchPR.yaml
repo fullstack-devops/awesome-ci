@@ -44,12 +44,16 @@ jobs:
       - name: test build Infos
         id: test-build-infos
         if: matrix.arch == 'amd64'
-        run: build/package/awesome-ci_* pr info -n ${{ github.event.pull_request.number }} -v
+        run: |
+          build/package/awesome-ci_* pr info -n ${{ github.event.pull_request.number }} -v
+          cat $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: test env file
+        if: matrix.arch == 'amd64'
         run: export | grep ACI_
       - name: test step export function
+        if: matrix.arch == 'amd64'
         run: echo "${{ steps.test-build-infos.outputs.ACI_PR_BRANCH }}"
 
       - name: Cache build outputs

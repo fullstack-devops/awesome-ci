@@ -35,5 +35,6 @@ func init() {
 
 	// Flags
 	infoCmd.Flags().IntVarP(&number, "number", "n", 0, "overwrite the issue number")
-	infoCmd.Flags().StringVarP(&formatOut, "output", "o", "", "define output available: [json, yaml]")
+	// needs to be implemented
+	// infoCmd.Flags().StringVarP(&formatOut, "output", "o", "", "define output available: [json, yaml]")
 }
