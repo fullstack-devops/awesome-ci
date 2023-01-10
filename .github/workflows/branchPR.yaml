@@ -46,7 +46,7 @@ jobs:
         if: matrix.arch == 'amd64'
         run: |
           build/package/awesome-ci_* pr info -n ${{ github.event.pull_request.number }} -v
-          cat $GITHUB_OUTPUT
+          echo "out: $(cat $GITHUB_OUTPUT)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: test env file

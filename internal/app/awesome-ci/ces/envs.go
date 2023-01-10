@@ -26,13 +26,13 @@ func (ces CES) ExportAsEnv(envVars []KeyValue) (err error) {
 			log.Warnln(err)
 			return err
 		}
-		log.Tracef("succfully written env variables to ", ces.EnvFile)
+		log.Tracef("succfully written env variables to %s", ces.EnvFile)
 
 		if err := outFile.CloseEnvFile(ces.EnvFile); err != nil {
 			log.Warnln(err)
 			return err
 		}
-		log.Tracef("succfully written env variables to ", ces.OutFile)
+		log.Tracef("succfully written env variables to %s", *ces.OutFile)
 
 	} else {
 
