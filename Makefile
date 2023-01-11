@@ -32,7 +32,7 @@ awesome-ci: dep
 #frontend:
 #
 test: awesome-ci ## Run unittests
-	go test -short -v ./internal/pkg/...
+	go test -short -covermode=atomic -coverprofile=coverage.out -v ./internal/pkg/...
 
 race: awesome-ci ## Run data race detector
 	-go test -race -short -v ${PKG_LIST}

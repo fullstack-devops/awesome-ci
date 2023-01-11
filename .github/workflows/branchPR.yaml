@@ -34,6 +34,9 @@ jobs:
           GOOS: linux
           GOARCH: "${{ matrix.arch }}"
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+
       - name: debugging git
         if: matrix.arch == 'amd64'
         run: |
