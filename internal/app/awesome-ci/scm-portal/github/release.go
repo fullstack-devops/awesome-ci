@@ -3,8 +3,6 @@ package github
 import (
 	"errors"
 	"fmt"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
@@ -15,24 +13,16 @@ import (
 )
 
 // CreateRelease
-func (ghrc *GitHubRichClient) CreateRelease(version string, releaseBranch string, body string, draft bool) (createdRelease *github.RepositoryRelease, err error) {
-
-	relName := "Release " + version
+func (ghrc *GitHubRichClient) CreateRelease(tagName string, releaseBranch string, body string) (createdRelease *github.RepositoryRelease, err error) {
+	draft := true
+	relName := "Release " + tagName
 	if releaseBranch == "" {
 		releaseBranch = tools.GetDefaultBranch()
 	}
 
-	// get body for release
-	if body != "" {
-		bodyFile, err := tools.CheckIsFile(body)
-		if err == nil {
-			body = bodyFile
-		}
-	}
-
 	releaseObject := github.RepositoryRelease{
 		TargetCommitish: &releaseBranch,
-		TagName:         &version,
+		TagName:         &tagName,
 		Name:            &relName,
 		Draft:           &draft,
 		Body:            &body,
@@ -51,29 +41,19 @@ func (ghrc *GitHubRichClient) CreateRelease(version string, releaseBranch string
 
 // PublishRelease
 func (ghrc *GitHubRichClient) PublishRelease(
-	version string,
+	tagName string,
 	releaseBranch string,
 	body string,
 	releaseId int64,
-	uploadArtifacts *string) (releaseAssets []*github.ReleaseAsset, err error) {
-	draftFalse := false
+	uploadArtifacts []tools.UploadAsset) (releaseAssets []*github.ReleaseAsset, err error) {
 
 	if releaseId == 0 {
-		releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
-		if !releaseIdBool {
-			log.Println("No release found, creating one...")
-			release, err := ghrc.CreateRelease(version, releaseBranch, body, true)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			releaseId = *release.ID
-		} else {
-			releaseId, err = strconv.ParseInt(releaseIdStr, 10, 64)
-			if err != nil {
-				fmt.Printf("%s of type %T", releaseIdStr, releaseIdStr)
-				os.Exit(2)
-			}
+		log.Infoln("no release found, creating one...")
+		release, err := ghrc.CreateRelease(tagName, releaseBranch, body)
+		if err != nil {
+			log.Fatalln(err)
 		}
+		releaseId = *release.ID
 	}
 
 	existingRelease, _, err := ghrc.Client.Repositories.GetRelease(
@@ -82,21 +62,16 @@ func (ghrc *GitHubRichClient) PublishRelease(
 		ghrc.Repository,
 		releaseId)
 	if err != nil {
-		return releaseAssets, err
+		return
 	}
 
 	// upload any given artifacts
 	var releaseBodyAssets string = ""
-	if *uploadArtifacts != "" {
-		filesAndInfos, err := tools.GetAsstes(uploadArtifacts, false)
-		if err != nil {
-			return releaseAssets, err
-		}
-
+	if len(uploadArtifacts) > 0 {
 		releaseBodyAssets = "### Asstes\n"
 
-		for _, fileAndInfo := range filesAndInfos {
-			fmt.Printf("uploading %s as asset to release\n", fileAndInfo.Name)
+		for _, fileAndInfo := range uploadArtifacts {
+			log.Infof("uploading %s as asset to release\n", fileAndInfo.Name)
 			// Upload assets to GitHub Release
 			relAsset, _, err := ghrc.Client.Repositories.UploadReleaseAsset(
 				ctx,
@@ -122,7 +97,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 	existingRelease.Body = &newReleaseBody
 
 	// publishing release
-	*existingRelease.Draft = draftFalse
+	*existingRelease.Draft = false
 	_, _, err = ghrc.Client.Repositories.EditRelease(
 		ctx,
 		ghrc.Owner,

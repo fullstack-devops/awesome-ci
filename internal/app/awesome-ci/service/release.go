@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -10,13 +11,10 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
-	gith "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
-
-	"github.com/google/go-github/v49/github"
 	log "github.com/sirupsen/logrus"
 )
 
-type ReleaseCreateSet struct {
+type ReleaseArgs struct {
 	Version        string
 	PatchLevel     string
 	PrNumber       int
@@ -27,36 +25,11 @@ type ReleaseCreateSet struct {
 	Body           string
 }
 
-type ReleasePublishSet struct {
-	Version        string
-	PatchLevel     string
-	ReleaseId      int64
-	Assets         string
-	PrNumber       int
-	MergeCommitSHA string
-	ReleaseBranch  string
-	DryRun         bool
-	Hotfix         bool
-	Body           string
-}
-
-func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
+func ReleaseCreate(args *ReleaseArgs) {
 	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	_, _, connCreds, err := ces.DetectCes()
-	if err != nil {
-		// return
-	}
-
-	ghrc, err := gith.NewGitHubClient(&connCreds.ServerUrl, &connCreds.Repository, &connCreds.Token)
-	if err != nil {
-	}
-	/* ghrc, err := connect.ConnectToGitHub()
-	if err != nil {
-		log.Fatalln(err)
-	} */
 
 	var version string = ""
 
@@ -73,12 +46,12 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		version = args.Version
 	} else if args.Hotfix {
 
-		release, err := ghrc.GetLatestReleaseVersion()
+		release, err := scmLayer.GetLatestReleaseVersion()
 
 		if err != nil {
 			log.Fatalln(err)
 		}
-		version, err = semver.IncreaseVersion(semver.Bugfix, *release.TagName)
+		version, err = semver.IncreaseVersion(semver.Bugfix, release.TagName)
 
 		if err != nil {
 			log.Fatalln(err)
@@ -99,48 +72,36 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 		}
 
 		version = prInfos.NextVersion
-		/* if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
-			log.Fatalln(errEnvs)
-		} */
+
+		if err = prInfosToEnv(scmLayer, prInfos); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	if args.DryRun {
 		log.Infof("Would create new release with version: %s\n", version)
 	} else {
 		log.Infof("Writing new release: %s\n", version)
-		createdRelease, err := ghrc.CreateRelease(version, args.ReleaseBranch, args.Body, true)
+		createdRelease, err := scmLayer.CreateRelease(version, args.ReleaseBranch, args.Body)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Infof("Create release successful. ID: %s", *createdRelease.ID)
+		log.Infof("Create release successful. ID: %d", createdRelease.ID)
 
-		/* envs, err := detect.LoadEnvVars()
-		if err != nil {
-			log.Warnf("could load env variables: %v", err)
+		var envVars []ces.KeyValue = []ces.KeyValue{
+			{Name: "ACI_RELEASE_ID", Value: fmt.Sprintf("%d", createdRelease.ID)},
 		}
-		envs.Set("ACI_RELEASE_ID", fmt.Sprintf("%d", *createdRelease.ID))
-		if errEnvs := envs.SetEnvVars(); errEnvs != nil {
-			log.Warnf("could not export env variable ACI_RELEASE_ID: %v", err)
-		} */
 
-		return createdRelease
+		if err := scmLayer.CES.ExportAsEnv(envVars); err != nil {
+			log.Fatalln("could not export env variables: %v", err)
+		}
 	}
-
-	return nil
 }
 
-func ReleasePublish(args *ReleasePublishSet) {
+func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
-	}
-	_, _, connCreds, err := ces.DetectCes()
-	if err != nil {
-		// return
-	}
-
-	ghrc, err := gith.NewGitHubClient(&connCreds.ServerUrl, &connCreds.Repository, &connCreds.Token)
-	if err != nil {
 	}
 
 	var version string = ""
@@ -158,18 +119,18 @@ func ReleasePublish(args *ReleasePublishSet) {
 		version = args.Version
 	} else if args.Hotfix {
 
-		release, err := ghrc.GetLatestReleaseVersion()
+		release, err := scmLayer.GetLatestReleaseVersion()
 
 		if err != nil {
 			log.Fatalln(err)
 		}
-		version, err = semver.IncreaseVersion(semver.Bugfix, *release.TagName)
+		version, err = semver.IncreaseVersion(semver.Bugfix, release.TagName)
 
 		if err != nil {
 			log.Fatalln(err)
 		}
 
-	} else if args.ReleaseId == 0 {
+	} else if releaseId == 0 {
 		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
 		if args.MergeCommitSHA == "" {
 			err := evalPrNumber(&args.PrNumber)
@@ -182,36 +143,47 @@ func ReleasePublish(args *ReleasePublishSet) {
 			log.Fatalln(err)
 		}
 		version = prInfos.NextVersion
-		/* if errEnvs := standardPrInfosToEnv(prInfos); errEnvs != nil {
-			log.Fatalln(errEnvs)
-		} */
+
+		if err = prInfosToEnv(scmLayer, prInfos); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
-	if args.Assets != "" {
-		_, err = tools.GetAsstes(&args.Assets, true)
-		if err != nil {
-			log.Fatalln("not all specified asstes available, please check")
+	var assetsEncoded []tools.UploadAsset
+	if len(assets) > 0 {
+		for _, asset := range assets {
+			assetInfo, err := tools.GetAsset(asset)
+			if err != nil {
+				log.Fatalln("not all specified asstes available, please check")
+			}
+			assetsEncoded = append(assetsEncoded, *assetInfo)
 		}
+	}
+	log.Infof("will upload %d assets", len(assets))
+
+	body, err := tools.ReadFileToString(args.Body)
+	if err != nil {
+		log.Warnf("could not process the given body: %v", err)
 	}
 
 	if args.DryRun {
-		log.Infof("Would publishing release: %s\n", version)
+		log.Infof("Would publishing release: %s", version)
 	} else {
-		log.Infof("Publishing release: %s - %d\n", version, args.ReleaseId)
-		_, err := ghrc.PublishRelease(version, args.ReleaseBranch, args.Body, args.ReleaseId, &args.Assets)
+		log.Infof("Publishing release: %s - %d", version, releaseId)
+		_, err := scmLayer.PublishRelease(version, args.ReleaseBranch, body, releaseId, assetsEncoded)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		/* for i, ra := range relAssets {
+
+		/* var envVars []ces.KeyValue
+		for i, ra := range relAssets {
 			// export Download URL to env. See: #53
-			envVars, err := detect.LoadEnvVars()
-			if err != nil {
-				log.Warnf("could load env variables: %v", err)
-			}
-			envVars.Set(fmt.Sprintf("ACI_ARTIFACT_%d_URL", i+1), *ra.BrowserDownloadURL)
-			err = envVars.SetEnvVars()
-			if err != nil {
-				log.Warnf("could not export env variable ACI_RELEASE_ID: %v", err)
+			envVars = append(envVars, ces.KeyValue{Name: fmt.Sprintf("ACI_ARTIFACT_%d_URL", i+1), Value: *ra.BrowserDownloadURL})
+		}
+
+		if len(envVars) > 0 {
+			if err := scmLayer.CES.ExportAsEnv(envVars); err != nil {
+				log.Fatalln("could not export env variables: %v", err)
 			}
 		} */
 	}

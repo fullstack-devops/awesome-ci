@@ -26,9 +26,10 @@ type PrMrRequestInfos struct {
 }
 
 type Release struct {
-	TagName     string     `json:"tag_name"`               // GitHub: PublishedAt; GitLab: ReleasedAt
-	Name        string     `json:"name"`                   // equaly
-	Commit      string     `json:"commit"`                 // GitHub: TargetCommitish; GitLab: Commit
-	CreatedAt   *time.Time `json:"created_at"`             // equaly
-	PublishedAt *time.Time `json:"published_at,omitempty"` // GitHub: PublishedAt; GitLab: ReleasedAt
+	ID          int64      `json:"id"`           // GitHub: ID, GitLab: not available!!
+	TagName     string     `json:"tag_name"`     // GitHub: PublishedAt; GitLab: ReleasedAt
+	Name        string     `json:"name"`         // equaly
+	Commit      string     `json:"commit"`       // GitHub: TargetCommitish; GitLab: Commit
+	CreatedAt   *time.Time `json:"created_at"`   // equaly
+	PublishedAt *time.Time `json:"published_at"` // GitHub: PublishedAt; GitLab: ReleasedAt
 }

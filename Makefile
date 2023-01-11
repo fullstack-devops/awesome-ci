@@ -11,7 +11,7 @@ PLATFORM ?= $(shell dpkg --print-architecture)
 # remove debug info from the binary & make it smaller
 LDFLAGS += -s -w
 # inject build info
-LDFLAGS += -X awesome-ci/internal/app/build.Version=${VERSION} -X awesome-ci/internal/app/build.CommitHash=${COMMIT_HASH} -X awesome-ci/internal/app/build.BuildDate=${BUILD_DATE}
+LDFLAGS += -X ${PROJECT_PKG}/internal/app/build.Version=${VERSION} -X ${PROJECT_PKG}/internal/app/build.CommitHash=${COMMIT_HASH} -X ${PROJECT_PKG}/internal/app/build.BuildDate=${BUILD_DATE}
 
 #PLATFORMS := linux/amd64 windows/amd64
 

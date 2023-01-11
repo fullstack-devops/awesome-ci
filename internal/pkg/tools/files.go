@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+var (
+	ErrEmptyString        = fmt.Errorf("empty string")
+	ErrExpextedFileNotDir = fmt.Errorf("expected file and not a directory")
+)
+
 type UploadArtifact struct {
 	File os.File
 	Name string
@@ -21,6 +26,35 @@ type UploadAsset struct {
 	Infos fs.FileInfo
 	IsZip bool
 	Hash  []byte
+}
+
+// ReadFileToString can find a given file and returns it as a string
+// if the input is not an empty string, the given input is returned
+func ReadFileToString(fileOrString string) (result string, err error) {
+	if fileOrString != "" {
+
+		fileInfo, err := os.Stat(fileOrString)
+		if err != nil && err != os.ErrNotExist {
+			return "", err
+		} else if err == os.ErrNotExist {
+			return fileOrString, nil
+		}
+
+		if fileInfo.IsDir() {
+			return "", ErrExpextedFileNotDir
+		}
+
+		if file, err := os.ReadFile(fileOrString); err != nil {
+			return "", err
+		} else {
+			return string(file), err
+		}
+
+	} else {
+		err = ErrEmptyString
+	}
+
+	return
 }
 
 // deprecated
@@ -44,41 +78,36 @@ func GetFilesAndInfos(uploadArtifacts *string) (artifacts []UploadArtifact, err 
 	return
 }
 
-func GetAsstes(uploadArtifacts *string, check bool) (asset []UploadAsset, err error) {
-	artifactsToUpload := strings.Split(*uploadArtifacts, ",")
-	for _, artifact := range artifactsToUpload {
-		assetName := strings.Split(artifact, "=")
+func GetAsset(assetLocation string) (asset *UploadAsset, err error) {
+	assetName := strings.Split(assetLocation, "=")
 
-		switch assetName[0] {
-		case "file":
-			file, err := os.OpenFile(assetName[1], os.O_RDWR, 0644)
-			if err != nil {
-				return nil, err
-			}
-			info, err := file.Stat()
-			if err != nil {
-				return nil, err
-			}
-			// if check, then close file, else return file interface for upload
-			if check {
-				file.Close()
-			} else {
-				hash, _ := getHashFromFile(assetName[1])
-				asset = append(asset, UploadAsset{
-					File:  *file,
-					Name:  info.Name(),
-					Infos: info,
-					IsZip: false,
-					Hash:  hash,
-				})
-			}
-		case "files":
-			// todo
-		case "zip":
-			// todo
-		default:
-			return nil, fmt.Errorf("not an valid asset format")
+	switch assetName[0] {
+
+	case "file":
+		file, err := os.OpenFile(assetName[1], os.O_RDWR, 0644)
+		if err != nil {
+			return nil, err
 		}
+		info, err := file.Stat()
+		if err != nil {
+			return nil, err
+		}
+		hash, _ := getHashFromFile(assetName[1])
+
+		return &UploadAsset{
+			File:  *file,
+			Name:  info.Name(),
+			Infos: info,
+			IsZip: false,
+			Hash:  hash,
+		}, nil
+
+	case "files":
+		// todo
+	case "zip":
+		// todo
+	default:
+		return nil, fmt.Errorf("not an valid asset format")
 	}
 
 	return
