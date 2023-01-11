@@ -46,10 +46,6 @@ jobs:
           key: awesome-ci-${{ github.sha }}-${{ hashFiles('build/package/awesome-ci*') }}
           restore-keys: |
             awesome-ci-${{ github.sha }}
-      #- name: Integration testing
-      #  run: ./tools/test.sh ./out/awesome-ci_${ACI_NEXT_VERSION}_${{ matrix.arch }}
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_release:
     runs-on: ubuntu-latest
