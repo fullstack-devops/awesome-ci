@@ -1,8 +1,9 @@
 package awesomeci
 
 import (
-	"awesome-ci/internal/app/awesome-ci/cmd"
 	"os"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd"
 
 	log "github.com/sirupsen/logrus"
 )

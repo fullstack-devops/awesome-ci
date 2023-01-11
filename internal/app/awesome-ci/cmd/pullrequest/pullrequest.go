@@ -1,7 +1,7 @@
 package pullrequest
 
 import (
-	"awesome-ci/internal/app/awesome-ci/service"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/service"
 
 	"github.com/spf13/cobra"
 )

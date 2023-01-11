@@ -1,9 +1,10 @@
 package scmportal
 
 import (
-	"awesome-ci/internal/app/awesome-ci/ces"
-	"awesome-ci/internal/pkg/semver"
 	"time"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 )
 
 type SCMLayer struct {

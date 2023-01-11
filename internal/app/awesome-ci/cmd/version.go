@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"awesome-ci/internal/app/build"
 	"fmt"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/build"
 
 	"github.com/spf13/cobra"
 )

@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"awesome-ci/internal/app/awesome-ci/cmd/connect"
-	"awesome-ci/internal/app/awesome-ci/cmd/parse"
-	"awesome-ci/internal/app/awesome-ci/cmd/pullrequest"
-	"awesome-ci/internal/app/awesome-ci/cmd/release"
 	"fmt"
 	"os"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/connect"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/parse"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/pullrequest"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/release"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

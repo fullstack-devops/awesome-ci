@@ -1,7 +1,7 @@
 package main
 
 import (
-	awesomeci "awesome-ci/internal/app/awesome-ci"
+	awesomeci "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci"
 )
 
 func main() {

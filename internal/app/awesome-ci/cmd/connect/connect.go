@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"awesome-ci/internal/app/awesome-ci/connect"
-	"awesome-ci/internal/pkg/rcpersist"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/connect"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/rcpersist"
 
 	"github.com/spf13/cobra"
 )

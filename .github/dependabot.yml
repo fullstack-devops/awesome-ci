@@ -7,10 +7,12 @@ version: 2
 updates:
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
+    rebase-strategy: auto
     schedule:
       interval: "daily"
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    rebase-strategy: auto
     schedule:
       interval: "weekly"

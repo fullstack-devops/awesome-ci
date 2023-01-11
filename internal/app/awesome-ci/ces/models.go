@@ -1,6 +1,6 @@
 package ces
 
-import "awesome-ci/internal/pkg/rcpersist"
+import "github.com/fullstack-devops/awesome-ci/internal/pkg/rcpersist"
 
 type CES struct {
 	Type    rcpersist.CESType // required

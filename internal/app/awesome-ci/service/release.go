@@ -1,15 +1,16 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/ces"
-	scmportal "awesome-ci/internal/app/awesome-ci/scm-portal"
-	"awesome-ci/internal/pkg/semver"
-	"awesome-ci/internal/pkg/tools"
 	"errors"
 	"regexp"
 	"strconv"
 
-	gith "awesome-ci/internal/app/awesome-ci/scm-portal/github"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces"
+	scmportal "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
+
+	gith "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
 
 	"github.com/google/go-github/v49/github"
 	log "github.com/sirupsen/logrus"

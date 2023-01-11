@@ -1,12 +1,13 @@
 package ces
 
 import (
-	githubrunner "awesome-ci/internal/app/awesome-ci/ces/github_runner"
-	gitlabrunner "awesome-ci/internal/app/awesome-ci/ces/gitlab_runner"
-	jenkinspipeline "awesome-ci/internal/app/awesome-ci/ces/jenkins_pipeline"
-	"awesome-ci/internal/pkg/models"
-	"awesome-ci/internal/pkg/rcpersist"
 	"os"
+
+	githubrunner "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces/github_runner"
+	gitlabrunner "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces/gitlab_runner"
+	jenkinspipeline "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces/jenkins_pipeline"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/models"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/rcpersist"
 
 	log "github.com/sirupsen/logrus"
 )

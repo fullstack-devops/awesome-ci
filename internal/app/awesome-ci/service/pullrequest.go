@@ -1,10 +1,11 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/ces"
-	scmportal "awesome-ci/internal/app/awesome-ci/scm-portal"
 	"fmt"
 	"strconv"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces"
+	scmportal "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal"
 
 	log "github.com/sirupsen/logrus"
 )

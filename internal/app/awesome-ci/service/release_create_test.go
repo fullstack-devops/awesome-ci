@@ -1,9 +1,10 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/connect"
 	"strings"
 	"testing"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/connect"
 )
 
 func TestCreateFirstRelease(t *testing.T) {

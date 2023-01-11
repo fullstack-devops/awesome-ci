@@ -1,9 +1,10 @@
 package jenkinspipeline
 
 import (
-	"awesome-ci/internal/pkg/models"
 	"fmt"
 	"os"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/models"
 )
 
 func DetectJenkinsPipeline() (connects *models.ConnectCredentials, err error) {

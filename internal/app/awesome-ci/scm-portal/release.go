@@ -1,8 +1,8 @@
 package scmportal
 
 import (
-	"awesome-ci/internal/app/awesome-ci/scm-portal/github"
-	"awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
 
 	log "github.com/sirupsen/logrus"
 )

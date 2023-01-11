@@ -1,10 +1,11 @@
 package github
 
 import (
-	"awesome-ci/internal/pkg/semver"
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 
 	"github.com/google/go-github/v49/github"
 )

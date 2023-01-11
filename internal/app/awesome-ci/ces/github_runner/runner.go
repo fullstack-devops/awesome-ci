@@ -1,9 +1,10 @@
 package githubrunner
 
 import (
-	"awesome-ci/internal/pkg/models"
 	"fmt"
 	"os"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/models"
 )
 
 func DetectGitHubActionsRunner() (connects *models.ConnectCredentials, err error) {

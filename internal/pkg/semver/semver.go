@@ -88,7 +88,7 @@ func ParsePatchLevelFormBranch(branchName string) (patchLevel PatchLevel, err er
 func ParsePatchLevel(alias string) PatchLevel {
 	switch alias {
 
-	case "bugfix", "fix", "dependabot":
+	case "patch", "bugfix", "fix", "dependabot":
 		return Bugfix
 
 	case "minor", "feature", "feat":

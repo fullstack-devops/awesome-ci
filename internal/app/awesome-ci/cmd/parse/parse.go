@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"awesome-ci/internal/pkg/parsejy"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/parsejy"
 
 	"github.com/spf13/cobra"
 )

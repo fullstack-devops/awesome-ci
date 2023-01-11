@@ -1,12 +1,13 @@
 package github
 
 import (
-	"awesome-ci/internal/pkg/tools"
 	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v49/github"

@@ -1,9 +1,10 @@
 package rcpersist
 
 import (
-	"awesome-ci/internal/pkg/tools"
 	"fmt"
 	"os"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"

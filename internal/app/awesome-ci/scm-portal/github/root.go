@@ -1,10 +1,11 @@
 package github
 
 import (
-	"awesome-ci/internal/pkg/tools"
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/google/go-github/v49/github"
 	log "github.com/sirupsen/logrus"

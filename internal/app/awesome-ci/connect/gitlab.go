@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
-	"awesome-ci/internal/pkg/rcpersist"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/rcpersist"
 
 	log "github.com/sirupsen/logrus"
 )

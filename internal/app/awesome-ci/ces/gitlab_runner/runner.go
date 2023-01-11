@@ -1,9 +1,10 @@
 package gitlabrunner
 
 import (
-	"awesome-ci/internal/pkg/models"
 	"fmt"
 	"os"
+
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/models"
 )
 
 func DetectGitLabActionsRunner() (connects *models.ConnectCredentials, err error) {

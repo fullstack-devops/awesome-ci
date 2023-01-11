@@ -1,8 +1,6 @@
 package service
 
 import (
-	"awesome-ci/internal/app/awesome-ci/connect"
-	"awesome-ci/internal/pkg/tools"
 	"context"
 	"fmt"
 	"os"
@@ -10,6 +8,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/connect"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"

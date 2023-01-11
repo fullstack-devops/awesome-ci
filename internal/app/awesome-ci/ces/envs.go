@@ -1,7 +1,7 @@
 package ces
 
 import (
-	"awesome-ci/internal/pkg/envvars"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/envvars"
 
 	log "github.com/sirupsen/logrus"
 )

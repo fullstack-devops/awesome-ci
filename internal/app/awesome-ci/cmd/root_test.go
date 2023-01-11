@@ -1,7 +1,6 @@
 package cmd_test
 
 import (
-	"awesome-ci/internal/app/awesome-ci/cmd"
 	"fmt"
 	"log"
 	"path"
@@ -9,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd"
 
 	"github.com/spf13/cobra/doc"
 )
