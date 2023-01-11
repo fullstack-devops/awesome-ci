@@ -40,7 +40,7 @@ You can find frequently asked questions directly in the "Questions and Answers" 
 
 ## Getting involved
 
-- [CONTRIBUTING](.github/CONTRIBUTING.md)
+- [CONTRIBUTING](docs/CONTRIBUTING.md)
 
 ---
 
