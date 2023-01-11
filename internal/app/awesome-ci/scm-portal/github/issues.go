@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/google/go-github/v49/github"
 )
@@ -119,7 +120,10 @@ func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersio
 			}
 
 			if aciPatchLevel.MatchString(*comment.Body) {
-				patchLevel = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
+				patchLevel, err = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
+				if err != nil && err != semver.ErrUseMinimalPatchVersion {
+					log.Warnln(err)
+				}
 				break
 			}
 		}

@@ -61,7 +61,10 @@ func ReleaseCreate(args *ReleaseCreateSet) *github.RepositoryRelease {
 	var version string = ""
 
 	if args.Version != "" && args.PatchLevel != "" {
-		parsedPatchLevel := semver.ParsePatchLevel(args.PatchLevel)
+		parsedPatchLevel, err := semver.ParsePatchLevel(args.PatchLevel)
+		if err != nil && err != semver.ErrUseMinimalPatchVersion {
+			log.Fatalln(err)
+		}
 		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
 		if err != nil {
 			log.Fatalln(err)
@@ -143,7 +146,10 @@ func ReleasePublish(args *ReleasePublishSet) {
 	var version string = ""
 
 	if args.Version != "" && args.PatchLevel != "" {
-		parsedPatchLevel := semver.ParsePatchLevel(args.PatchLevel)
+		parsedPatchLevel, err := semver.ParsePatchLevel(args.PatchLevel)
+		if err != nil && err != semver.ErrUseMinimalPatchVersion {
+			log.Fatalln(err)
+		}
 		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
 		if err != nil {
 			log.Fatalln(err)

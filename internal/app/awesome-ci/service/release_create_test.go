@@ -8,6 +8,10 @@ import (
 )
 
 func TestCreateFirstRelease(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
+
 	preparedReleases := &[]string{}
 	testEnv, cleanup := getTestEnvironment(preparedReleases, t)
 
@@ -43,6 +47,9 @@ func TestCreateFirstRelease(t *testing.T) {
 }
 
 func TestCreateRelease_1_1_0(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
 
 	preparedReleases := &[]string{"1.0.1"}
 
@@ -89,6 +96,9 @@ func TestCreateRelease_1_1_0(t *testing.T) {
 }
 
 func TestCreateRelease_1_2_0(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0"}
 
@@ -135,6 +145,9 @@ func TestCreateRelease_1_2_0(t *testing.T) {
 }
 
 func TestCreateRelease_1_2_1(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.2.0"}
 
@@ -181,6 +194,9 @@ func TestCreateRelease_1_2_1(t *testing.T) {
 }
 
 func TestCreateRelease_1_2_2(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.1.1", "1.1.2", "1.2.0", "1.2.1"}
 
@@ -227,6 +243,9 @@ func TestCreateRelease_1_2_2(t *testing.T) {
 }
 
 func TestCreateHotfixRelease_1_1_1(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.2.0", "1.2.1"}
 
@@ -275,6 +294,9 @@ func TestCreateHotfixRelease_1_1_1(t *testing.T) {
 }
 
 func TestCreateHotfixRelease_1_1_2(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping long-running test.")
+	}
 
 	preparedReleases := &[]string{"1.0.1", "1.1.0", "1.2.0", "1.2.1", "1.1.1"}
 

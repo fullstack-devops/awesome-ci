@@ -2,7 +2,6 @@ package semver
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -16,7 +15,8 @@ const (
 )
 
 var (
-	ErrInvalidBranchName = fmt.Errorf("the branch name does not match the prescribed spelling")
+	ErrUseMinimalPatchVersion = fmt.Errorf("could not determan witch version to set. given first string does'n start with major, feature or bugfix -> using minimal patch version")
+	ErrInvalidBranchName      = fmt.Errorf("the branch name does not match the prescribed spelling")
 )
 
 // IncreaseSemVer increases a given version by naming, see docs
@@ -30,10 +30,7 @@ func IncreaseVersion(patchLevel PatchLevel, version string) (incresedVersion str
 		incresedVersion, err = minor(version)
 	case Major:
 		incresedVersion, err = major(version)
-	default:
-		incresedVersion, err = patch(version)
-		log.Println("could not determan witch version to set. given first string does'n start with release, feature or bugfix")
-		log.Println("used minimal patch version!")
+
 	}
 	return
 }
@@ -79,27 +76,25 @@ func ParsePatchLevelFormBranch(branchName string) (patchLevel PatchLevel, err er
 	patchLevel = "bugfix"
 
 	if strings.Index(branchName, "/") > 0 {
-		return ParsePatchLevel(branchName[:strings.Index(branchName, "/")]), nil
+		return ParsePatchLevel(branchName[:strings.Index(branchName, "/")])
 	} else {
 		return Bugfix, ErrInvalidBranchName
 	}
 }
 
-func ParsePatchLevel(alias string) PatchLevel {
+func ParsePatchLevel(alias string) (PatchLevel, error) {
 	switch alias {
 
 	case "patch", "bugfix", "fix", "dependabot":
-		return Bugfix
+		return Bugfix, nil
 
 	case "minor", "feature", "feat":
-		return Feature
+		return Feature, nil
 
 	case "major":
-		return Major
+		return Major, nil
 
 	default:
-		log.Println("could not determan witch version to set. given first string does'n start with major, feature or bugfix")
-		log.Println("using minimal patch version!")
-		return Bugfix
+		return Bugfix, ErrUseMinimalPatchVersion
 	}
 }
