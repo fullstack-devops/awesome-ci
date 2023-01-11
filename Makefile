@@ -17,7 +17,7 @@ LDFLAGS += -X awesome-ci/internal/app/build.Version=${VERSION} -X awesome-ci/int
 
 .PHONY: docs clean
 
-all: dep awesome-ci test
+all: dep awesome-ci
 # coverage
 
 dep:
@@ -32,7 +32,7 @@ awesome-ci: dep
 #frontend:
 #
 test: awesome-ci ## Run unittests
-	go test -short -covermode=atomic -coverprofile=coverage.out -v ./internal/pkg/...
+	go test -short -v ./internal/pkg/...
 
 race: awesome-ci ## Run data race detector
 	-go test -race -short -v ${PKG_LIST}
