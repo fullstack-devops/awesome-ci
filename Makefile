@@ -27,10 +27,11 @@ dep_update:
 	go get -t ./...
 
 awesome-ci: dep
-	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_${PLATFORM} ./cmd/awesome-ci
+	GOOS=linux GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_amd64 ./cmd/awesome-ci
+	GOOS=linux GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_arm64 ./cmd/awesome-ci
+	GOOS=windows GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_amd64.exe ./cmd/awesome-ci
+	GOOS=windows GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_arm64.exe ./cmd/awesome-ci
 
-#frontend:
-#
 test: awesome-ci ## Run unittests
 	go test -short -v ./internal/pkg/...
 
