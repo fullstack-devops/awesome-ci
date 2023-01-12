@@ -44,6 +44,7 @@ jobs:
         with:
           path: build/package/
           key: awesome-ci-${{ github.sha }}-${{ hashFiles('build/package/awesome-ci*') }}
+          enableCrossOsArchive: true
           restore-keys: |
             awesome-ci-${{ github.sha }}
 
@@ -69,12 +70,11 @@ jobs:
         run: ls -la
 
       - name: Publish Release
-        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=build/package/$ARTIFACT1,file=build/package/$ARTIFACT2" -body "scripts/release-template.md"
+        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=build/package/$ARTIFACT1" -body "scripts/release-template.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACI_RELEASE_ID: ${{ needs.create_release.outputs.releaseid }}
           ARTIFACT1: awesome-ci_${{ needs.create_release.outputs.version }}_amd64
-          ARTIFACT2: awesome-ci_${{ needs.create_release.outputs.version }}_arm64
 
   update_action:
     runs-on: ubuntu-latest
