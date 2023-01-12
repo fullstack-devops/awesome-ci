@@ -65,6 +65,7 @@ jobs:
         with:
           path: build/package/
           key: awesome-ci-${{ github.event.pull_request.head.sha }}-${{ hashFiles('build/package/awesome-ci*') }}
+          enableCrossOsArchive: true
           restore-keys: |
             awesome-ci-${{ github.event.pull_request.head.sha }}
 
