@@ -6,21 +6,12 @@ nav_order: 1
 ---
 
 # GitHub Actions examples
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>
-    Table of contents
-  </summary>
-  {: .text-delta }
-1. TOC
-{:toc}
-</details>
-
 
 ### Build a Release
 
-This is an example from th awesome-ci project you can find the original workflow [here](https://github.com/fullstack-devops/awesome-ci/blob/main/.github/workflows/Release.yaml)
+This is an example from th awesome-ci project you can find the original workflow [here](https://github.com/fullstack-devops/awesome-ci/blob/main/.github/workflows/Release.yaml).
+
+{% raw %}
 
 ```yaml
 name: Publish Release
@@ -29,95 +20,81 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - "README.md"
-      - 'docs/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.github/PULL_REQUEST_TEMPLATE.md'
-
 
 jobs:
-  generate_infos:
+  create_release:
     runs-on: ubuntu-latest
     outputs:
-      releaseid: $\{\{ steps.tag.outputs.releaseid \}\}
-      version: $\{\{ steps.tag.outputs.version \}\}
-      pr: $\{\{ steps.tag.outputs.pr \}\}
+      release-id: ${{ steps.tag.outputs.ACI_RELEASE_ID }}
+      version: ${{ steps.tag.outputs.ACI_NEXT_VERSION }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
-      - name: collect infos and create release
-        run: |
-          awesome-ci pr info
-          awesome-ci release create -merge-sha $\{\{ github.sha \}\}
-        env:
-          GITHUB_TOKEN: $\{\{ secrets.GITHUB_TOKEN \}\}
-
-      - name: collect infos
+      - name: create release
         id: tag
-        shell: bash
-        run: |
-          echo "::set-output name=version::$ACI_VERSION"
-          echo "::set-output name=pr::$ACI_PR"
-          echo "::set-output name=releaseid::$ACI_RELEASE_ID"
+        run: awesome-ci release create --merge-sha ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
-    needs: generate_infos
+    needs: create_release
     strategy:
       matrix:
         arch: ["amd64", "arm64"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.19
 
-      - name: Build "$\{\{ matrix.arch \}\}"
-        run: go build -v -ldflags "-X main.version=$\{\{ needs.generate_infos.outputs.version \}\}" -o out/awesome-ci_$\{\{ needs.generate_infos.outputs.version \}\}_$\{\{ matrix.arch \}\}
+      - name: Build "${{ matrix.arch }}"
+        run: make VERSION="${{ needs.create_release.outputs.version }}"
         env:
           GOOS: linux
-          GOARCH: "$\{\{ matrix.arch \}\}"
+          GOARCH: "${{ matrix.arch }}"
 
       - name: Cache build outputs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-$\{\{ github.sha \}\}-$\{\{ hashFiles('out/awesome-ci*') \}\}
+          key: awesome-ci-${{ github.sha }}-${{ hashFiles('out/awesome-ci*') }}
           restore-keys: |
-            awesome-ci-$\{\{ github.sha \}\}
+            awesome-ci-${{ github.sha }}
 
   publish_release:
     runs-on: ubuntu-latest
-    needs: [generate_infos, build]
+    needs: [create_release, build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
       - name: get cached build outputs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-outputs-modules
         with:
           path: out/
-          key: awesome-ci-$\{\{ github.sha \}\}
-      
+          key: awesome-ci-${{ github.sha }}
+
       - name: Publish Release
-        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=out/$ARTIFACT1,file=out/$ARTIFACT2"
+        run: awesome-ci release publish --release-id "$ACI_RELEASE_ID" --asset "file=out/$ARTIFACT1" --asset "file=out/$ARTIFACT2"
         env:
-          GITHUB_TOKEN: $\{\{ secrets.GITHUB_TOKEN \}\}
-          ACI_RELEASE_ID: $\{\{ needs.generate_infos.outputs.releaseid \}\}
-          ARTIFACT1: awesome-ci_$\{\{ needs.generate_infos.outputs.version \}\}_amd64
-          ARTIFACT2: awesome-ci_$\{\{ needs.generate_infos.outputs.version \}\}_arm64
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACI_RELEASE_ID: ${{ needs.create_release.outputs.release-id }}
+          ARTIFACT1: awesome-ci_${{ needs.create_release.outputs.version }}_amd64
+          ARTIFACT2: awesome-ci_${{ needs.create_release.outputs.version }}_arm64
 ```
+
+{% endraw %}
 
 You need more examples? Please open an issue!

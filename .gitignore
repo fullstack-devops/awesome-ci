@@ -1,3 +1,6 @@
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -10,10 +13,25 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+out/*
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-out
+
+# Go workspace file
+go.work
+/docs/architecture/.asciidoctor/
+/build/docs/.asciidoctor/
+/build/coverage/
+/build/package/
+!/build/**/.keep
+/.idea
+
 *.env
-awesome-ci
 tests/github_env
+test.txt
+
+docs/_site
+# awesome specialties
+.awesomerc.yaml
+awesome.env

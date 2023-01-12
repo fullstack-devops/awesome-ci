@@ -1,37 +1,75 @@
 PROJECT_NAME := "awesome-ci"
-PKG := "$(PROJECT_NAME)"
-PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
-GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
+PROJECT_PKG = github.com/fullstack-devops/awesome-ci
+PKG_LIST = "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
+BUILD_DIR = ./build
 
-.PHONY: all dep build clean test coverage coverhtml lint
+VERSION ?=$(shell git describe --tags --exact-match 2>/dev/null || echo "dev-pr")
+COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null)
+BUILD_DATE ?= $(shell date +%FT%T%z)
+PLATFORM ?= $(shell dpkg --print-architecture)
 
-all: build
+# remove debug info from the binary & make it smaller
+LDFLAGS += -s -w
+# inject build info
+LDFLAGS += -X ${PROJECT_PKG}/internal/app/build.Version=${VERSION} -X ${PROJECT_PKG}/internal/app/build.CommitHash=${COMMIT_HASH} -X ${PROJECT_PKG}/internal/app/build.BuildDate=${BUILD_DATE}
 
-lint: ## Lint the files
-	@golint -set_exit_status ${PKG_LIST}
+#PLATFORMS := linux/amd64 windows/amd64
 
-test: ## Run unittests
-	export ACI_TEST_REPO=fullstack-devops/awesome-ci-test
-	@go test ./...
+.PHONY: docs clean
 
-race: dep ## Run data race detector
-	@go test -race -short -v main.go
+all: dep awesome-ci
+# coverage
 
-coverage: ## Generate global code coverage report
-	./tools/coverage.sh;
+dep:
+	go get -t ./...
 
-coverhtml: ## Generate global code coverage report in HTML
-	./tools/coverage.sh html;
+dep_update:
+	go get -t ./...
 
-dep: ## Get the dependencies
-	@go get -v -d ./...
-	@go get -u golang.org/x/lint
+awesome-ci: dep
+	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_${PLATFORM} ./cmd/awesome-ci
 
-build: dep ## Build the binary file
-	@go build -v -o "./out/$(PKG)" main.go
+#frontend:
+#
+test: awesome-ci ## Run unittests
+	go test -short -v ./internal/pkg/...
+
+race: awesome-ci ## Run data race detector
+	-go test -race -short -v ${PKG_LIST}
+
+# this requires ruby with the gem asciidoctor, asciidoctor-pdf and asciidoctor-diagram installed -> gem install asciidoctor-**
+# also graphviz is required
+docs:
+	asciidoctor -b html -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
+	asciidoctor-pdf -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
+
+docspodman:
+	podman run --rm -it -v ./:/documents/ docker.io/asciidoctor/docker-asciidoctor asciidoctor -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
+	podman run --rm -it -v ./:/documents/ docker.io/asciidoctor/docker-asciidoctor asciidoctor-pdf -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
+
+coverage:
+	-go test -covermode=count -coverprofile "${BUILD_DIR}/coverage/awesome-ci.cov" "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
+	echo mode: count > "${BUILD_DIR}/coverage/coverage.cov"
+	tail -n +2 "${BUILD_DIR}/coverage/awesome-ci.cov" >> "${BUILD_DIR}/coverage/coverage.cov"
+	go tool cover -html="${BUILD_DIR}/coverage/coverage.cov" -o "${BUILD_DIR}/coverage/coverage.html"
+
 
 clean: ## Remove previous build
-	@rm -r out
+	rm -rf ${BUILD_DIR}/docs/*
+	rm -rf ${BUILD_DIR}/coverage/*
+	rm -rf ${BUILD_DIR}/package/*
+	touch ${BUILD_DIR}/docs/.keep ${BUILD_DIR}/coverage/.keep ${BUILD_DIR}/package/.keep
 
-help: ## Display this help screen
-	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+help:
+	@echo Available targets are:
+	@echo   all             - build all
+	@echo   dep             - fetch dependencies
+	@echo   dep_update      - update dependencies
+	@echo   awesome-ci      - build awesome-ci
+	@echo   test            - run tests
+	@echo   race            - run race condition tests
+	@echo   coverage        - generate test coverage report
+	@echo   docs            - generate end user/developer documents
+	@echo   docspodman      - generate end user/developer documents with podman
+	@echo   clean           - cleanup project direcotories

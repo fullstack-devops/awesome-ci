@@ -1,14 +1,25 @@
-# Awesome CI
-
 [![Publish Release](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml)
+
+# Awesome CI
 
 **Description**: This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of [SemVer](https://semver.org/). The required version number is created with the correct naming of the branch prefix.
 
 - **Technology stack**: This tool is written in golang
-- **Status**: Alpha, at release the [CHANGELOG](CHANGELOG.md) would be updated.
+- **Status**: Stable, at release the [CHANGELOG](CHANGELOG.md) would be updated.
 - **Requests and Issues**: Please feel free to open an question or feature request in the Issue Board.
+- **Supported environments**:
+  - GitHub & GitHub Enterprise
+  - GitHub actions
+  - Jenkins Pipelines
+- **Sweet Spot**: If you use GitHub or GitHub Enterprise and GitHub Actions, you can use awesome-ci to its full potential!
 
- > Hint: GitLab is currently not supported
+**ToDos**:
+
+- more documentation
+- more tests (at least 80% coverage)
+- implement GitLab Api
+
+> Info: GitLab is currently not supported
 
 ## Usage
 
@@ -29,18 +40,15 @@ You can find frequently asked questions directly in the "Questions and Answers" 
 
 ## Getting involved
 
-General instructions on _how_ to contribute: [CONTRIBUTING](CONTRIBUTING.md)
+- [CONTRIBUTING](docs/CONTRIBUTING.md)
 
-General instructions _during_ the contribution period: [CONTRIBUTION](CONTRIBUTION.md)
-
-
-----
+---
 
 ## Open source licensing info
+
 1. [LICENSE](LICENSE)
 
-
-----
+---
 
 ## Credits and references
 
