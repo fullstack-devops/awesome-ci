@@ -20,9 +20,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: create_release
-    strategy:
-      matrix:
-        arch: ["amd64", "arm64"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -31,11 +28,11 @@ jobs:
         with:
           go-version: 1.19
 
-      - name: Build "${{ matrix.arch }}"
+      - name: Build
         run: make VERSION="${{ needs.create_release.outputs.version }}"
-        env:
-          GOOS: linux
-          GOARCH: "${{ matrix.arch }}"
+
+      - name: Test
+        run: make test
 
       - name: Cache build outputs
         uses: actions/cache@v3
@@ -44,7 +41,6 @@ jobs:
         with:
           path: build/package/
           key: awesome-ci-${{ github.sha }}-${{ hashFiles('build/package/awesome-ci*') }}
-          enableCrossOsArchive: true
           restore-keys: |
             awesome-ci-${{ github.sha }}
 
@@ -70,11 +66,15 @@ jobs:
         run: ls -la
 
       - name: Publish Release
-        run: awesome-ci release publish -releaseid "$ACI_RELEASE_ID" -assets "file=build/package/$ARTIFACT1" -body "scripts/release-template.md"
+        run: >-
+          awesome-ci release publish --release-id ${{ needs.create_release.outputs.releaseid }}
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_amd64"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_arm64"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_amd64.exe"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_arm64.exe"
+          -body "scripts/release-template.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ACI_RELEASE_ID: ${{ needs.create_release.outputs.releaseid }}
-          ARTIFACT1: awesome-ci_${{ needs.create_release.outputs.version }}_amd64
 
   update_action:
     runs-on: ubuntu-latest
