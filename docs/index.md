@@ -16,7 +16,7 @@ If you have any questions, you can find a form on the issue board. First, make s
 
 ### Notice:
 
-Every command that you can use is in the sidebar at cli. All options are listed there.
+Every command that you can use is in the sidebar at cli. All options are listed there or use the `awesome-ci help` command.
 
 If you need an example for your pipeline you can find it in the sidebar under the tab examples.
 
@@ -34,8 +34,8 @@ The patching of the version only takes effect if the merged branch begins with t
 
 > see also [override specialties](#override-specialties)
 
-![awesome-ci release process](release-process.drawio.svg "awesome-ci release process")
-![awesome-ci workflow](aci-workflow.drawio.png "awesome-ci workflow")
+![awesome-ci release process](pictures/release-process.drawio.svg "awesome-ci release process")
+![awesome-ci workflow](pictures/aci-workflow.drawio.png "awesome-ci workflow")
 
 > Hint: this tool automatically detects your environment. Supported are **Jenkins**, **GitHub Actions** and ~~GitLab CI~~
 

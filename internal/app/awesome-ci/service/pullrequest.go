@@ -25,21 +25,8 @@ func PrintPRInfos(number int, formatOut string) {
 		log.Fatalln(err)
 	}
 
-	var envVars []ces.KeyValue = []ces.KeyValue{
-		{Name: "ACI_PR", Value: strconv.Itoa(prInfos.Number)},
-		{Name: "ACI_PR_SHA", Value: prInfos.Sha},
-		{Name: "ACI_PR_SHA_SHORT", Value: prInfos.ShaShort},
-		{Name: "ACI_PR_BRANCH", Value: prInfos.BranchName},
-		{Name: "ACI_MERGE_COMMIT_SHA", Value: prInfos.MergeCommitSha},
-		{Name: "ACI_OWNER", Value: prInfos.Owner},
-		{Name: "ACI_REPO", Value: prInfos.Repo},
-		{Name: "ACI_PATCH_LEVEL", Value: string(prInfos.PatchLevel)},
-		{Name: "ACI_VERSION", Value: prInfos.NextVersion},
-		{Name: "ACI_LATEST_VERSION", Value: prInfos.LatestVersion},
-	}
-
-	if err := scmLayer.CES.ExportAsEnv(envVars); err != nil {
-		log.Fatalln("could not export env variables: %v", err)
+	if err := prInfosToEnv(scmLayer, prInfos); err != nil {
+		log.Fatalln(err)
 	}
 
 	fmt.Println("### Info output:")
@@ -47,7 +34,6 @@ func PrintPRInfos(number int, formatOut string) {
 	fmt.Printf("Latest release version: %s\n", prInfos.LatestVersion)
 	fmt.Printf("Patch level: %s\n", prInfos.PatchLevel)
 	fmt.Printf("Possible new release version: %s\n", prInfos.NextVersion)
-
 }
 
 func prInfosToEnv(scmLayer *scmportal.SCMLayer, prInfos *scmportal.PrMrRequestInfos) error {
@@ -61,6 +47,7 @@ func prInfosToEnv(scmLayer *scmportal.SCMLayer, prInfos *scmportal.PrMrRequestIn
 		{Name: "ACI_REPO", Value: prInfos.Repo},
 		{Name: "ACI_PATCH_LEVEL", Value: string(prInfos.PatchLevel)},
 		{Name: "ACI_VERSION", Value: prInfos.NextVersion},
+		{Name: "ACI_NEXT_VERSION", Value: prInfos.NextVersion},
 		{Name: "ACI_LATEST_VERSION", Value: prInfos.LatestVersion},
 	}
 
