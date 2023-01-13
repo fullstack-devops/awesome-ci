@@ -10,15 +10,21 @@ options:
     filters:
       Type:
         - feat
-    sort_by: Scope
+        - feature
+        - fix
+        - perf
+        - refactor
+        - chore
 
   commit_groups:
-    group_by: Type
-    sort_by: Title
-    title_order:
-      - feat
     title_maps:
       feat: Features
+      feature: features
+      fix: Bug Fixes
+      Fix: Bug Fixes
+      perf: Performance Improvements
+      refactor: Code Refactoring
+      chore: Chores
 
   header:
     pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
@@ -29,7 +35,3 @@ options:
   notes:
     keywords:
       - BREAKING CHANGE
-  issues:
-    prefix:
-      - bugfix
-      - fix
