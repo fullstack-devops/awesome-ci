@@ -1,4 +1,6 @@
 [![Publish Release](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml)
+[![CodeQL](https://github.com/fullstack-devops/awesome-ci/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/codeql-analysis.yml)
+[![gh-pages](https://github.com/fullstack-devops/awesome-ci/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/pages/pages-build-deployment)
 
 # Awesome CI
 
