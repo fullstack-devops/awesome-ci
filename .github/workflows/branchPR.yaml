@@ -5,7 +5,7 @@ on:
 
 jobs:
   generate_infos:
-    uses: fullstack-devops/actions/.github/workflows/generate-build-infos.yml@main
+    uses: fullstack-devops/git-workflows/.github/workflows/generate-build-infos.yml@main
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
