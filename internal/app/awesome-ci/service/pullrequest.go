@@ -10,17 +10,22 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func PrintPRInfos(number int, formatOut string) {
+func PrintPRInfos(number int, mergeCommitSha string, formatOut string) {
 	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if err = evalPrNumber(&number); err != nil {
-		log.Fatalln(err)
+	log.Infof("detected ces type: %s", scmLayer.CES.Type)
+
+	if mergeCommitSha == "" {
+		if err = evalPrNumber(&number); err != nil {
+			log.Fatalln(err)
+		}
+		log.Infof("evaluated pull request number %d", number)
 	}
 
-	prInfos, err := scmLayer.GetPrInfos(number, "")
+	prInfos, err := scmLayer.GetPrInfos(number, mergeCommitSha)
 	if err != nil {
 		log.Fatalln(err)
 	}

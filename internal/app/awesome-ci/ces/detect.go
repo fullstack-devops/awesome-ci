@@ -24,7 +24,7 @@ func DetectCes() (cesType CES,
 
 	if creds, errRc := rcFile.Load(); errRc == nil {
 		cesType = CES{
-			Type:    rcFile.CESType,
+			Type:    rcpersist.CESTypeLoMa,
 			EnvFile: envFile,
 		}
 		scmPortalType = rcFile.SCMPortalType

@@ -60,6 +60,7 @@ func ReleaseCreate(args *ReleaseArgs) {
 	} else {
 		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
 		if args.MergeCommitSHA == "" {
+			log.Infoln("no merge commit sha is given, eval...")
 			err := evalPrNumber(&args.PrNumber)
 			if err != nil {
 				log.Fatalln(err)
@@ -205,7 +206,7 @@ func getPrFromMergeMessage() (pr int, err error) {
 	regex := `.*#([0-9]+).*`
 	r := regexp.MustCompile(regex)
 
-	mergeMessage := r.FindStringSubmatch(runcmd(`git log -1 --pretty=format:"%s"`, true))
+	mergeMessage := r.FindStringSubmatch(tools.RunCmd(`git log -1 --pretty=format:"%s"`, true))
 	if len(mergeMessage) > 1 {
 		return strconv.Atoi(mergeMessage[1])
 	} else {

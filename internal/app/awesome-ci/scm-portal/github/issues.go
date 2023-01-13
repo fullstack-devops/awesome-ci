@@ -116,6 +116,7 @@ func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersio
 
 			if aciVersionOverride.MatchString(*comment.Body) {
 				nextVersion = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
+				log.Infof("found version override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
 				break
 			}
 
@@ -124,6 +125,7 @@ func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersio
 				if err != nil && err != semver.ErrUseMinimalPatchVersion {
 					log.Warnln(err)
 				}
+				log.Infof("found patchLevel override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
 				break
 			}
 		}

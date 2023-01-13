@@ -45,6 +45,7 @@ jobs:
             awesome-ci-${{ github.sha }}
 
   publish_release:
+    environment: production
     runs-on: ubuntu-latest
     needs: [create_release, build]
     steps:

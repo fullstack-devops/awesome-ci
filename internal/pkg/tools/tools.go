@@ -13,7 +13,7 @@ import (
 )
 
 func GetDefaultBranch() string {
-	branch := runcmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
+	branch := RunCmd(`git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'`, true)
 	return strings.TrimSuffix(branch, "\n")
 }
 
@@ -23,7 +23,7 @@ func DevideOwnerAndRepo(fullRepo string) (owner string, repo string) {
 	return
 }
 
-func runcmd(cmd string, shell bool) string {
+func RunCmd(cmd string, shell bool) string {
 	if shell {
 		out, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {

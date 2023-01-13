@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd"
 
@@ -20,7 +19,6 @@ const fmTemplate = `---
 layout: default
 nav_order: 2
 parent: CLI
-date: %s
 title: "%s"
 ---
 `
@@ -39,14 +37,13 @@ func TestCreateCobraDocs(t *testing.T) {
 }
 
 func filePrepender(filename string) string {
-	now := time.Now().Format(time.RFC3339)
 	name := filepath.Base(filename)
 	base := strings.TrimSuffix(name, path.Ext(name))
 
 	if base != "awesome-ci" {
 		base = strings.Replace(base, "awesome-ci", "", -1)
 	}
-	return fmt.Sprintf(fmTemplate, now, strings.Replace(base, "_", " ", -1))
+	return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1))
 }
 
 func linkHandler(name string) string {

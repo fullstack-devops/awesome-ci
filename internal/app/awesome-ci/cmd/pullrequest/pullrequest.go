@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	number    int
-	formatOut string
+	number         int
+	formatOut      string
+	mergeCommitSha string
 )
 
 var Cmd = &cobra.Command{
@@ -25,7 +26,7 @@ var infoCmd = &cobra.Command{
 	Short: "get pull request info",
 	Long:  `Print all infos about a pull request in GitHub.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		service.PrintPRInfos(number, formatOut)
+		service.PrintPRInfos(number, mergeCommitSha, formatOut)
 	},
 }
 
@@ -35,6 +36,7 @@ func init() {
 
 	// Flags
 	infoCmd.Flags().IntVarP(&number, "number", "n", 0, "overwrite the issue number")
+	infoCmd.Flags().StringVarP(&mergeCommitSha, "merge-commit-sha", "c", "", "send a given merge commit sha")
 	// needs to be implemented
 	// infoCmd.Flags().StringVarP(&formatOut, "output", "o", "", "define output available: [json, yaml]")
 }
