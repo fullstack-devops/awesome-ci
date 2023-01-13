@@ -70,10 +70,10 @@ jobs:
       - name: Publish Release
         run: >-
           awesome-ci release publish --release-id ${{ needs.create_release.outputs.releaseid }}
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux_amd64"
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux_arm64"
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows_amd64.exe"
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows_arm64.exe"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux-amd64"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux-arm64"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows-amd64.exe"
+          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows-arm64.exe"
           -body "scripts/release-template.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
