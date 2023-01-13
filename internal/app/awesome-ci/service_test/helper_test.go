@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/connect"
+	scmportal "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal"
+	githublocal "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
@@ -26,7 +28,7 @@ type TestEnvironment struct {
 	localGitRep         *git.Repository
 }
 
-func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *TestEnvironment, cleanup func()) {
+func getTestEnvironment(preparedReleases *[]string, t *testing.T, ghrc *githublocal.GitHubRichClient) (testEnv *TestEnvironment, cleanup func()) {
 
 	testRepo, ok := os.LookupEnv("ACI_TEST_REPO")
 
@@ -35,7 +37,14 @@ func getTestEnvironment(preparedReleases *[]string, t *testing.T) (testEnv *Test
 		t.FailNow()
 	}
 
-	testEnv = &TestEnvironment{
+	scmLayer, err := scmportal.LoadSCMPortalLayer()
+	if err != nil {
+		t.Errorf("%v", err)
+		t.FailNow()
+	}
+
+	scmLayer.CES.
+		testEnv = &TestEnvironment{
 		ctx:       context.Background(),
 		testOwner: strings.Split(testRepo, "/")[0],
 		testRepo:  strings.Split(testRepo, "/")[1],

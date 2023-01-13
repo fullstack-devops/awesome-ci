@@ -14,7 +14,6 @@ import (
 // 3. read comments from pr/mr and looking for overrides
 func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRequestInfos, err error) {
 	infos = &PrMrRequestInfos{}
-	infos.Number = number
 
 	// 1. get pr/mr infos from github or gitlab
 	switch grc := lay.Grc.(type) {
@@ -25,6 +24,7 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 			return nil, err
 		}
 
+		infos.Number = *prInfos.Number
 		infos.Sha = *prInfos.Head.SHA
 		infos.ShaShort = infos.Sha[:8]
 		infos.BranchName = *prInfos.Head.Ref
@@ -42,12 +42,12 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 	}
 
 	// 2. comment help instructions to issue
-	if errCommHelp := lay.CommentHelpToPullRequest(number); errCommHelp != nil {
+	if errCommHelp := lay.CommentHelpToPullRequest(infos.Number); errCommHelp != nil {
 		log.Warnln(errCommHelp)
 	}
 
 	// 3. read comments from pr/mr and looking for overrides
-	version, patchLevel, err := lay.SearchIssuesForOverrides(number)
+	version, patchLevel, err := lay.SearchIssuesForOverrides(infos.Number)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 		return infos, nil
 
 	} else {
-		log.Traceln("version override via pr comments specified")
+		log.Infoln("version override via pr comments specified")
 		infos.NextVersion = *version
 	}
 
