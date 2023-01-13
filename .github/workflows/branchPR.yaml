@@ -36,7 +36,7 @@ jobs:
           echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
 
       - name: test build Infos
-        run: build/package/awesome-ci_${{ needs.generate_infos.outputs.version }}_amd64 pr info -n ${{ github.event.pull_request.number }} -v > $GITHUB_STEP_SUMMARY
+        run: build/package/awesome-ci_${{ needs.generate_infos.outputs.version }}_linux_amd64 pr info -n ${{ github.event.pull_request.number }} -v > $GITHUB_STEP_SUMMARY
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: test env file
