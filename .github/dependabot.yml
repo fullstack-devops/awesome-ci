@@ -8,11 +8,17 @@ updates:
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
     rebase-strategy: auto
+    commit-message:
+      prefix: "fix"
+      include: scope
     schedule:
       interval: "daily"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     rebase-strategy: auto
+    commit-message:
+      prefix: "fix"
+      include: scope
     schedule:
       interval: "weekly"
