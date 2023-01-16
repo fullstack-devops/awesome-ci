@@ -23,6 +23,7 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 		if err != nil {
 			return nil, err
 		}
+		log.Traceln("got PR information from scm-portal-layer")
 
 		infos.Number = *prInfos.Number
 		infos.Sha = *prInfos.Head.SHA
@@ -35,6 +36,7 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 		if infos.PatchLevel, err = semver.ParsePatchLevelFormBranch(infos.BranchName); err != nil {
 			log.Warnln(err)
 		}
+		log.Traceln("completed PR standard information to: ", *infos)
 
 	case *gitlab.GitLabRichClient:
 		// not implemented
@@ -42,22 +44,28 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 	}
 
 	// 2. comment help instructions to issue
+	log.Traceln("comment help instructions to issue")
 	if errCommHelp := lay.CommentHelpToPullRequest(infos.Number); errCommHelp != nil {
 		log.Warnln(errCommHelp)
 	}
+	log.Traceln("commented help instructions to issue")
 
 	// 3. read comments from pr/mr and looking for overrides
+	log.Traceln("read comments from pr/mr and looking for overrides")
 	version, patchLevel, err := lay.SearchIssuesForOverrides(infos.Number)
 	if err != nil {
 		return nil, err
 	}
+	log.Tracef("read comments from pr/mr complete conclusions (if nil no override), version: %v, patchLevel: %v", version, patchLevel)
 
 	// get latest release, if any
+	log.Traceln("get latest release, if any")
 	repositoryRelease, err := lay.GetLatestReleaseVersion()
 	if err != nil {
 		log.Infoln("no github release found -> wirting default 0.0.0")
 		infos.LatestVersion = "0.0.0"
 	} else {
+		log.Infoln("found latest release", repositoryRelease.TagName)
 		infos.LatestVersion = repositoryRelease.TagName
 	}
 

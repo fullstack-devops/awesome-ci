@@ -114,38 +114,45 @@ func (ghrc *GitHubRichClient) PublishRelease(
 // GetLatestReleaseVersion
 func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
 	var releaseMap = make(map[string]*github.RepositoryRelease)
+	var loadReleasesFromRepo func(page int)
 
-	var listOptions github.ListOptions = github.ListOptions{
-		PerPage: 100,
-		Page:    0,
-	}
-
-	for listOptions.Page >= 0 {
-		releases, response, err := ghrc.Client.Repositories.ListReleases(ctx, ghrc.Owner, ghrc.Repository, &listOptions)
-
+	loadReleasesFromRepo = func(page int) {
+		log.Tracef("querying release page %d", page)
+		releases, response, err := ghrc.Client.Repositories.ListReleases(ctx, ghrc.Owner, ghrc.Repository, &github.ListOptions{
+			PerPage: 100,
+			Page:    page,
+		})
 		if err != nil {
-			return nil, err
+			log.Fatalf("error at loading repos from emst: %v", err)
 		}
 
+		log.Tracef("found %d releases at page %d begin with mapping...", len(releases), page)
 		for _, release := range releases {
 			releaseMap[*release.TagName] = release
 		}
 
-		if listOptions.Page == response.NextPage {
-			break
+		log.Traceln("####### next page:", response.NextPage)
+		if response.NextPage == 0 {
+			log.Traceln("ended with paging through releases")
+			return
+		} else {
+			loadReleasesFromRepo(page + 1)
 		}
-
-		listOptions.Page = response.NextPage
 	}
+
+	// starting recusive function
+	loadReleasesFromRepo(1)
 
 	return ghrc.findLatestRelease(`.`, releaseMap)
 }
 
 func (ghrc *GitHubRichClient) findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
+	log.Traceln("open local git repository...")
 	gitRepo, err := git.PlainOpen(directory)
 	if err != nil {
 		return nil, err
 	}
+	log.Traceln("...opened local git repository")
 
 	tags, err := tools.GetGitTagsUpToHead(gitRepo)
 
