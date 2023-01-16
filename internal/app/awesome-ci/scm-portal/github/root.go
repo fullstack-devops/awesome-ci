@@ -40,7 +40,10 @@ func NewGitHubClient(serverUrl *string, repoUrl *string, token *string) (githubR
 	}
 
 	if rateLimit, _, err := githubClient.RateLimits(context.Background()); err != nil {
-		return nil, fmt.Errorf("connection to GitHub could not be etablished: %v", err)
+		if !strings.Contains(fmt.Sprintf("%v", err), "404 Rate limiting is not enabled") {
+			log.Traceln("rate limiting is not enabled, but connection is good")
+			return nil, fmt.Errorf("connection to GitHub could not be etablished: %v", err)
+		}
 	} else {
 		log.Tracef("remaining rates %d", rateLimit.Core.Remaining)
 	}

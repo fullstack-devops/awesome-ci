@@ -81,13 +81,20 @@ func ReleaseCreate(args *ReleaseArgs) {
 
 	if args.DryRun {
 		log.Infof("Would create new release with version: %s\n", version)
+
+		fmt.Println("### Info output:")
+		fmt.Printf("Would create new release with version: %s\n", version)
 	} else {
 		log.Infof("Writing new release: %s\n", version)
+		fmt.Println("### Info output:")
+		fmt.Printf("Writing new release with version: %s\n", version)
+
 		createdRelease, err := scmLayer.CreateRelease(version, args.ReleaseBranch, args.Body)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		log.Infof("Create release successful. ID: %d", createdRelease.ID)
+		fmt.Printf("Create release successful. ID: %d", createdRelease.ID)
 
 		var envVars []ces.KeyValue = []ces.KeyValue{
 			{Name: "ACI_RELEASE_ID", Value: fmt.Sprintf("%d", createdRelease.ID)},
