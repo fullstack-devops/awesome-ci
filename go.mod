@@ -9,7 +9,7 @@ require (
 	github.com/google/go-github/v49 v49.1.0
 	github.com/itchyny/gojq v0.12.11
 	github.com/spf13/cobra v1.6.1
-	github.com/xanzy/go-gitlab v0.78.0
+	github.com/xanzy/go-gitlab v0.80.2
 	golang.org/x/oauth2 v0.4.0
 	gopkg.in/yaml.v2 v2.4.0
 )
