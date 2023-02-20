@@ -20,6 +20,7 @@ type ReleaseArgs struct {
 	PrNumber       int
 	MergeCommitSHA string
 	ReleaseBranch  string
+	ReleasePrefix  string
 	DryRun         bool
 	Hotfix         bool
 	Body           string
@@ -31,52 +32,9 @@ func ReleaseCreate(args *ReleaseArgs) {
 		log.Fatalln(err)
 	}
 
-	var version string = ""
-
-	if args.Version != "" && args.PatchLevel != "" {
-		parsedPatchLevel, err := semver.ParsePatchLevel(args.PatchLevel)
-		if err != nil && err != semver.ErrUseMinimalPatchVersion {
-			log.Fatalln(err)
-		}
-		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	} else if args.Version != "" && args.PatchLevel == "" {
-		version = args.Version
-	} else if args.Hotfix {
-
-		release, err := scmLayer.GetLatestReleaseVersion()
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-		version, err = semver.IncreaseVersion(semver.Bugfix, release.TagName)
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-	} else {
-		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
-		if args.MergeCommitSHA == "" {
-			log.Infoln("no merge commit sha is given, eval...")
-			err := evalPrNumber(&args.PrNumber)
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}
-
-		prInfos, err := scmLayer.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		version = prInfos.NextVersion
-
-		if err = prInfosToEnv(scmLayer, prInfos); err != nil {
-			log.Fatalln(err)
-		}
+	version, releasePrefix, err := argsToVersion(scmLayer, args)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	if args.DryRun {
@@ -89,7 +47,7 @@ func ReleaseCreate(args *ReleaseArgs) {
 		fmt.Println("### Info output:")
 		fmt.Printf("Writing new release with version: %s\n", version)
 
-		createdRelease, err := scmLayer.CreateRelease(version, args.ReleaseBranch, args.Body)
+		createdRelease, err := scmLayer.CreateRelease(version, releasePrefix, args.ReleaseBranch, args.Body)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -112,47 +70,11 @@ func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 		log.Fatalln(err)
 	}
 
-	var version string = ""
+	var version, releasePrefix string
 
-	if args.Version != "" && args.PatchLevel != "" {
-		parsedPatchLevel, err := semver.ParsePatchLevel(args.PatchLevel)
-		if err != nil && err != semver.ErrUseMinimalPatchVersion {
-			log.Fatalln(err)
-		}
-		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
+	if releaseId == 0 {
+		version, releasePrefix, err = argsToVersion(scmLayer, args)
 		if err != nil {
-			log.Fatalln(err)
-		}
-	} else if args.Version != "" && args.PatchLevel == "" {
-		version = args.Version
-	} else if args.Hotfix {
-
-		release, err := scmLayer.GetLatestReleaseVersion()
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-		version, err = semver.IncreaseVersion(semver.Bugfix, release.TagName)
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-	} else if releaseId == 0 {
-		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
-		if args.MergeCommitSHA == "" {
-			err := evalPrNumber(&args.PrNumber)
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}
-		prInfos, err := scmLayer.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		version = prInfos.NextVersion
-
-		if err = prInfosToEnv(scmLayer, prInfos); err != nil {
 			log.Fatalln(err)
 		}
 	}
@@ -178,7 +100,7 @@ func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 		log.Infof("Would publishing release: %s", version)
 	} else {
 		log.Infof("Publishing release: %s - %d", version, releaseId)
-		_, err := scmLayer.PublishRelease(version, args.ReleaseBranch, body, releaseId, assetsEncoded)
+		_, err := scmLayer.PublishRelease(version, releasePrefix, args.ReleaseBranch, body, releaseId, assetsEncoded)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -195,6 +117,65 @@ func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 			}
 		} */
 	}
+}
+
+func argsToVersion(scmLayer *scmportal.SCMLayer, args *ReleaseArgs) (version, releasePrefix string, err error) {
+	if args.ReleasePrefix != "" {
+		releasePrefix = args.ReleasePrefix
+	} else {
+		releasePrefix = "Release"
+	}
+
+	if args.Version != "" && args.PatchLevel != "" {
+		parsedPatchLevel, err := semver.ParsePatchLevel(args.PatchLevel)
+		if err != nil && err != semver.ErrUseMinimalPatchVersion {
+			log.Fatalln(err)
+		}
+		version, err = semver.IncreaseVersion(parsedPatchLevel, args.Version)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+	} else if args.Version != "" && args.PatchLevel == "" {
+		version = args.Version
+
+	} else if args.Hotfix {
+		release, err := scmLayer.GetLatestReleaseVersion()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		version, err = semver.IncreaseVersion(semver.Bugfix, release.TagName)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if args.ReleasePrefix == "" {
+			releasePrefix = "Hotfix"
+		}
+
+	} else {
+		// if no merge commit sha is provided, the pull request number should either be specified or evaluated from the merge message (fallback)
+		if args.MergeCommitSHA == "" {
+			log.Infoln("no merge commit sha is given, eval...")
+			err := evalPrNumber(&args.PrNumber)
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+
+		prInfos, err := scmLayer.GetPrInfos(args.PrNumber, args.MergeCommitSHA)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		version = prInfos.NextVersion
+
+		if err = prInfosToEnv(scmLayer, prInfos); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return
 }
 
 func evalPrNumber(override *int) (err error) {

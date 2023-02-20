@@ -42,11 +42,11 @@ func (lay SCMLayer) GetLatestReleaseVersion() (release *Release, err error) {
 	return
 }
 
-func (lay SCMLayer) CreateRelease(tagName string, branch string, body string) (createdRelease *Release, err error) {
+func (lay SCMLayer) CreateRelease(tagName string, releasePrefix string, branch string, body string) (createdRelease *Release, err error) {
 	switch grc := lay.Grc.(type) {
 
 	case *github.GitHubRichClient:
-		createdRel, err := grc.CreateRelease(tagName, branch, body)
+		createdRel, err := grc.CreateRelease(tagName, releasePrefix, branch, body)
 		if err != nil {
 			return nil, err
 		}
@@ -78,11 +78,11 @@ func (lay SCMLayer) CreateRelease(tagName string, branch string, body string) (c
 	return
 }
 
-func (lay SCMLayer) PublishRelease(tagName string, branch string, body string, releaseId int64, assets []tools.UploadAsset) (publishedRelease *Release, err error) {
+func (lay SCMLayer) PublishRelease(tagName string, releasePrefix string, branch string, body string, releaseId int64, assets []tools.UploadAsset) (publishedRelease *Release, err error) {
 	switch grc := lay.Grc.(type) {
 
 	case *github.GitHubRichClient:
-		_, err := grc.PublishRelease(tagName, branch, body, releaseId, assets)
+		_, err := grc.PublishRelease(tagName, releasePrefix, branch, body, releaseId, assets)
 		if err != nil {
 			return nil, err
 		}
