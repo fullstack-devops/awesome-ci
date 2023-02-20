@@ -13,9 +13,9 @@ import (
 )
 
 // CreateRelease
-func (ghrc *GitHubRichClient) CreateRelease(tagName string, releaseBranch string, body string) (createdRelease *github.RepositoryRelease, err error) {
+func (ghrc *GitHubRichClient) CreateRelease(tagName string, releasePrefix string, releaseBranch string, body string) (createdRelease *github.RepositoryRelease, err error) {
 	draft := true
-	relName := "Release " + tagName
+	relName := fmt.Sprintf("%s %s", releasePrefix, tagName)
 	if releaseBranch == "" {
 		releaseBranch = tools.GetDefaultBranch()
 	}
@@ -42,6 +42,7 @@ func (ghrc *GitHubRichClient) CreateRelease(tagName string, releaseBranch string
 // PublishRelease
 func (ghrc *GitHubRichClient) PublishRelease(
 	tagName string,
+	releasePrefix string,
 	releaseBranch string,
 	body string,
 	releaseId int64,
@@ -49,7 +50,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 
 	if releaseId == 0 {
 		log.Infoln("no release found, creating one...")
-		release, err := ghrc.CreateRelease(tagName, releaseBranch, body)
+		release, err := ghrc.CreateRelease(tagName, releasePrefix, releaseBranch, body)
 		if err != nil {
 			log.Fatalln(err)
 		}

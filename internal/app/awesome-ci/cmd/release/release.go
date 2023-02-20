@@ -68,6 +68,7 @@ func init() {
 	Cmd.PersistentFlags().BoolVarP(&releaseArgs.Hotfix, "hotfix", "", false, "create a hotfix release")
 	Cmd.PersistentFlags().StringVar(&releaseArgs.MergeCommitSHA, "merge-sha", "", "set the merge sha")
 	Cmd.PersistentFlags().StringVar(&releaseArgs.ReleaseBranch, "release-branch", "", "set release branch (default: git default)")
+	Cmd.PersistentFlags().StringVar(&releaseArgs.ReleasePrefix, "release-prefix", "", "set a custom release prefix (default -> Release or Hotfix)")
 	Cmd.PersistentFlags().StringVar(&releaseArgs.Version, "version", "", "override version to Update")
 	Cmd.PersistentFlags().StringVarP(&releaseArgs.Body, "body", "b", "", "custom release message (markdown string or file)")
 	Cmd.PersistentFlags().StringVarP(&releaseArgs.PatchLevel, "patch-level", "l", "", "predefine patch level of version to Update")
