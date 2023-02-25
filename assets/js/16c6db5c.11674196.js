@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[422],{7310:e=>{e.exports=JSON.parse('{"title":"CLI","slug":"/category/cli","permalink":"/awesome-ci/docs/category/cli","navigation":{"previous":{"title":"Overview","permalink":"/awesome-ci/docs/overview"},"next":{"title":"awesome-ci","permalink":"/awesome-ci/docs/cli/awesome-ci"}}}')}}]);
