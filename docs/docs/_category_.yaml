@@ -1,0 +1,6 @@
+label: "Awesome CI"
+collapsible: true
+collapsed: true
+link:
+  type: generated-index
+  title: Awesome CI
