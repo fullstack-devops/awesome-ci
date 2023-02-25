@@ -32,10 +32,6 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           editUrl: "https://github.com/fullstack-devops/awesome-ci/tree/main/",
         },
-        blog: {
-          showReadingTime: true,
-          editUrl: "https://github.com/fullstack-devops/awesome-ci/tree/main/",
-        },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
         },
@@ -58,7 +54,7 @@ const config = {
         items: [
           {
             type: "doc",
-            docId: "intro",
+            docId: "overview",
             position: "left",
             label: "Overview",
           },
@@ -81,7 +77,7 @@ const config = {
             items: [
               {
                 label: "Overview",
-                to: "/docs/intro",
+                to: "/docs/overview",
               },
             ],
           },

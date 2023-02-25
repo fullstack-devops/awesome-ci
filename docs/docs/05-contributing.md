@@ -1,5 +1,5 @@
 ---
-title: Contributing
+title: CONTRIBUTING
 ---
 
 # Contributing
@@ -25,6 +25,10 @@ Please note we have a code of conduct, please follow it in all your interactions
 | ------------ | -------------------------------------- |
 | `ces`        | code execution service                 |
 | `scm-portal` | means GitHub, GitLab or Bitbucket etc. |
+
+### Abstraction of layers
+
+![Abstraction of layers](/img-awesome-ci/layers.svg)
 
 ## Code of Conduct
 
