@@ -3,6 +3,7 @@ package cmd_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -13,23 +14,17 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-var docsPath = "../../../../docs/cmd"
+var docsPath = "../../../../docs/docs/CLI"
 
 const fmTemplate = `---
-layout: default
-nav_order: 2
-parent: CLI
 title: "%s"
 ---
 `
 
 func TestCreateCobraDocs(t *testing.T) {
-	/* if os.Getenv("COBRA_DOCS") == "" {
-		err := doc.GenMarkdownTree(cmd.RootCmd, "../../../../docs/cmd")
-		if err != nil {
-			log.Fatal(err)
-		}
-	} */
+	if _, ok := os.LookupEnv("CI"); ok {
+		t.Skip()
+	}
 	err := doc.GenMarkdownTreeCustom(cmd.RootCmd, docsPath, filePrepender, linkHandler)
 	if err != nil {
 		log.Fatal(err)
@@ -40,13 +35,15 @@ func filePrepender(filename string) string {
 	name := filepath.Base(filename)
 	base := strings.TrimSuffix(name, path.Ext(name))
 
+	// replace "_" with " " for a nicer look
+	base = strings.Replace(base, "_", " ", -1)
 	if base != "awesome-ci" {
-		base = strings.Replace(base, "awesome-ci", "", -1)
+		base = strings.Replace(base, "awesome-ci", "_", -1)
 	}
-	return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1))
+	return fmt.Sprintf(fmTemplate, base)
 }
 
 func linkHandler(name string) string {
 	base := strings.TrimSuffix(name, path.Ext(name))
-	return "/commands/" + strings.ToLower(base) + "/"
+	return "./" + strings.ToLower(base)
 }
