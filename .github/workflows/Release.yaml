@@ -70,9 +70,9 @@ jobs:
         run: ls -la
 
       - name: update changelog
-        run: docker --rm run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
+        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
       - name: update changelog in template
-        run: docker --rm run -v "$PWD":/workdir quay.io/git-chglog/git-chglog ${{ needs.create_release.outputs.latest-version }}.. >> scripts/release-template.md
+        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog ${{ needs.create_release.outputs.latest-version }}.. >> scripts/release-template.md
 
       - name: Publish Release
         run: >-
