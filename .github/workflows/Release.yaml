@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: 1.20
 
       - name: Build
         run: make VERSION="${{ needs.create_release.outputs.version }}"
@@ -65,12 +65,14 @@ jobs:
           path: build/package/
           key: awesome-ci-${{ github.sha }}
 
-      - name: get generated artifacts
+      - name: list generated artifacts
         working-directory: build/package
         run: ls -la
 
       - name: update changelog
-        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
+        run: docker --rm run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
+      - name: update changelog in template
+        run: docker --rm run -v "$PWD":/workdir quay.io/git-chglog/git-chglog ${{ needs.create_release.outputs.latest-version }}.. >> scripts/release-template.md
 
       - name: Publish Release
         run: >-
@@ -83,27 +85,6 @@ jobs:
           --body "scripts/release-template.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  update_changelog:
-    runs-on: ubuntu-latest
-    needs: [create_release, publish_release]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: update changelog
-        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
-
-      - name: git update main
-        continue-on-error: true
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git status
-          git commit CHANGELOG.md -m "update CHANGELOG.md"
-          git push
 
   update_action:
     runs-on: ubuntu-latest
