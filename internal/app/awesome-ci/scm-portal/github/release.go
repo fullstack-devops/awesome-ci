@@ -69,7 +69,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 	// upload any given artifacts
 	var releaseBodyAssets string = ""
 	if len(uploadArtifacts) > 0 {
-		releaseBodyAssets = "### Asstes\n"
+		releaseBodyAssets = "### Assets\n"
 
 		for _, fileAndInfo := range uploadArtifacts {
 			log.Infof("uploading %s as asset to release\n", fileAndInfo.Name)
@@ -129,7 +129,11 @@ func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.R
 
 		log.Tracef("found %d releases at page %d begin with mapping...", len(releases), page)
 		for _, release := range releases {
-			releaseMap[*release.TagName] = release
+			if !*release.Draft {
+				releaseMap[*release.TagName] = release
+			} else {
+				log.Infof("ignoring draft release %s", *release.Name)
+			}
 		}
 
 		log.Traceln("####### next page:", response.NextPage)

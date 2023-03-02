@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: 1.20
 
       - name: Build
         run: make VERSION="${{ needs.create_release.outputs.version }}"
@@ -52,6 +52,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
@@ -63,9 +65,14 @@ jobs:
           path: build/package/
           key: awesome-ci-${{ github.sha }}
 
-      - name: get generated artifacts
+      - name: list generated artifacts
         working-directory: build/package
         run: ls -la
+
+      - name: update changelog
+        run: docker --rm run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
+      - name: update changelog in template
+        run: docker --rm run -v "$PWD":/workdir quay.io/git-chglog/git-chglog ${{ needs.create_release.outputs.latest-version }}.. >> scripts/release-template.md
 
       - name: Publish Release
         run: >-
@@ -74,30 +81,10 @@ jobs:
           -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux-arm64"
           -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows-amd64.exe"
           -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows-arm64.exe"
-          -body "scripts/release-template.md"
+          -a "file=CHANGELOG.md"
+          --body "scripts/release-template.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  update_changelog:
-    runs-on: ubuntu-latest
-    needs: [create_release, publish_release]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: update changelog
-        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
-
-      - name: git update main
-        continue-on-error: true
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git status
-          git commit CHANGELOG.md -m "update CHANGELOG.md"
-          git push
 
   update_action:
     runs-on: ubuntu-latest
