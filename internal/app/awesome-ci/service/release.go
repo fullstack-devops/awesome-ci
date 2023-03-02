@@ -84,7 +84,7 @@ func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 		for _, asset := range assets {
 			assetInfo, err := tools.GetAsset(asset)
 			if err != nil {
-				log.Fatalln("not all specified asstes available, please check")
+				log.Fatalln("not all specified assets available, please check")
 			}
 			assetsEncoded = append(assetsEncoded, *assetInfo)
 		}

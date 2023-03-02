@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: 'Bug: '
-labels: 'bug'
-assignees: ''
-
+title: "Bug: "
+labels: "bug"
+assignees: ""
 ---
 
 **Describe the bug**
@@ -13,20 +12,20 @@ A clear and concise description of what the bug is.
 **Your environment/setup**
 In what tool is your pipeline running?
 
-- Jenkins Pipeline
-- GitHub Actions
-- GitLab CI
+- [ ] GitHub Actions
+- [ ] GitLab CI
+- [ ] Jenkins Pipeline
 
 How is this tool installed
 
-- Container
-- Bare Metal
-- Virtual machine
+- [ ] Container
+- [ ] Bare Metal
+- [ ] Virtual machine
 
 Are all environment variables set? See README.md
 
-- yes
-- no
+- [ ] yes
+- [ ] no
 
 **To Reproduce**
 Paste your executed command here:
