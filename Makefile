@@ -36,15 +36,9 @@ test: ## Run unittests
 race: ## Run data race detector
 	-go test -race -short -v ${PKG_LIST}
 
-# this requires ruby with the gem asciidoctor, asciidoctor-pdf and asciidoctor-diagram installed -> gem install asciidoctor-**
-# also graphviz is required
-docs:
-	asciidoctor -b html -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
-	asciidoctor-pdf -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
-
-docspodman:
-	podman run --rm -it -v ./:/documents/ docker.io/asciidoctor/docker-asciidoctor asciidoctor -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
-	podman run --rm -it -v ./:/documents/ docker.io/asciidoctor/docker-asciidoctor asciidoctor-pdf -r asciidoctor-diagram -d book -D build/docs ./docs/architecture/awesome-ci.adoc
+chglog:
+	go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
+	git-chglog -o CHANGELOG.md 1.0.0..
 
 coverage:
 	-go test -covermode=count -coverprofile "${BUILD_DIR}/coverage/awesome-ci.cov" "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
@@ -68,7 +62,6 @@ help:
 	@echo   awesome-ci      - build awesome-ci
 	@echo   test            - run tests
 	@echo   race            - run race condition tests
+	@echo   chglog          - install and create changelog with chglog
 	@echo   coverage        - generate test coverage report
-	@echo   docs            - generate end user/developer documents
-	@echo   docspodman      - generate end user/developer documents with podman
 	@echo   clean           - cleanup project direcotories

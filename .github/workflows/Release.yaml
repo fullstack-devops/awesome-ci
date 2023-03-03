@@ -35,6 +35,11 @@ jobs:
       - name: Test
         run: make test
 
+      - name: update changelog in template
+        run: cp scripts/release-template.md build/package/release-template.md && make chglog ${{ needs.create_release.outputs.latest-version }}.. >> build/package/release-template.md
+      - name: create full changelog
+        run: make chglog -o build/package/CHANGELOG.md 1.0.0..
+
       - name: Cache build outputs
         uses: actions/cache@v3
         env:
@@ -68,11 +73,6 @@ jobs:
       - name: list generated artifacts
         working-directory: build/package
         run: ls -la
-
-      - name: update changelog in template
-        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog ${{ needs.create_release.outputs.latest-version }}.. >> scripts/release-template.md
-      - name: create full changelog
-        run: docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog -o CHANGELOG.md 1.0.0..
 
       - name: Publish Release
         run: >-
