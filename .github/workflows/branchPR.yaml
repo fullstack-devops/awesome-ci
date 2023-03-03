@@ -42,6 +42,9 @@ jobs:
       - name: test env file
         run: export | grep ACI_
 
+      - name: create changelog & update release-template.md
+        run: LATEST_VERSION="${{ needs.generate_infos.outputs.latest-version }}" make chglog
+
       - name: Cache build outputs
         uses: actions/cache@v3
         env:
@@ -58,6 +61,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: get cached build outputs
         uses: actions/cache@v3
@@ -69,4 +74,6 @@ jobs:
 
       - name: get generated artifacts
         working-directory: build/package
-        run: ls -la
+        run: |
+          ls -la
+          cat release-template.md
