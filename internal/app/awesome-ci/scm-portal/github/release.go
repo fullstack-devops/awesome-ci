@@ -94,7 +94,12 @@ func (ghrc *GitHubRichClient) PublishRelease(
 		}
 	}
 
-	newReleaseBody := fmt.Sprintf("%s\n\n%s", *existingRelease.Body, releaseBodyAssets)
+	var newReleaseBody = ""
+	if *existingRelease.Body == "" {
+		newReleaseBody = fmt.Sprintf("%s\n\n%s", body, releaseBodyAssets)
+	} else {
+		newReleaseBody = fmt.Sprintf("%s\n\n%s", *existingRelease.Body, releaseBodyAssets)
+	}
 	existingRelease.Body = &newReleaseBody
 
 	// publishing release
