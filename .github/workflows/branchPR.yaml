@@ -42,10 +42,8 @@ jobs:
       - name: test env file
         run: export | grep ACI_
 
-      - name: create full changelog
-        run: |
-          make chglog -o build/package/CHANGELOG.md 1.0.0..
-          ls -la
+      - name: create changelog & update release-template.md
+        run: LATEST_VERSION="${{ needs.generate_infos.outputs.latest-version }}" make chglog
 
       - name: Cache build outputs
         uses: actions/cache@v3
@@ -76,4 +74,6 @@ jobs:
 
       - name: get generated artifacts
         working-directory: build/package
-        run: ls -la
+        run: |
+          ls -la
+          cat release-template.md

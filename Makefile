@@ -3,6 +3,7 @@ PROJECT_PKG = github.com/fullstack-devops/awesome-ci
 PKG_LIST = "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
 BUILD_DIR = ./build
 
+LATEST_VERSION ?= "1.0.0"
 VERSION ?=$(shell git describe --tags --exact-match 2>/dev/null || echo "dev-pr")
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date +%FT%T%z)
@@ -38,7 +39,9 @@ race: ## Run data race detector
 
 chglog:
 	go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
-	git-chglog -o CHANGELOG.md 1.0.0..
+	cp scripts/release-template.md build/package/release-template.md
+	git-chglog ${LATEST_VERSION}.. >> build/package/release-template.md
+	git-chglog -o build/package/CHANGELOG.md 1.0.0..
 
 coverage:
 	-go test -covermode=count -coverprofile "${BUILD_DIR}/coverage/awesome-ci.cov" "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
