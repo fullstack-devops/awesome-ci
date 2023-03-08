@@ -9,8 +9,8 @@ require (
 	github.com/google/go-github/v49 v49.1.0
 	github.com/itchyny/gojq v0.12.12
 	github.com/spf13/cobra v1.6.1
-	github.com/xanzy/go-gitlab v0.80.2
-	golang.org/x/oauth2 v0.5.0
+	github.com/xanzy/go-gitlab v0.80.3
+	golang.org/x/oauth2 v0.6.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -46,12 +46,12 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/skeema/knownhosts v1.1.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/mod v0.9.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
