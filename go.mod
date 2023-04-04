@@ -8,7 +8,7 @@ require (
 	github.com/go-git/go-git/v5 v5.6.0
 	github.com/google/go-github/v49 v49.1.0
 	github.com/itchyny/gojq v0.12.12
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/xanzy/go-gitlab v0.80.3
 	golang.org/x/oauth2 v0.6.0
 	gopkg.in/yaml.v2 v2.4.0
