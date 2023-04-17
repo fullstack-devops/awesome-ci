@@ -9,7 +9,7 @@ require (
 	github.com/google/go-github/v49 v49.1.0
 	github.com/itchyny/gojq v0.12.12
 	github.com/spf13/cobra v1.6.1
-	github.com/xanzy/go-gitlab v0.80.3
+	github.com/xanzy/go-gitlab v0.83.0
 	golang.org/x/oauth2 v0.6.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -32,7 +32,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.4.1 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.4.0 // indirect
@@ -53,6 +53,6 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	google.golang.org/protobuf v1.29.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
