@@ -19,14 +19,14 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.20
+          go-version: 1.19
 
       - name: Build
-        run: |
-          go help gopath
-          make VERSION="${{ needs.generate_infos.outputs.version }}"
+        run: make
+        env:
+          VERSION: "${{ needs.generate_infos.outputs.version }}"
 
       - name: Test
         run: make test
@@ -45,7 +45,9 @@ jobs:
         run: export | grep ACI_
 
       - name: create changelog & update release-template.md
-        run: LATEST_VERSION="${{ needs.generate_infos.outputs.latest-version }}" make chglog
+        run: make chglog
+        env:
+          LATEST_VERSION: "${{ needs.generate_infos.outputs.latest-version }}"
 
       - name: Cache build outputs
         uses: actions/cache@v3
