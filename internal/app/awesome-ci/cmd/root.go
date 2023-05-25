@@ -8,6 +8,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/parse"
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/pullrequest"
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/release"
+	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/transform"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -33,6 +34,7 @@ func init() {
 	RootCmd.AddCommand(release.Cmd)
 	RootCmd.AddCommand(parse.Cmd)
 	RootCmd.AddCommand(connect.Cmd)
+	RootCmd.AddCommand(transform.Cmd)
 
 	// flags
 	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
