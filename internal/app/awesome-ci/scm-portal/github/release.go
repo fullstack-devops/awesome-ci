@@ -8,7 +8,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v52/github"
+	"github.com/google/go-github/v53/github"
 	log "github.com/sirupsen/logrus"
 )
 

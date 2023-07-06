@@ -1,6 +1,6 @@
 package github
 
-import "github.com/google/go-github/v52/github"
+import "github.com/google/go-github/v53/github"
 
 type GitHubRichClient struct {
 	Client     *github.Client
