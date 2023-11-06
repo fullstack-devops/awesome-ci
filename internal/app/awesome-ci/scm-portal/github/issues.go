@@ -8,7 +8,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v56/github"
 )
 
 var (
@@ -90,7 +90,8 @@ func (ghrc *GitHubRichClient) CommentHelpToPullRequest(number int) (err error) {
 	return
 }
 
-func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersion string, patchLevel semver.PatchLevel, err error) {
+func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersion *string, patchLevel *semver.PatchLevel, err error) {
+	var pLevel semver.PatchLevel
 	// if an comment exists with aci_patch_level=major, make a major version!
 	issueComments, err := ghrc.GetIssueComments(prNumber)
 	if err != nil {
@@ -115,17 +116,18 @@ func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersio
 			aciPatchLevel := regexp.MustCompile(`^aci_patch_level: ([a-zA-Z]+)`)
 
 			if aciVersionOverride.MatchString(*comment.Body) {
-				nextVersion = aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
+				nextVersion = &aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
 				log.Infof("found version override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
 				break
 			}
 
 			if aciPatchLevel.MatchString(*comment.Body) {
-				patchLevel, err = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
+				pLevel, err = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
 				if err != nil && err != semver.ErrUseMinimalPatchVersion {
 					log.Warnln(err)
 				}
 				log.Infof("found patchLevel override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
+				patchLevel = &pLevel
 				break
 			}
 		}
