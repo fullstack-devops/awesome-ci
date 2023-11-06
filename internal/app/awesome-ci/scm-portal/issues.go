@@ -9,13 +9,11 @@ import (
 )
 
 func (lay SCMLayer) SearchIssuesForOverrides(number int) (nextVersion *string, patchLevel *semver.PatchLevel, err error) {
-	var nVersion string
-	var pLevel semver.PatchLevel
 
 	switch grc := lay.Grc.(type) {
 
 	case *github.GitHubRichClient:
-		nVersion, pLevel, err = grc.SearchIssuesForOverrides(number)
+		nextVersion, patchLevel, err = grc.SearchIssuesForOverrides(number)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -23,17 +21,6 @@ func (lay SCMLayer) SearchIssuesForOverrides(number int) (nextVersion *string, p
 	case *gitlab.GitLabRichClient:
 		// not implemented
 		log.Warnln("gitlab is not yet implemented")
-	}
-
-	if nVersion == "" {
-		nextVersion = nil
-	} else {
-		nextVersion = &nVersion
-	}
-	if pLevel == "" {
-		patchLevel = nil
-	} else {
-		patchLevel = &pLevel
 	}
 
 	return

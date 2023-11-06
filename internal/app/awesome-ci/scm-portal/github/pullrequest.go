@@ -3,7 +3,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v56/github"
 	log "github.com/sirupsen/logrus"
 )
 

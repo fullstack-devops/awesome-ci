@@ -8,7 +8,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v56/github"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -129,7 +129,7 @@ func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.R
 			Page:    page,
 		})
 		if err != nil {
-			log.Fatalf("error at loading repos from emst: %v", err)
+			log.Fatalf("error at loading repos from: %v", err)
 		}
 
 		log.Tracef("found %d releases at page %d begin with mapping...", len(releases), page)
