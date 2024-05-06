@@ -58,19 +58,18 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 	}
 	log.Tracef("read comments from pr/mr complete conclusions (if nil no override), version: %v, patchLevel: %v", version, patchLevel)
 
-	// get latest release, if any
-	log.Traceln("get latest release, if any")
-	repositoryRelease, err := lay.GetLatestReleaseVersion()
-	if err != nil {
-		log.Infoln("no github release found -> wirting default 0.0.0")
-		infos.LatestVersion = "0.0.0"
-	} else {
-		log.Infoln("found latest release", repositoryRelease.TagName)
-		infos.LatestVersion = repositoryRelease.TagName
-	}
-
 	// check if version override (3)
 	if version == nil {
+		// get latest release, if any
+		log.Traceln("get latest release, if any")
+		repositoryRelease, err := lay.GetLatestReleaseVersion()
+		if err != nil {
+			log.Infoln("no github release found -> writing default 0.0.0")
+			infos.LatestVersion = "0.0.0"
+		} else {
+			log.Infoln("found latest release", repositoryRelease.TagName)
+			infos.LatestVersion = repositoryRelease.TagName
+		}
 
 		if patchLevel != nil {
 			infos.PatchLevel = *patchLevel
