@@ -50,7 +50,7 @@ jobs:
           LATEST_VERSION: "${{ needs.generate_infos.outputs.latest-version }}"
 
       - name: Cache build outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-outputs-modules
         with:
@@ -69,7 +69,7 @@ jobs:
           fetch-depth: 0
 
       - name: get cached build outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-outputs-modules
         with:

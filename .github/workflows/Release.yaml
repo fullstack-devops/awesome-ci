@@ -45,7 +45,7 @@ jobs:
           LATEST_VERSION: "${{ needs.create_release.outputs.latest-version }}"
 
       - name: Cache build outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-outputs-modules
         with:
@@ -65,7 +65,7 @@ jobs:
         uses: fullstack-devops/awesome-ci-action@main
 
       - name: get cached build outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-outputs-modules
         with:
