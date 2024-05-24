@@ -1,4 +1,3 @@
-PROJECT_NAME := "awesome-ci"
 PROJECT_PKG = github.com/fullstack-devops/awesome-ci
 PKG_LIST = "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
 BUILD_DIR = ./build
@@ -14,28 +13,63 @@ LDFLAGS += -s -w
 # inject build info
 LDFLAGS += -X ${PROJECT_PKG}/internal/app/build.Version=${VERSION} -X ${PROJECT_PKG}/internal/app/build.CommitHash=${COMMIT_HASH} -X ${PROJECT_PKG}/internal/app/build.BuildDate=${BUILD_DATE}
 
-.PHONY: docs clean
+# all: clean dep test test/cover build
+all: clean dep build
 
-all: dep awesome-ci
-# coverage
+# ==================================================================================== #
+# QUALITY CONTROL
+# ==================================================================================== #
 
+## tidy: format code and tidy modfile
+.PHONY: tidy
+tidy:
+	go fmt ./...
+	go mod tidy -v
+
+## audit: run quality control checks
+.PHONY: audit
+audit:
+	go mod verify
+	go vet ./...
+	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+	go test -race -buildvcs -vet=off ./...
+
+# ==================================================================================== #
+# DEVELOPMENT
+# ==================================================================================== #
+
+## dep: fetch dependencies
+.PHONY: dep
 dep:
 	go get -t ./...
 
-dep_update:
-	go get -t ./...
+## test: run all tests
+.PHONY: test
+test:
+	go test -v -race -buildvcs ./...
 
-awesome-ci: dep
+## test/cover: run all tests and display coverage
+.PHONY: test/cover
+test/cover:
+	go test -v -race -buildvcs -coverprofile=${BUILD_DIR}/coverage/coverage.out ./...
+	go tool cover -html=${BUILD_DIR}/coverage/coverage.out -o ${BUILD_DIR}/coverage/coverage.html
+
+## build: build the application
+.PHONY: build
+build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_linux-amd64 ./cmd/awesome-ci
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_linux-arm64 ./cmd/awesome-ci
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_windows-amd64.exe ./cmd/awesome-ci
 	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_windows-arm64.exe ./cmd/awesome-ci
 
-test: ## Run unittests
-	-go test -short -v ./internal/pkg/...
-
-race: ## Run data race detector
-	-go test -race -short -v ${PKG_LIST}
+## upx: compress binaries
+.PHONY: upx
+upx:
+	upx -5 ./build/package/awesome-ci_${VERSION}_linux-amd64
+	upx -5 ./build/package/awesome-ci_${VERSION}_linux-arm64
+	upx -5 ./build/package/awesome-ci_${VERSION}_windows-amd64.exe
+# upx --best ./build/package/awesome-ci_${VERSION}_windows-arm64.exe
 
 chglog:
 	go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
@@ -43,28 +77,10 @@ chglog:
 	git-chglog ${LATEST_VERSION}.. >> build/package/release-template.md
 	git-chglog -o build/package/CHANGELOG.md 1.0.0..
 
-coverage:
-	-go test -covermode=count -coverprofile "${BUILD_DIR}/coverage/awesome-ci.cov" "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
-	echo mode: count > "${BUILD_DIR}/coverage/coverage.cov"
-	tail -n +2 "${BUILD_DIR}/coverage/awesome-ci.cov" >> "${BUILD_DIR}/coverage/coverage.cov"
-	go tool cover -html="${BUILD_DIR}/coverage/coverage.cov" -o "${BUILD_DIR}/coverage/coverage.html"
-
-
+## clean: remove previous builds
+.PHONY: clean
 clean: ## Remove previous build
-	rm -rf ${BUILD_DIR}/docs/*
 	rm -rf ${BUILD_DIR}/coverage/*
+	rm -rf ${BUILD_DIR}/docs/*
 	rm -rf ${BUILD_DIR}/package/*
-	touch ${BUILD_DIR}/docs/.keep ${BUILD_DIR}/coverage/.keep ${BUILD_DIR}/package/.keep
-
-
-help:
-	@echo Available targets are:
-	@echo   all             - build all
-	@echo   dep             - fetch dependencies
-	@echo   dep_update      - update dependencies
-	@echo   awesome-ci      - build awesome-ci
-	@echo   test            - run tests
-	@echo   race            - run race condition tests
-	@echo   chglog          - install and create changelog with chglog
-	@echo   coverage        - generate test coverage report
-	@echo   clean           - cleanup project direcotories
+	touch ${BUILD_DIR}/docs/.gitkeep ${BUILD_DIR}/coverage/.gitkeep ${BUILD_DIR}/package/.gitkeep

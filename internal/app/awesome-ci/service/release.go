@@ -59,7 +59,7 @@ func ReleaseCreate(args *ReleaseArgs) {
 		}
 
 		if err := scmLayer.CES.ExportAsEnv(envVars); err != nil {
-			log.Fatalln("could not export env variables: %v", err)
+			log.Fatalf("could not export env variables: %v", err)
 		}
 	}
 }
