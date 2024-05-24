@@ -49,9 +49,9 @@ func (envVars *EnvVariables) CloseEnvFile(file string) (err error) {
 	return envFile.Close()
 }
 
-func (envs *EnvVariables) Set(name string, value string) {
-	var envFound bool = false
-	for _, env := range envs.Envs {
+func (envVars *EnvVariables) Set(name string, value string) {
+	var envFound = false
+	for _, env := range envVars.Envs {
 		if *env.Name == name {
 			*env.Value = value
 			envFound = true
@@ -59,12 +59,12 @@ func (envs *EnvVariables) Set(name string, value string) {
 		}
 	}
 	if !envFound {
-		envs.Envs = append(envs.Envs, EnvVariable{Name: &name, Value: &value})
+		envVars.Envs = append(envVars.Envs, EnvVariable{Name: &name, Value: &value})
 	}
 }
 
-func (envs *EnvVariables) Get(name string) (envVariable *EnvVariable) {
-	for _, env := range envs.Envs {
+func (envVars *EnvVariables) Get(name string) (envVariable *EnvVariable) {
+	for _, env := range envVars.Envs {
 		if *env.Name == name {
 			return &env
 		}

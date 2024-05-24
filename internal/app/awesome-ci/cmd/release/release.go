@@ -12,7 +12,7 @@ import (
 
 var (
 	releaseArgs service.ReleaseArgs
-	releaseId   int64
+	releaseID   int64
 	assets      []string
 )
 
@@ -40,20 +40,20 @@ var publishCmd = &cobra.Command{
 	Long:  `Print all infos about a pull request in GitHub.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if releaseId == 0 {
+		if releaseID == 0 {
 			log.Traceln("looking of env variable 'ACI_RELEASE_ID' since flag is not set")
-			releaseIdStr, releaseIdBool := os.LookupEnv("ACI_RELEASE_ID")
-			if releaseIdBool {
-				releaseIdTmp, err := strconv.ParseInt(releaseIdStr, 10, 64)
+			releaseIDStr, releaseIDBool := os.LookupEnv("ACI_RELEASE_ID")
+			if releaseIDBool {
+				releaseIDTmp, err := strconv.ParseInt(releaseIDStr, 10, 64)
 				if err != nil {
 					log.Fatalln(err)
 				} else {
-					releaseId = releaseIdTmp
+					releaseID = releaseIDTmp
 				}
 			}
 		}
 
-		service.ReleasePublish(&releaseArgs, releaseId, assets)
+		service.ReleasePublish(&releaseArgs, releaseID, assets)
 	},
 }
 
@@ -74,6 +74,6 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&releaseArgs.PatchLevel, "patch-level", "l", "", "predefine patch level of version to Update")
 
 	// exclusive Flags
-	publishCmd.Flags().Int64VarP(&releaseId, "release-id", "", 0, "publish an early defined release (also looking for env ACI_RELEASE_ID)")
+	publishCmd.Flags().Int64VarP(&releaseID, "release-id", "", 0, "publish an early defined release (also looking for env ACI_RELEASE_ID)")
 	publishCmd.Flags().StringArrayVarP(&assets, "asset", "a", []string{}, "define output by get")
 }

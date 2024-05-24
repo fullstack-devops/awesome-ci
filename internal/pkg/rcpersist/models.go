@@ -30,7 +30,7 @@ type RcFile struct {
 }
 
 type ConnectCredentials struct {
-	ServerUrl  string  `yaml:"server_url"`
+	ServerURL  string  `yaml:"server_url"`
 	Repository string  `yaml:"repository"`
 	Token      Token   `yaml:"token"`
 	TokenPlain *string `yaml:"tplain,omitempty"`

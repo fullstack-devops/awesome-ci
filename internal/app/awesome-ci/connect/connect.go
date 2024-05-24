@@ -21,15 +21,15 @@ func CheckConnection() {
 
 		switch rcFile.SCMPortalType {
 		case rcpersist.SCMPortalTypeGitHub:
-			_, err = github.NewGitHubClient(&creds.ServerUrl, &creds.Repository, creds.TokenPlain)
+			_, err = github.NewGitHubClient(&creds.ServerURL, &creds.Repository, creds.TokenPlain)
 			if err != nil {
 				log.Fatalf("connection to github could not be established please check. %v", err)
 			}
-			log.Infof("Successfully connected to github with .rc file to %s", rcFile.ConnectCreds.ServerUrl)
+			log.Infof("Successfully connected to github with .rc file to %s", rcFile.ConnectCreds.ServerURL)
 
 		case rcpersist.SCMPortalTypeGitLab:
 			log.Warnf("gitlab not yet implemented")
-			_, err = gitlab.NewGitLabClient(&creds.ServerUrl, &creds.Repository, creds.TokenPlain)
+			_, err = gitlab.NewGitLabClient(&creds.ServerURL, &creds.Repository, creds.TokenPlain)
 			if err != nil {
 				log.Fatalf("connection to gitlab could not be established please check. %v", err)
 			}

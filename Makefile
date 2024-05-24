@@ -14,7 +14,7 @@ LDFLAGS += -s -w
 LDFLAGS += -X ${PROJECT_PKG}/internal/app/build.Version=${VERSION} -X ${PROJECT_PKG}/internal/app/build.CommitHash=${COMMIT_HASH} -X ${PROJECT_PKG}/internal/app/build.BuildDate=${BUILD_DATE}
 
 # all: clean dep test test/cover build
-all: clean dep build
+all: clean dep test/cover build
 
 # ==================================================================================== #
 # QUALITY CONTROL

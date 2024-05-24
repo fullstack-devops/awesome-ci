@@ -78,11 +78,11 @@ func (lay SCMLayer) CreateRelease(tagName string, releasePrefix string, branch s
 	return
 }
 
-func (lay SCMLayer) PublishRelease(tagName string, releasePrefix string, branch string, body string, releaseId int64, assets []tools.UploadAsset) (publishedRelease *Release, err error) {
+func (lay SCMLayer) PublishRelease(tagName string, releasePrefix string, branch string, body string, releaseID int64, assets []tools.UploadAsset) (publishedRelease *Release, err error) {
 	switch grc := lay.Grc.(type) {
 
 	case *github.GitHubRichClient:
-		_, err := grc.PublishRelease(tagName, releasePrefix, branch, body, releaseId, assets)
+		_, err := grc.PublishRelease(tagName, releasePrefix, branch, body, releaseID, assets)
 		if err != nil {
 			return nil, err
 		}

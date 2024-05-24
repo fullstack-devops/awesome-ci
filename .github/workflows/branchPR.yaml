@@ -15,13 +15,14 @@ jobs:
     steps:
       - run: export
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.19
+          go-version-file: go.mod
+          cache: true
 
       - name: Build
         run: make
@@ -29,7 +30,10 @@ jobs:
           VERSION: "${{ needs.generate_infos.outputs.version }}"
 
       - name: Test
-        run: make test
+        run: make test/cover
+
+      - name: Audit
+        run: make audit
 
       - name: debugging git
         run: |
@@ -48,6 +52,13 @@ jobs:
         run: make chglog
         env:
           LATEST_VERSION: "${{ needs.generate_infos.outputs.latest-version }}"
+
+      - name: UPX GitHub Action
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+      - name: Compress binaries
+        run: make upx
 
       - name: Cache build outputs
         uses: actions/cache@v3

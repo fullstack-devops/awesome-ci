@@ -6,7 +6,6 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-// GetLatestReleaseVersion
 func (glrc *GitLabRichClient) GetLatestReleaseVersion() (latestRelease *gitlab.Release, err error) {
 
 	return nil, fmt.Errorf("not implemented")

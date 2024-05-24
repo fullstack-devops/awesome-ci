@@ -1,7 +1,7 @@
 package models
 
 type ConnectCredentials struct {
-	ServerUrl  string
+	ServerURL  string
 	Repository string
 	Token      string
 }
