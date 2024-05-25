@@ -4,30 +4,46 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  deploy:
-    name: Deploy to GitHub Pages
+  build:
+    name: Build Docusaurus
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
         with:
-          node-version: 16
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
           cache: yarn
-          cache-dependency-path: docs
 
       - name: Install dependencies
-        working-directory: docs
         run: yarn install --frozen-lockfile
       - name: Build website
-        working-directory: docs
         run: yarn build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Build Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
-          user_name: fullstack-devops[bot]
-          user_email: fullstack-devops[bot]@users.noreply.github.com
+          path: build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
