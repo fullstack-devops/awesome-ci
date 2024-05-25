@@ -59,6 +59,8 @@ jobs:
           install-only: true
       - name: Compress binaries
         run: make upx
+        env:
+          VERSION: "${{ needs.generate_infos.outputs.version }}"
 
       - name: Cache build outputs
         uses: actions/cache@v3
