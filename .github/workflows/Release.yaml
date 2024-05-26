@@ -67,7 +67,7 @@ jobs:
       - name: Compress binaries with upx
         run: make upx
         env:
-          VERSION: "${{ needs.generate-infos.outputs.version }}"
+          VERSION: "${{ needs.create-release.outputs.version }}"
 
       - name: create changelog & update release-template.md
         run: make chglog
