@@ -7,7 +7,7 @@ import (
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v62/github"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -22,16 +22,16 @@ var (
 
 // NewGitHubClient creates a new GitHub client
 // Needs the ConnectCredentials
-func NewGitHubClient(serverUrl *string, repoUrl *string, token *string) (githubRichClient *GitHubRichClient, err error) {
-	gitHubTs := oauth2.StaticTokenSource(
+func NewGitHubClient(serverURL *string, repoURL *string, token *string) (githubRichClient *GitHubRichClient, err error) {
+	gitHubTS := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: *token},
 	)
-	githubTc := oauth2.NewClient(context.Background(), gitHubTs)
+	githubTc := oauth2.NewClient(context.Background(), gitHubTS)
 
 	var githubClient *github.Client
 
-	if !strings.HasPrefix(*serverUrl, "https://github.com") {
-		githubClient, err = github.NewEnterpriseClient(*serverUrl, *serverUrl, githubTc)
+	if !strings.HasPrefix(*serverURL, "https://github.com") {
+		githubClient, err = github.NewClient(githubTc).WithEnterpriseURLs(*serverURL, *serverURL)
 		if err != nil {
 			return nil, fmt.Errorf("error at initializing github client: %v", err)
 		}
@@ -39,7 +39,7 @@ func NewGitHubClient(serverUrl *string, repoUrl *string, token *string) (githubR
 		githubClient = github.NewClient(githubTc)
 	}
 
-	if rateLimit, _, err := githubClient.RateLimits(context.Background()); err != nil {
+	if rateLimit, _, err := githubClient.RateLimit.Get(context.Background()); err != nil {
 		if !strings.Contains(fmt.Sprintf("%v", err), "404 Rate limiting is not enabled") {
 			log.Traceln("rate limiting is not enabled, but connection is good")
 			return nil, fmt.Errorf("connection to GitHub could not be etablished: %v", err)
@@ -48,16 +48,11 @@ func NewGitHubClient(serverUrl *string, repoUrl *string, token *string) (githubR
 		log.Tracef("remaining rates %d", rateLimit.Core.Remaining)
 	}
 
-	owner, repository := tools.DevideOwnerAndRepo(*repoUrl)
+	owner, repository := tools.DevideOwnerAndRepo(*repoURL)
 
 	return &GitHubRichClient{
 		Client:     githubClient,
 		Owner:      owner,
 		Repository: repository,
 	}, nil
-}
-
-func (ghrc *GitHubRichClient) TestGitHubClientConnection() (err error) {
-	_, _, err = ghrc.Client.RateLimits(context.Background())
-	return
 }

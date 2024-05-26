@@ -11,13 +11,13 @@ func DetectGitHubActionsRunner() (connects *models.ConnectCredentials, err error
 	ci, ciPresent := os.LookupEnv("CI")
 	isCI := ci == "true" && ciPresent
 
-	serverUrl, isServerUrl := os.LookupEnv("GITHUB_SERVER_URL")
+	serverURL, isServerURL := os.LookupEnv("GITHUB_SERVER_URL")
 	repository, isRepository := os.LookupEnv("GITHUB_REPOSITORY")
 	token, isToken := os.LookupEnv("GITHUB_TOKEN")
 
-	if isCI && isServerUrl && isRepository && isToken {
+	if isCI && isServerURL && isRepository && isToken {
 		return &models.ConnectCredentials{
-			ServerUrl:  serverUrl,
+			ServerURL:  serverURL,
 			Repository: repository,
 			Token:      token,
 		}, nil

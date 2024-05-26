@@ -8,11 +8,21 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v62/github"
 	log "github.com/sirupsen/logrus"
 )
 
-// CreateRelease
+// CreateRelease creates a new release in the GitHub repository.
+//
+// Parameters:
+// - tagName: the name of the tag for the release.
+// - releasePrefix: the prefix for the release name.
+// - releaseBranch: the branch for the release (default: git default).
+// - body: the body of the release (markdown string or file).
+//
+// Returns:
+// - createdRelease: the created repository release.
+// - err: an error if there was a problem creating the release.
 func (ghrc *GitHubRichClient) CreateRelease(tagName string, releasePrefix string, releaseBranch string, body string) (createdRelease *github.RepositoryRelease, err error) {
 	draft := true
 	relName := fmt.Sprintf("%s %s", releasePrefix, tagName)
@@ -39,35 +49,47 @@ func (ghrc *GitHubRichClient) CreateRelease(tagName string, releasePrefix string
 	return
 }
 
-// PublishRelease
+// PublishRelease publishes a GitHub release.
+//
+// Parameters:
+// - tagName: the name of the tag for the release.
+// - releasePrefix: the prefix for the release name.
+// - releaseBranch: the branch for the release.
+// - body: the body of the release.
+// - releaseID: the ID of the existing release (0 if not found).
+// - uploadArtifacts: the list of artifacts to upload.
+//
+// Returns:
+// - releaseAssets: the list of release assets.
+// - err: an error if any occurred.
 func (ghrc *GitHubRichClient) PublishRelease(
 	tagName string,
 	releasePrefix string,
 	releaseBranch string,
 	body string,
-	releaseId int64,
+	releaseID int64,
 	uploadArtifacts []tools.UploadAsset) (releaseAssets []*github.ReleaseAsset, err error) {
 
-	if releaseId == 0 {
+	if releaseID == 0 {
 		log.Infoln("no release found, creating one...")
 		release, err := ghrc.CreateRelease(tagName, releasePrefix, releaseBranch, body)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		releaseId = *release.ID
+		releaseID = *release.ID
 	}
 
 	existingRelease, _, err := ghrc.Client.Repositories.GetRelease(
 		ctx,
 		ghrc.Owner,
 		ghrc.Repository,
-		releaseId)
+		releaseID)
 	if err != nil {
 		return
 	}
 
 	// upload any given artifacts
-	var releaseBodyAssets string = ""
+	var releaseBodyAssets = ""
 	if len(uploadArtifacts) > 0 {
 		releaseBodyAssets = "### Assets\n"
 
@@ -78,7 +100,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 				ctx,
 				ghrc.Owner,
 				ghrc.Repository,
-				releaseId,
+				releaseID,
 				&github.UploadOptions{
 					Name: fileAndInfo.Name,
 				},
@@ -108,7 +130,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 		ctx,
 		ghrc.Owner,
 		ghrc.Repository,
-		releaseId,
+		releaseID,
 		existingRelease)
 	if err != nil {
 		return releaseAssets, err
@@ -117,7 +139,21 @@ func (ghrc *GitHubRichClient) PublishRelease(
 	return
 }
 
-// GetLatestReleaseVersion
+// GetLatestReleaseVersion retrieves the latest release version from the GitHub repository.
+//
+// It returns the latest non-draft release and any error encountered during the process.
+// The latest release is mapped to its tag name in the releaseMap.
+// The function queries the releases in the repository in pages of 100, starting from page 1.
+// For each release, it checks if it is not a draft and adds it to the releaseMap.
+// The function continues querying releases until there are no more pages.
+// Finally, it calls the findLatestRelease function to find the latest release based on the releaseMap.
+//
+// Parameters:
+// - ghrc: a pointer to the GitHubRichClient struct.
+//
+// Returns:
+// - latestRelease: a pointer to the latest non-draft release.
+// - err: an error if any occurred during the process.
 func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.RepositoryRelease, err error) {
 	var releaseMap = make(map[string]*github.RepositoryRelease)
 	var loadReleasesFromRepo func(page int)
@@ -156,6 +192,15 @@ func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.R
 	return ghrc.findLatestRelease(`.`, releaseMap)
 }
 
+// findLatestRelease finds the latest release in the given directory based on the tags in the local git repository.
+//
+// Parameters:
+// - directory: the directory of the local git repository.
+// - githubReleaseMap: a map of tags to github.RepositoryRelease objects.
+//
+// Returns:
+// - latestRelease: the latest release found in the directory, or nil if no release is found.
+// - err: an error if any occurred during the process.
 func (ghrc *GitHubRichClient) findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
 	log.Traceln("open local git repository...")
 	gitRepo, err := git.PlainOpen(directory)

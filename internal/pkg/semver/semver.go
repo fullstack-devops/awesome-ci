@@ -19,7 +19,15 @@ var (
 	ErrInvalidBranchName      = fmt.Errorf("the branch name does not match the prescribed spelling")
 )
 
-// IncreaseSemVer increases a given version by naming, see docs
+// IncreaseVersion increases a given version by the specified patch level.
+//
+// Parameters:
+// - patchLevel: the patch level to increase the version by (Bugfix, Feature, Major).
+// - version: the current version string.
+//
+// Returns:
+// - incresedVersion: the increased version string.
+// - err: an error if the patch level is invalid or if there is an error increasing the version.
 func IncreaseVersion(patchLevel PatchLevel, version string) (incresedVersion string, err error) {
 	incresedVersion = version
 

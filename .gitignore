@@ -13,17 +13,16 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-out/*
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
 # Go workspace file
-go.work
-/docs/architecture/.asciidoctor/
-/build/docs/.asciidoctor/
-/build/**
-!/build/**/.keep
+/build/coverage/**
+/build/docs/**
+/build/package/**
+!/build/**/.gitkeep
+
 /.idea
 
 *.env

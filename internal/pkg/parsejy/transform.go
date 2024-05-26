@@ -4,7 +4,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-func TransformJsonToYaml(jso []byte) (y []byte, err error) {
+func TransformJSONToYaml(jso []byte) (y []byte, err error) {
 	y, err = yaml.JSONToYAML(jso)
 	if err != nil {
 		return
@@ -12,7 +12,7 @@ func TransformJsonToYaml(jso []byte) (y []byte, err error) {
 	return
 }
 
-func TransformYamlToJson(yam []byte) (jso []byte, err error) {
+func TransformYamlToJSON(yam []byte) (jso []byte, err error) {
 	jso, err = yaml.YAMLToJSON(yam)
 	if err != nil {
 		return

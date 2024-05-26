@@ -17,7 +17,7 @@ func LoadSCMPortalLayer() (scmLayer *SCMLayer, err error) {
 
 	switch scmPortalType {
 	case rcpersist.SCMPortalTypeGitHub:
-		ghrc, err := github.NewGitHubClient(&connCreds.ServerUrl, &connCreds.Repository, &connCreds.Token)
+		ghrc, err := github.NewGitHubClient(&connCreds.ServerURL, &connCreds.Repository, &connCreds.Token)
 		if err != nil {
 			return nil, err
 		}
@@ -27,7 +27,7 @@ func LoadSCMPortalLayer() (scmLayer *SCMLayer, err error) {
 		}, err
 
 	case rcpersist.SCMPortalTypeGitLab:
-		glrc, err := gitlab.NewGitLabClient(&connCreds.ServerUrl, &connCreds.Repository, &connCreds.Token)
+		glrc, err := gitlab.NewGitLabClient(&connCreds.ServerURL, &connCreds.Repository, &connCreds.Token)
 		if err != nil {
 			return nil, err
 		}

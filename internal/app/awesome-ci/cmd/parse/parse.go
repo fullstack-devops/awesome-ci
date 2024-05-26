@@ -26,9 +26,9 @@ var jsonCmd = &cobra.Command{
 	Short: "parse a json string or file",
 	Run: func(cmd *cobra.Command, args []string) {
 		if File != "" {
-			parsejy.ParseFile(Query, File, parsejy.JsonSyntax)
+			parsejy.ParseFile(Query, File, parsejy.JSONSyntax)
 		} else {
-			parsejy.Parse(Query, []byte(String), parsejy.JsonSyntax)
+			parsejy.Parse(Query, []byte(String), parsejy.JSONSyntax)
 		}
 	},
 }

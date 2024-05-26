@@ -54,17 +54,17 @@ func ReleaseCreate(args *ReleaseArgs) {
 		log.Infof("Create release successful. ID: %d", createdRelease.ID)
 		fmt.Printf("Create release successful. ID: %d", createdRelease.ID)
 
-		var envVars []ces.KeyValue = []ces.KeyValue{
+		var envVars = []ces.KeyValue{
 			{Name: "ACI_RELEASE_ID", Value: fmt.Sprintf("%d", createdRelease.ID)},
 		}
 
 		if err := scmLayer.CES.ExportAsEnv(envVars); err != nil {
-			log.Fatalln("could not export env variables: %v", err)
+			log.Fatalf("could not export env variables: %v", err)
 		}
 	}
 }
 
-func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
+func ReleasePublish(args *ReleaseArgs, releaseID int64, assets []string) {
 	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
@@ -72,7 +72,7 @@ func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 
 	var version, releasePrefix string
 
-	if releaseId == 0 {
+	if releaseID == 0 {
 		version, releasePrefix, err = argsToVersion(scmLayer, args)
 		if err != nil {
 			log.Fatalln(err)
@@ -99,8 +99,8 @@ func ReleasePublish(args *ReleaseArgs, releaseId int64, assets []string) {
 	if args.DryRun {
 		log.Infof("Would publishing release: %s", version)
 	} else {
-		log.Infof("Publishing release: %s - %d", version, releaseId)
-		_, err := scmLayer.PublishRelease(version, releasePrefix, args.ReleaseBranch, body, releaseId, assetsEncoded)
+		log.Infof("Publishing release: %s - %d", version, releaseID)
+		_, err := scmLayer.PublishRelease(version, releasePrefix, args.ReleaseBranch, body, releaseID, assetsEncoded)
 		if err != nil {
 			log.Fatalln(err)
 		}

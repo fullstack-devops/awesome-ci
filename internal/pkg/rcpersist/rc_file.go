@@ -80,8 +80,8 @@ func (rc *RcFile) UpdateCreds(server string, repo string, token string) error {
 			rc.ConnectCreds.Token = Token(encryptedToken)
 		}
 	}
-	if rc.ConnectCreds.ServerUrl != server {
-		rc.ConnectCreds.ServerUrl = server
+	if rc.ConnectCreds.ServerURL != server {
+		rc.ConnectCreds.ServerURL = server
 	}
 	if rc.ConnectCreds.Repository != repo {
 		rc.ConnectCreds.Repository = repo

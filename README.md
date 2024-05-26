@@ -1,5 +1,9 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/fullstack-devops/awesome-ci)](https://goreportcard.com/report/github.com/fullstack-devops/awesome-ci)
+[![GitHub release](https://img.shields.io/github/release/fullstack-devops/awesome-ci.svg)](https://github.com/fullstack-devops/awesome-ci/releases/latest)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fullstack-devops/awesome-ci.svg)](https://github.com/fullstack-devops/awesome-ci)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/fullstack-devops/awesome-ci/blob/main/LICENSE)
+
 [![Publish Release](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/Release.yaml)
-[![CodeQL](https://github.com/fullstack-devops/awesome-ci/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/codeql-analysis.yml)
 [![gh-pages](https://github.com/fullstack-devops/awesome-ci/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/fullstack-devops/awesome-ci/actions/workflows/pages/pages-build-deployment)
 
 # Awesome CI

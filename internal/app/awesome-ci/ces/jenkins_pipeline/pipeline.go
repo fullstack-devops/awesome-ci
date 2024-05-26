@@ -11,15 +11,15 @@ func DetectJenkinsPipeline() (connects *models.ConnectCredentials, err error) {
 	ci, ciPresent := os.LookupEnv("CI")
 	isCI := ci == "true" && ciPresent
 
-	_, isjenkinsUrl := os.LookupEnv("JENKINS_URL")
+	_, isjenkinsURL := os.LookupEnv("JENKINS_URL")
 
-	serverUrl, isServerUrl := os.LookupEnv("GIT_URL")
+	serverURL, isServerURL := os.LookupEnv("GIT_URL")
 	repository, isRepository := os.LookupEnv("GITHUB_REPOSITORY")
 	token, isToken := os.LookupEnv("GITHUB_TOKEN")
 
-	if isCI && isjenkinsUrl && isServerUrl && isRepository && isToken {
+	if isCI && isjenkinsURL && isServerURL && isRepository && isToken {
 		return &models.ConnectCredentials{
-			ServerUrl:  serverUrl,
+			ServerURL:  serverURL,
 			Repository: repository,
 			Token:      token,
 		}, nil

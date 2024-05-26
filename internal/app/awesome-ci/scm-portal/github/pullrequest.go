@@ -3,7 +3,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v62/github"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +35,7 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (p
 		}
 
 		log.Infof("listed %d pull requests, searching for maching mergeCommitSha", len(pullRequests))
-		var found int = 0
+		var found = 0
 		for _, pr := range pullRequests {
 			if pr.GetMergeCommitSHA() == mergeCommitSha {
 				log.Infof("found matching pull requests with number %d, and mergeCommitSha %s", *pr.Number, *pr.MergeCommitSHA)

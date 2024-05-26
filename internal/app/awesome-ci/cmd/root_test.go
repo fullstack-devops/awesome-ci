@@ -14,18 +14,47 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-var docsPath = "../../../../docs/docs/CLI"
+var docsPath = filepath.Join("docs", "docs", "02-cli")
 
 const fmTemplate = `---
 title: "%s"
 ---
 `
 
+func findDirectoryUpwards(startDir, targetDir string) (string, error) {
+	currentDir, err := filepath.Abs(startDir)
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		targetPath := filepath.Join(currentDir, targetDir)
+		if _, err := os.Stat(targetPath); err == nil {
+			return currentDir, nil
+		}
+
+		parentDir := filepath.Dir(currentDir)
+		if parentDir == currentDir {
+			break
+		}
+		currentDir = parentDir
+	}
+
+	return "", nil
+}
+
 func TestCreateCobraDocs(t *testing.T) {
 	if _, ok := os.LookupEnv("CI"); ok {
 		t.Skip()
 	}
-	err := doc.GenMarkdownTreeCustom(cmd.RootCmd, docsPath, filePrepender, linkHandler)
+
+	rootDir, err := findDirectoryUpwards(".", docsPath)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	docsPath := filepath.Join(rootDir, docsPath)
+	err = doc.GenMarkdownTreeCustom(cmd.RootCmd, docsPath, filePrepender, linkHandler)
 	if err != nil {
 		log.Fatal(err)
 	}

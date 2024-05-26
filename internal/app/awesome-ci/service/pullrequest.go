@@ -42,7 +42,7 @@ func PrintPRInfos(number int, mergeCommitSha string, formatOut string) {
 }
 
 func prInfosToEnv(scmLayer *scmportal.SCMLayer, prInfos *scmportal.PrMrRequestInfos) error {
-	var envVars []ces.KeyValue = []ces.KeyValue{
+	var envVars = []ces.KeyValue{
 		{Name: "ACI_PR", Value: strconv.Itoa(prInfos.Number)},
 		{Name: "ACI_PR_SHA", Value: prInfos.Sha},
 		{Name: "ACI_PR_SHA_SHORT", Value: prInfos.ShaShort},

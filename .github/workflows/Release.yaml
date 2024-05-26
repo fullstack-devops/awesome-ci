@@ -13,39 +13,69 @@ on:
       - "CHANGELOG.md"
 
 jobs:
-  create_release:
+  create-release:
     uses: fullstack-devops/git-workflows/.github/workflows/create-release.yml@main
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
-  build:
+  quality-gate:
     runs-on: ubuntu-latest
-    needs: create_release
+    needs: [create-release]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Test
+        run: make test/cover
+      - name: Audit
+        run: make audit
+
+      - name: debugging git
+        run: |
+          echo "git name-rev HEAD: $(git name-rev HEAD)"
+          echo "git log -1 --pretty=format:"%s": $(git log -1 --pretty=format:"%s")"
+          echo "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@': $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [create-release, quality-gate]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.19
+          go-version-file: go.mod
+          cache: true
 
       - name: Build
         run: make
         env:
-          VERSION: "${{ needs.create_release.outputs.version }}"
+          VERSION: "${{ needs.create-release.outputs.version }}"
 
-      - name: Test
-        run: make test
+      - name: Setup UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+      - name: Compress binaries with upx
+        run: make upx
+        env:
+          VERSION: "${{ needs.generate-infos.outputs.version }}"
 
       - name: create changelog & update release-template.md
         run: make chglog
         env:
-          LATEST_VERSION: "${{ needs.create_release.outputs.latest-version }}"
+          LATEST_VERSION: "${{ needs.create-release.outputs.latest-version }}"
 
       - name: Cache build outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-outputs-modules
         with:
@@ -54,18 +84,18 @@ jobs:
           restore-keys: |
             awesome-ci-${{ github.sha }}
 
-  publish_release:
+  publish-release:
     environment: production
     runs-on: ubuntu-latest
-    needs: [create_release, build]
+    needs: [create-release, build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
       - name: get cached build outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-outputs-modules
         with:
@@ -78,11 +108,11 @@ jobs:
 
       - name: Publish Release
         run: >-
-          awesome-ci release publish --release-id ${{ needs.create_release.outputs.releaseid }}
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux-amd64"
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_linux-arm64"
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows-amd64.exe"
-          -a "file=build/package/awesome-ci_${{ needs.create_release.outputs.version }}_windows-arm64.exe"
+          awesome-ci release publish --release-id ${{ needs.create-release.outputs.releaseid }}
+          -a "file=build/package/awesome-ci_${{ needs.create-release.outputs.version }}_linux-amd64"
+          -a "file=build/package/awesome-ci_${{ needs.create-release.outputs.version }}_linux-arm64"
+          -a "file=build/package/awesome-ci_${{ needs.create-release.outputs.version }}_windows-amd64.exe"
+          -a "file=build/package/awesome-ci_${{ needs.create-release.outputs.version }}_windows-arm64.exe"
           -a "file=build/package/CHANGELOG.md"
           --body "build/package/release-template.md"
         env:
@@ -90,10 +120,10 @@ jobs:
 
   update_action:
     runs-on: ubuntu-latest
-    needs: [create_release, publish_release]
+    needs: [create-release, publish-release]
     steps:
       - name: Check out awesome-ci-action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fullstack-devops/awesome-ci-action
           token: ${{ secrets.ACI_REPO_TOKEN }}
@@ -111,4 +141,4 @@ jobs:
           git tag v$NEW_VERSION -m "update to version v$NEW_VERSION"
           git push --follow-tags
         env:
-          NEW_VERSION: ${{ needs.create_release.outputs.version }}
+          NEW_VERSION: ${{ needs.create-release.outputs.version }}

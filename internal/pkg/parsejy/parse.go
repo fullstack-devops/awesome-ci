@@ -10,7 +10,7 @@ import (
 
 type Syntax string
 
-const JsonSyntax Syntax = "JSON"
+const JSONSyntax Syntax = "JSON"
 const YamlSyntax Syntax = "YAML"
 
 func ParseFile(queryString string, file string, syntax Syntax) (err error) {
@@ -31,7 +31,7 @@ func Parse(queryString string, input []byte, syntax Syntax) (err error) {
 	}
 
 	if syntax == YamlSyntax {
-		input, err = TransformYamlToJson(input)
+		input, err = TransformYamlToJSON(input)
 		if err != nil {
 			return err
 		}

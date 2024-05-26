@@ -29,7 +29,7 @@ func DetectCes() (cesType CES,
 		}
 		scmPortalType = rcFile.SCMPortalType
 		connCreds = &models.ConnectCredentials{
-			ServerUrl:  creds.ServerUrl,
+			ServerURL:  creds.ServerURL,
 			Repository: creds.Repository,
 			Token:      *creds.TokenPlain,
 		}
