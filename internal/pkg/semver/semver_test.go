@@ -12,7 +12,7 @@ func TestPatchLevels(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, semver.Bugfix, patchLevel)
 
-	patchLevel, err = semver.ParsePatchLevelFormBranch("something/test-#1")
+	_, err = semver.ParsePatchLevelFormBranch("something/test-#1")
 	require.Error(t, err)
 	require.Equal(t, semver.ErrUseMinimalPatchVersion, err)
 
