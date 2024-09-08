@@ -7,8 +7,8 @@ import (
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
-	"github.com/google/go-github/v62/github"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/go-github/v64/github"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
@@ -41,11 +41,11 @@ func NewGitHubClient(serverURL *string, repoURL *string, token *string) (githubR
 
 	if rateLimit, _, err := githubClient.RateLimit.Get(context.Background()); err != nil {
 		if !strings.Contains(fmt.Sprintf("%v", err), "404 Rate limiting is not enabled") {
-			log.Traceln("rate limiting is not enabled, but connection is good")
+			logrus.Traceln("rate limiting is not enabled, but connection is good")
 			return nil, fmt.Errorf("connection to GitHub could not be etablished: %v", err)
 		}
 	} else {
-		log.Tracef("remaining rates %d", rateLimit.Core.Remaining)
+		logrus.Tracef("remaining rates %d", rateLimit.Core.Remaining)
 	}
 
 	owner, repository := tools.DevideOwnerAndRepo(*repoURL)

@@ -55,7 +55,7 @@ func init() {
 	Cmd.AddCommand(checkCmd)
 
 	// Flags
-	githubCmd.Flags().StringVarP(&Server, "server", "s", "https://github.com", "(required) github instance to connect")
+	githubCmd.Flags().StringVarP(&Server, "server", "s", "https://github.com", "github instance to connect")
 	githubCmd.Flags().StringVarP(&Repository, "repository", "r", "", "(required) repo eg.: octo-org/octo-repo")
 	githubCmd.Flags().StringVarP(&Token, "token", "t", "", "(required) plain token eg.: ghp_*****")
 

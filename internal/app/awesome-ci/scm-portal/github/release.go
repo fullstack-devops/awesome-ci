@@ -8,8 +8,8 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v62/github"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/go-github/v64/github"
+	"github.com/sirupsen/logrus"
 )
 
 // CreateRelease creates a new release in the GitHub repository.
@@ -71,10 +71,10 @@ func (ghrc *GitHubRichClient) PublishRelease(
 	uploadArtifacts []tools.UploadAsset) (releaseAssets []*github.ReleaseAsset, err error) {
 
 	if releaseID == 0 {
-		log.Infoln("no release found, creating one...")
+		logrus.Infoln("no release found, creating one...")
 		release, err := ghrc.CreateRelease(tagName, releasePrefix, releaseBranch, body)
 		if err != nil {
-			log.Fatalln(err)
+			logrus.Fatalln(err)
 		}
 		releaseID = *release.ID
 	}
@@ -94,7 +94,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 		releaseBodyAssets = "### Assets\n"
 
 		for _, fileAndInfo := range uploadArtifacts {
-			log.Infof("uploading %s as asset to release\n", fileAndInfo.Name)
+			logrus.Infof("uploading %s as asset to release\n", fileAndInfo.Name)
 			// Upload assets to GitHub Release
 			relAsset, _, err := ghrc.Client.Repositories.UploadReleaseAsset(
 				ctx,
@@ -106,7 +106,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 				},
 				&fileAndInfo.File)
 			if err != nil {
-				log.Println("error at uploading asset to release: ", err)
+				logrus.Println("error at uploading asset to release: ", err)
 			} else {
 				// add asset to release body
 				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, fileAndInfo.Name, *relAsset.BrowserDownloadURL, fileAndInfo.Infos.ModTime().Format(time.RFC3339), fileAndInfo.Hash)
@@ -159,27 +159,27 @@ func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.R
 	var loadReleasesFromRepo func(page int)
 
 	loadReleasesFromRepo = func(page int) {
-		log.Tracef("querying release page %d", page)
+		logrus.Tracef("querying release page %d", page)
 		releases, response, err := ghrc.Client.Repositories.ListReleases(ctx, ghrc.Owner, ghrc.Repository, &github.ListOptions{
 			PerPage: 100,
 			Page:    page,
 		})
 		if err != nil {
-			log.Fatalf("error at loading repos from: %v", err)
+			logrus.Fatalf("error at loading repos from: %v", err)
 		}
 
-		log.Tracef("found %d releases at page %d begin with mapping...", len(releases), page)
+		logrus.Tracef("found %d releases at page %d begin with mapping...", len(releases), page)
 		for _, release := range releases {
 			if !*release.Draft {
 				releaseMap[*release.TagName] = release
 			} else {
-				log.Infof("ignoring draft release %s", *release.Name)
+				logrus.Infof("ignoring draft release %s", *release.Name)
 			}
 		}
 
-		log.Traceln("####### next page:", response.NextPage)
+		logrus.Traceln("####### next page:", response.NextPage)
 		if response.NextPage == 0 {
-			log.Traceln("ended with paging through releases")
+			logrus.Traceln("ended with paging through releases")
 			return
 		} else {
 			loadReleasesFromRepo(page + 1)
@@ -202,16 +202,16 @@ func (ghrc *GitHubRichClient) GetLatestReleaseVersion() (latestRelease *github.R
 // - latestRelease: the latest release found in the directory, or nil if no release is found.
 // - err: an error if any occurred during the process.
 func (ghrc *GitHubRichClient) findLatestRelease(directory string, githubReleaseMap map[string]*github.RepositoryRelease) (latestRelease *github.RepositoryRelease, err error) {
-	log.Traceln("open local git repository...")
+	logrus.Traceln("open local git repository...")
 	gitRepo, err := git.PlainOpen(directory)
 	if err != nil {
 		return nil, err
 	}
-	log.Traceln("...opened local git repository")
+	logrus.Traceln("...opened local git repository")
 
 	tags, err := tools.GetGitTagsUpToHead(gitRepo)
 
-	log.Traceln(tags)
+	logrus.Traceln(tags)
 	if err != nil {
 		return nil, err
 	}

@@ -71,7 +71,7 @@ func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRe
 	if err != nil {
 		return nil, err
 	}
-	log.Tracef("read comments from pr/mr complete conclusions (if nil no override), version: %v, patchLevel: %v", version, patchLevel)
+	log.Tracef("read comments from pr/mr complete conclusions (if nil no override), version: %s, patchLevel: %v", *version, patchLevel)
 
 	// Check if version override (3)
 	if version == nil {

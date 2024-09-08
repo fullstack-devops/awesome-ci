@@ -12,7 +12,7 @@ updates:
       prefix: "fix"
       include: scope
     schedule:
-      interval: "daily"
+      interval: "weekly"
 
   - package-ecosystem: "github-actions"
     directory: "/"

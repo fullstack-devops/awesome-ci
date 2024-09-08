@@ -24,7 +24,7 @@ jobs:
       version: ${{ steps.tag.outputs.ACI_NEXT_VERSION }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
@@ -42,7 +42,7 @@ jobs:
         arch: ["amd64", "arm64"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -69,7 +69,7 @@ jobs:
     needs: [create_release, build]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup awesome-ci
         uses: fullstack-devops/awesome-ci-action@main
 
