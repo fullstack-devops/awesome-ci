@@ -4,55 +4,58 @@ import (
 	"testing"
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPatchLevels(t *testing.T) {
-	testPatchLevelFormBranch(t, semver.Bugfix, "bugfix/test-#1")
-	testPatchLevelFormBranch(t, semver.Bugfix, "something/test-#1")
-	testPatchLevelFormBranch(t, semver.Bugfix, "dependabot/test-#1")
-	testPatchLevelFormBranch(t, semver.Feature, "feature/test-#1")
-	testPatchLevelFormBranch(t, semver.Feature, "feat/test-#1")
-	testPatchLevelFormBranch(t, semver.Major, "major/test-#1")
+	patchLevel, err := semver.ParsePatchLevelFormBranch("bugfix/test-#1")
+	require.NoError(t, err)
+	require.Equal(t, semver.Bugfix, patchLevel)
+
+	_, err = semver.ParsePatchLevelFormBranch("something/test-#1")
+	require.Error(t, err)
+	require.Equal(t, semver.ErrUseMinimalPatchVersion, err)
+
+	patchLevel, err = semver.ParsePatchLevelFormBranch("dependabot/test-#1")
+	require.NoError(t, err)
+	require.Equal(t, semver.Bugfix, patchLevel)
+
+	patchLevel, err = semver.ParsePatchLevelFormBranch("feature/test-#1")
+	require.NoError(t, err)
+	require.Equal(t, semver.Feature, patchLevel)
+
+	patchLevel, err = semver.ParsePatchLevelFormBranch("feat/test-#1")
+	require.NoError(t, err)
+	require.Equal(t, semver.Feature, patchLevel)
+
+	patchLevel, err = semver.ParsePatchLevelFormBranch("major/test-#1")
+	require.NoError(t, err)
+	require.Equal(t, semver.Major, patchLevel)
 }
 
 func TestVersionIncrease(t *testing.T) {
-	testVersionIncrease(t, semver.Bugfix, "0.0.1", "0.0.2")
-	testVersionIncrease(t, semver.Bugfix, "0.2.7", "0.2.8")
-	testVersionIncrease(t, semver.Bugfix, "6.5.1", "6.5.2")
+	nextVersion, err := semver.IncreaseVersion(semver.Bugfix, "0.0.1")
+	require.NoError(t, err)
+	require.Equal(t, "0.0.2", nextVersion)
 
-	testVersionIncrease(t, semver.Feature, "6.5.1", "6.6.0")
+	nextVersion, err = semver.IncreaseVersion(semver.Bugfix, "0.2.7")
+	require.NoError(t, err)
+	require.Equal(t, "0.2.8", nextVersion)
 
-	testVersionIncrease(t, semver.Major, "6.5.1", "7.0.0")
+	nextVersion, err = semver.IncreaseVersion(semver.Bugfix, "6.5.1")
+	require.NoError(t, err)
+	require.Equal(t, "6.5.2", nextVersion)
+
+	nextVersion, err = semver.IncreaseVersion(semver.Feature, "6.5.1")
+	require.NoError(t, err)
+	require.Equal(t, "6.6.0", nextVersion)
+
+	nextVersion, err = semver.IncreaseVersion(semver.Major, "6.5.1")
+	require.NoError(t, err)
+	require.Equal(t, "7.0.0", nextVersion)
 }
 
 func TestInvalidBranchName(t *testing.T) {
 	_, err := semver.ParsePatchLevelFormBranch("something-else")
-	if err == nil {
-		t.Errorf("shout fail at wrong branch name")
-		t.FailNow()
-	}
-}
-
-func testPatchLevelFormBranch(t *testing.T, patchLevelExpected semver.PatchLevel, branchName string) {
-	final, err := semver.ParsePatchLevelFormBranch(branchName)
-	if err != nil && err != semver.ErrUseMinimalPatchVersion {
-		t.Errorf("%v", err)
-		t.FailNow()
-	}
-	if final != patchLevelExpected {
-		t.Errorf("got not expected PatchLevel, should be %s is: %s", patchLevelExpected, final)
-		t.FailNow()
-	}
-}
-
-func testVersionIncrease(t *testing.T, patchLevel semver.PatchLevel, oldVersion string, versionExpected string) {
-	final, err := semver.IncreaseVersion(patchLevel, oldVersion)
-	if err != nil && err != semver.ErrUseMinimalPatchVersion {
-		t.Errorf("%v", err)
-		t.FailNow()
-	}
-	if final != versionExpected {
-		t.Errorf("got not expected Version, should be %s is: %s", versionExpected, final)
-		t.FailNow()
-	}
+	require.Error(t, err)
 }

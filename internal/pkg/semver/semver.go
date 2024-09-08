@@ -2,8 +2,9 @@ package semver
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 type PatchLevel string
@@ -31,57 +32,26 @@ var (
 func IncreaseVersion(patchLevel PatchLevel, version string) (incresedVersion string, err error) {
 	incresedVersion = version
 
+	semVer, err := semver.NewVersion(version)
+	if err != nil {
+		return "", err
+	}
+
 	switch patchLevel {
 	case Bugfix:
-		incresedVersion, err = patch(version)
+		return semVer.IncPatch().String(), nil
 	case Feature:
-		incresedVersion, err = minor(version)
+		return semVer.IncMinor().String(), nil
 	case Major:
-		incresedVersion, err = major(version)
-
+		return semVer.IncMajor().String(), nil
 	}
-	return
-}
 
-func major(version string) (newVersion string, err error) {
-	splitedVersion := strings.Split(version, ".")
-
-	major, err := strconv.Atoi(splitedVersion[0])
-	if err != nil {
-		return
-	}
-	newMajor := (major + 1)
-
-	newVersion = fmt.Sprintf("%d.0.0", newMajor)
-	return
-}
-func minor(version string) (newVersion string, err error) {
-	splitedVersion := strings.Split(version, ".")
-
-	minor, err := strconv.Atoi(splitedVersion[1])
-	if err != nil {
-		return
-	}
-	newMinor := (minor + 1)
-
-	newVersion = fmt.Sprintf("%s.%d.0", splitedVersion[0], newMinor)
-	return
-}
-func patch(version string) (newVersion string, err error) {
-	splitedVersion := strings.Split(version, ".")
-
-	patch, err := strconv.Atoi(splitedVersion[2])
-	if err != nil {
-		return
-	}
-	newPatch := (patch + 1)
-
-	newVersion = fmt.Sprintf("%s.%s.%d", splitedVersion[0], splitedVersion[1], newPatch)
+	incresedVersion = semVer.String()
 	return
 }
 
 func ParsePatchLevelFormBranch(branchName string) (patchLevel PatchLevel, err error) {
-	patchLevel = "bugfix"
+	patchLevel = "bugfix" // default patch level
 
 	if strings.Index(branchName, "/") > 0 {
 		return ParsePatchLevel(branchName[:strings.Index(branchName, "/")])

@@ -6,13 +6,17 @@ import (
 	"strings"
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
-	"github.com/google/go-github/v62/github"
+	"github.com/google/go-github/v64/github"
 )
 
 var (
 	direction, sort = "asc", "created"
+	detailsOpening  = `<details><summary>Possible awesome-ci commands for this Pull Request</summary>`
+
+	// https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+	semVerRegex = `(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`
 )
 
 func (ghrc *GitHubRichClient) GetIssueComments(issueNumber int) (issueComments []*github.IssueComment, err error) {
@@ -29,7 +33,7 @@ func (ghrc *GitHubRichClient) GetIssueComments(issueNumber int) (issueComments [
 	if err == nil {
 		var issueCommentsFiltered []*github.IssueComment
 		for _, issueComment := range issueComments {
-			if !strings.HasPrefix(*issueComment.Body, `<details><summary>Possible awesome-ci commands for this Pull Request</summary>`) {
+			if !strings.HasPrefix(*issueComment.Body, detailsOpening) {
 				issueCommentsFiltered = append(issueCommentsFiltered, issueComment)
 			}
 		}
@@ -59,14 +63,22 @@ func (ghrc *GitHubRichClient) CommentHelpToPullRequest(number int) (err error) {
 		return fmt.Errorf("unable to list comments: %x", err)
 	}
 
-	body := `<details><summary>Possible awesome-ci commands for this Pull Request</summary>` +
-		`</br>aci_patch_level: major</br>aci_version_override: 2.1.0` +
-		`</br></br>Need more help?</br>Have a look at <a href="https://github.com/fullstack-devops/awesome-ci" target="_blank">my repo</a>` +
-		`</br>This message was created by awesome-ci and can be disabled by the env variable <code>ACI_SILENT=true</code></details>`
+	body := detailsOpening + `
+	| command | description |
+	| --- | --- |
+	| aci_patch_level: major | create a major version bump |
+	| aci_version_override: 2.1.0 | set the version to 2.1.0 using only semver compatible syntax! |
+
+	Need more help?
+
+	Have a look at [my repo](https://github.com/fullstack-devops/awesome-ci)
+
+	This message was created by awesome-ci and can be disabled by the env variable <code>ACI_SILENT=true</code>
+	</details>`
 
 	var prComment *github.IssueComment
 	for _, prc := range comments {
-		if strings.HasPrefix(*prc.Body, `<details><summary>Possible awesome-ci commands for this Pull Request</summary>`) {
+		if strings.HasPrefix(*prc.Body, detailsOpening) {
 			prComment = prc
 		}
 	}
@@ -112,21 +124,21 @@ func (ghrc *GitHubRichClient) SearchIssuesForOverrides(prNumber int) (nextVersio
 
 		// if isCollaborator {
 		if true {
-			aciVersionOverride := regexp.MustCompile(`^aci_version_override: ([0-9]+\.[0-9]+\.[0-9]+)`)
+			aciVersionOverride := regexp.MustCompile(`^aci_version_override: (` + semVerRegex + `)`)
 			aciPatchLevel := regexp.MustCompile(`^aci_patch_level: ([a-zA-Z]+)`)
 
 			if aciVersionOverride.MatchString(*comment.Body) {
 				nextVersion = &aciVersionOverride.FindStringSubmatch(*comment.Body)[1]
-				log.Infof("found version override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
+				logrus.Infof("found version override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
 				break
 			}
 
 			if aciPatchLevel.MatchString(*comment.Body) {
 				pLevel, err = semver.ParsePatchLevel(aciPatchLevel.FindStringSubmatch(*comment.Body)[1])
 				if err != nil && err != semver.ErrUseMinimalPatchVersion {
-					log.Warnln(err)
+					logrus.Warnln(err)
 				}
-				log.Infof("found patchLevel override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
+				logrus.Infof("found patchLevel override in comment form %s at %s", comment.User.GetLogin(), comment.GetCreatedAt())
 				patchLevel = &pLevel
 				break
 			}

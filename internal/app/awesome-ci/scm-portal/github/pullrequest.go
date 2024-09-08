@@ -3,8 +3,8 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v62/github"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/go-github/v64/github"
+	"github.com/sirupsen/logrus"
 )
 
 // GetPrInfos need the PullRequest-Number
@@ -15,12 +15,12 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (p
 		if err != nil {
 			return nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
 		}
-		log.Infof("found pull request '%s' with given number %d", *prInfos.Title, prNumber)
+		logrus.Infof("found pull request '%s' with given number %d", *prInfos.Title, prNumber)
 
 		return
 	} else if mergeCommitSha != "" {
 
-		log.Infoln("listing pull requests to compare with merge commit sha")
+		logrus.Infoln("listing pull requests to compare with merge commit sha")
 		prOpts := github.PullRequestListOptions{
 			State:     "all",
 			Sort:      "updated",
@@ -34,11 +34,11 @@ func (ghrc *GitHubRichClient) GetPrInfos(prNumber int, mergeCommitSha string) (p
 			return nil, fmt.Errorf("could not load any information about the given pull request  %d: %v", prNumber, err)
 		}
 
-		log.Infof("listed %d pull requests, searching for maching mergeCommitSha", len(pullRequests))
+		logrus.Infof("listed %d pull requests, searching for maching mergeCommitSha", len(pullRequests))
 		var found = 0
 		for _, pr := range pullRequests {
 			if pr.GetMergeCommitSHA() == mergeCommitSha {
-				log.Infof("found matching pull requests with number %d, and mergeCommitSha %s", *pr.Number, *pr.MergeCommitSHA)
+				logrus.Infof("found matching pull requests with number %d, and mergeCommitSha %s", *pr.Number, *pr.MergeCommitSHA)
 				prInfos = pr
 				found = found + 1
 			}

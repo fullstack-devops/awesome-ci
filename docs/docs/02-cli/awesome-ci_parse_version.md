@@ -1,21 +1,18 @@
 ---
-title: "_ parse json"
+title: "_ parse version"
 ---
-## awesome-ci parse json
+## awesome-ci parse version
 
-parse a json string or file
+Parse the given version string and validate against semver
 
 ```
-awesome-ci parse json [flags]
+awesome-ci parse version [flags]
 ```
 
 ### Options
 
 ```
-  -f, --file string     file to be parsed
-  -h, --help            help for json
-  -q, --query string    (required) query for output
-  -s, --string string   query for output
+  -h, --help   help for version
 ```
 
 ### Options inherited from parent commands
