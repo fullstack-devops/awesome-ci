@@ -8,7 +8,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 	"github.com/sirupsen/logrus"
 
-	"github.com/google/go-github/v64/github"
+	"github.com/google/go-github/v67/github"
 )
 
 var (
@@ -64,17 +64,18 @@ func (ghrc *GitHubRichClient) CommentHelpToPullRequest(number int) (err error) {
 	}
 
 	body := detailsOpening + `
-	| command | description |
-	| --- | --- |
-	| aci_patch_level: major | create a major version bump |
-	| aci_version_override: 2.1.0 | set the version to 2.1.0 using only semver compatible syntax! |
 
-	Need more help?
+| command | description |
+| --- | --- |
+| aci_patch_level: major | create a major version bump |
+| aci_version_override: 2.1.0 | set the version to 2.1.0 using only semver compatible syntax! |
 
-	Have a look at [my repo](https://github.com/fullstack-devops/awesome-ci)
+Need more help?
 
-	This message was created by awesome-ci and can be disabled by the env variable <code>ACI_SILENT=true</code>
-	</details>`
+Have a look at [my repo](https://github.com/fullstack-devops/awesome-ci)
+
+This message was created by awesome-ci and can be disabled by the env variable <code>ACI_SILENT=true</code>
+</details>`
 
 	var prComment *github.IssueComment
 	for _, prc := range comments {

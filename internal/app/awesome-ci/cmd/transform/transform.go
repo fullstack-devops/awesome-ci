@@ -41,9 +41,9 @@ func init() {
 	Cmd.AddCommand(groupByCmd)
 
 	// Flags
-	groupByCmd.PersistentFlags().IntVarP(&GroupPrefixInt, "prefix", "p", 3, "group by prefix until index -- eg.: 'st1_base-image' and int 3, will be grouped by 'st1'")
-	groupByCmd.PersistentFlags().IntVarP(&SubstractString, "sub-prefix", "", 0, "remove prefix until index number -- eg.: 'st1_base-image' and 4 will be 'base-image'")
+	groupByCmd.Flags().IntVarP(&GroupPrefixInt, "prefix", "p", 3, "group by prefix until index -- eg.: 'st1_base-image' and int 3, will be grouped by 'st1'")
+	groupByCmd.Flags().IntVarP(&SubstractString, "sub-prefix", "", 0, "remove prefix until index number -- eg.: 'st1_base-image' and 4 will be 'base-image'")
 
-	groupByCmd.MarkPersistentFlagRequired("prefix")
+	groupByCmd.MarkFlagRequired("prefix")
 	// exclusive Flags
 }

@@ -15,10 +15,11 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:   "connect",
-	Short: "connect persistent to github by creating an encrypted rc file",
-	Long: `connect initial to a GitHub or GitHub Enterprise
-				at some point you can also connect to GitLab (not yet implemented)
-				this is only useful without a runner or in an jenkins pipeline`,
+	Short: "Create an encrypted .rc file to persistently connect to GitHub or GitHub Enterprise",
+	Long: `Initial connection to a GitHub or GitHub Enterprise
+creates an encrypted .rc file to persistently connect to GitHub
+soon you can also connect to GitLab (not yet implemented)
+useful without a runner or in an jenkins pipeline`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -34,7 +35,7 @@ var githubCmd = &cobra.Command{
 
 var removeCmd = &cobra.Command{
 	Use:   "remove",
-	Short: "remove all connection files and secrets",
+	Short: "remove all persisted connection files and secrets",
 	Run: func(cmd *cobra.Command, args []string) {
 		rcpersist.RemoveRcFile()
 	},
@@ -42,7 +43,7 @@ var removeCmd = &cobra.Command{
 
 var checkCmd = &cobra.Command{
 	Use:   "check",
-	Short: "check current connection",
+	Short: "verify current connection is working",
 	Run: func(cmd *cobra.Command, args []string) {
 		connect.CheckConnection()
 	},
@@ -55,7 +56,7 @@ func init() {
 	Cmd.AddCommand(checkCmd)
 
 	// Flags
-	githubCmd.Flags().StringVarP(&Server, "server", "s", "https://github.com", "github instance to connect")
+	githubCmd.Flags().StringVarP(&Server, "server", "s", "https://github.com", "github instance to connect, default: https://github.com")
 	githubCmd.Flags().StringVarP(&Repository, "repository", "r", "", "(required) repo eg.: octo-org/octo-repo")
 	githubCmd.Flags().StringVarP(&Token, "token", "t", "", "(required) plain token eg.: ghp_*****")
 
