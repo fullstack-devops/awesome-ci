@@ -15,7 +15,7 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:   "parse",
-	Short: "parse json and yaml files and inspect values like jq + more",
+	Short: "inspect and parse JSON and YAML files to retrieve values, similar to jq with additional features",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -47,7 +47,7 @@ var yamlCmd = &cobra.Command{
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Parse the given version string and validate against semver",
+	Short: "Validate the given version string against semver syntax",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := parse.ValidateVersion(args[0]); err != nil {
 			panic(err)
@@ -62,18 +62,20 @@ func init() {
 	Cmd.AddCommand(versionCmd)
 
 	// Flags
-	jsonCmd.PersistentFlags().StringVarP(&File, "file", "f", "", "file to be parsed")
-	jsonCmd.PersistentFlags().StringVarP(&Query, "query", "q", "", "(required) query for output")
-	jsonCmd.PersistentFlags().StringVarP(&String, "string", "s", "", "query for output")
+	jsonCmd.Flags().StringVarP(&File, "file", "f", "", "file to be parsed")
+	jsonCmd.Flags().StringVarP(&Query, "query", "q", "", "(required) query for output")
+	jsonCmd.Flags().StringVarP(&String, "string", "s", "", "query for output")
 
-	yamlCmd.PersistentFlags().StringVarP(&File, "file", "f", "", "file to be parsed")
-	yamlCmd.PersistentFlags().StringVarP(&Query, "query", "q", "", "(required) query for output")
-	yamlCmd.PersistentFlags().StringVarP(&String, "string", "s", "", "query for output")
+	yamlCmd.Flags().StringVarP(&File, "file", "f", "", "file to be parsed")
+	yamlCmd.Flags().StringVarP(&Query, "query", "q", "", "(required) query for output")
+	yamlCmd.Flags().StringVarP(&String, "string", "s", "", "query for output")
 
-	jsonCmd.MarkPersistentFlagRequired("query")
+	jsonCmd.MarkFlagRequired("query")
 	jsonCmd.MarkFlagsMutuallyExclusive("file", "string")
+	jsonCmd.MarkFlagFilename("file")
 
-	yamlCmd.MarkPersistentFlagRequired("query")
+	yamlCmd.MarkFlagRequired("query")
 	yamlCmd.MarkFlagsMutuallyExclusive("file", "string")
+	yamlCmd.MarkFlagFilename("file")
 	// exclusive Flags
 }

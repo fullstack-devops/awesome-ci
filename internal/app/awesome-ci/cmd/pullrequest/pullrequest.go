@@ -14,8 +14,8 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:   "pr",
-	Short: "pull request",
-	Long:  `All software has versions. This is Awesome-CI's`,
+	Short: "Manage GitHub pull requests",
+	Long:  `The pull request command is used to manage GitHub pull requests. It provides subcommands to get pull request info, allowing you to get all infos about a pull request in GitHub.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -23,8 +23,7 @@ var Cmd = &cobra.Command{
 
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "get pull request info",
-	Long:  `Print all infos about a pull request in GitHub.`,
+	Short: "Get pull request info",
 	Run: func(cmd *cobra.Command, args []string) {
 		service.PrintPRInfos(number, mergeCommitSha, formatOut)
 	},

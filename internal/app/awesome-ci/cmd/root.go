@@ -9,6 +9,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/pullrequest"
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/release"
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/cmd/transform"
+	"github.com/fullstack-devops/awesome-ci/internal/app/build"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,11 +18,12 @@ import (
 var Verbose bool
 
 var RootCmd = &cobra.Command{
-	Use:   "awesome-ci",
-	Short: "Awesome CI make your release tagging easy",
+	Use:     "awesome-ci",
+	Version: fmt.Sprintf("%s (%s)-(%s)", build.Version, build.CommitHash, build.BuildDate),
+	Short:   "Awesome CI make your release tagging easy",
 	Long: `Awesome CI make your release tagging easy
-      Comatible with CI pipelines like Jenkins and GitHub
-      Find more information and examples at: https://github.com/fullstack-devops/awesome-ci`,
+Comatible with CI pipelines like Jenkins and GitHub
+Find more information and examples at: https://github.com/fullstack-devops/awesome-ci`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -29,7 +31,6 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	// commands
-	RootCmd.AddCommand(versionCmd)
 	RootCmd.AddCommand(pullrequest.Cmd)
 	RootCmd.AddCommand(release.Cmd)
 	RootCmd.AddCommand(parse.Cmd)

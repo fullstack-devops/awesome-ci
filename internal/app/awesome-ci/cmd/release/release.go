@@ -18,8 +18,8 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:   "release",
-	Short: "release",
-	Long:  `tbd`,
+	Short: "Manage GitHub releases with ease",
+	Long:  `The release command is used to manage GitHub releases. It provides subcommands to create and publish releases, allowing you to automate the release process and integrate it into CI/CD workflows. Use this command to streamline the release tagging and deployment of your software projects.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -27,8 +27,7 @@ var Cmd = &cobra.Command{
 
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "create a GitHub release",
-	Long:  `Print all infos about a pull request in GitHub.`,
+	Short: "Create a new GitHub release",
 	Run: func(cmd *cobra.Command, args []string) {
 		service.ReleaseCreate(&releaseArgs)
 	},
@@ -36,8 +35,7 @@ var createCmd = &cobra.Command{
 
 var publishCmd = &cobra.Command{
 	Use:   "publish",
-	Short: "publish a GitHub release",
-	Long:  `Print all infos about a pull request in GitHub.`,
+	Short: "Publish a recently created GitHub release",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if releaseID == 0 {
