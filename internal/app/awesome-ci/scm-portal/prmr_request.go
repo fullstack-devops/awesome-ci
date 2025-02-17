@@ -2,60 +2,47 @@ package scmportal
 
 import (
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
-	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// GetPrInfos retrieves pull request or merge request information
-// from the GitHub or GitLab API, comments help instructions to the
-// issue and reads comments from the pull request or merge request
-// to look for overrides.
-//
-// The function returns the standard information about the pull
-// request or merge request and the next version to be released
-// based on the overrides found in the comments.
-//
-// If no version override is found, the function retrieves the
-// latest release version from the GitHub API and increments the
-// version based on the patch level override.
-//
-// The function returns the standard information and the next
-// version to be released.
+// GetPrInfos retrieves detailed information about a pull request or merge request
+// from the version control system. It uses the provided pull request number or
+// merge commit SHA to fetch the relevant information. The function populates a
+// PrMrRequestInfos struct with details such as the PR number, SHA, branch name,
+// owner, repository, and merge commit SHA. It also parses the patch level from
+// the branch name and checks for version or patch level overrides in the issue
+// comments. If no version override is found, it determines the latest version
+// and calculates the next version based on the patch level.
+
 func (lay SCMLayer) GetPrInfos(number int, mergeCommitSha string) (infos *PrMrRequestInfos, err error) {
 	// Initialize the standard information
 	infos = &PrMrRequestInfos{}
 
 	// Get the pull request or merge request information
 	// from the GitHub or GitLab API
-	switch grc := lay.Grc.(type) {
 
-	case *github.GitHubRichClient:
-		prInfos, err := grc.GetPrInfos(number, mergeCommitSha)
-		if err != nil {
-			return nil, err
-		}
-		log.Traceln("got PR information from scm-portal-layer")
-
-		infos.Number = *prInfos.Number
-		infos.Sha = *prInfos.Head.SHA
-		infos.ShaShort = infos.Sha[:8]
-		infos.BranchName = *prInfos.Head.Ref
-		infos.Owner = grc.Owner
-		infos.Repo = grc.Repository
-		infos.MergeCommitSha = *prInfos.MergeCommitSHA
-
-		// Parse the patch level from the branch name
-		if infos.PatchLevel, err = semver.ParsePatchLevelFormBranch(infos.BranchName); err != nil {
-			log.Warnln(err)
-		}
-		log.Traceln("completed PR standard information to: ", *infos)
-
-	case *gitlab.GitLabRichClient:
-		// GitLab is not yet implemented
-		log.Warnln("gitlab is not yet implemented")
+	grc := lay.Grc.(*github.GitHubRichClient)
+	prInfos, err := grc.GetPrInfos(number, mergeCommitSha)
+	if err != nil {
+		return nil, err
 	}
+	log.Traceln("got PR information from scm-portal-layer")
+
+	infos.Number = *prInfos.Number
+	infos.Sha = *prInfos.Head.SHA
+	infos.ShaShort = infos.Sha[:8]
+	infos.BranchName = *prInfos.Head.Ref
+	infos.Owner = grc.Owner
+	infos.Repo = grc.Repository
+	infos.MergeCommitSha = *prInfos.MergeCommitSHA
+
+	// Parse the patch level from the branch name
+	if infos.PatchLevel, err = semver.ParsePatchLevelFormBranch(infos.BranchName); err != nil {
+		log.Warnln(err)
+	}
+	log.Traceln("completed PR standard information to: ", *infos)
 
 	// Comment help instructions to the issue
 	log.Traceln("comment help instructions to issue")

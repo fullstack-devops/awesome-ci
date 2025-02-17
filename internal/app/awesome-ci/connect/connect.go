@@ -2,7 +2,6 @@ package connect
 
 import (
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
-	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/rcpersist"
 
 	log "github.com/sirupsen/logrus"
@@ -29,10 +28,6 @@ func CheckConnection() {
 
 		case rcpersist.SCMPortalTypeGitLab:
 			log.Warnf("gitlab not yet implemented")
-			_, err = gitlab.NewGitLabClient(&creds.ServerURL, &creds.Repository, creds.TokenPlain)
-			if err != nil {
-				log.Fatalf("connection to gitlab could not be established please check. %v", err)
-			}
 
 		default:
 			log.Fatal("Type in rcFile not known")
