@@ -10,6 +10,7 @@ import (
 	scmportal "github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/uploadasset"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -79,10 +80,10 @@ func ReleasePublish(args *ReleaseArgs, releaseID int64, assets []string) {
 		}
 	}
 
-	var assetsEncoded []tools.UploadAsset
+	var assetsEncoded []uploadasset.UploadAsset
 	if len(assets) > 0 {
 		for _, asset := range assets {
-			assetInfo, err := tools.GetAsset(asset)
+			assetInfo, err := uploadasset.GetAsset(asset)
 			if err != nil {
 				log.Fatalln("not all specified assets available, please check", err)
 			}

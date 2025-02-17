@@ -28,7 +28,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ### Abstraction of layers
 
-![Abstraction of layers](/img-awesome-ci/layers.svg)
+![Abstraction of layers](/img/layers.svg)
 
 ## Code of Conduct
 

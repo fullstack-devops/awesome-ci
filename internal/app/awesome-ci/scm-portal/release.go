@@ -3,7 +3,7 @@ package scmportal
 import (
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
-	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/uploadasset"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -78,7 +78,7 @@ func (lay SCMLayer) CreateRelease(tagName string, releasePrefix string, branch s
 	return
 }
 
-func (lay SCMLayer) PublishRelease(tagName string, releasePrefix string, branch string, body string, releaseID int64, assets []tools.UploadAsset) (publishedRelease *Release, err error) {
+func (lay SCMLayer) PublishRelease(tagName string, releasePrefix string, branch string, body string, releaseID int64, assets []uploadasset.UploadAsset) (publishedRelease *Release, err error) {
 	switch grc := lay.Grc.(type) {
 
 	case *github.GitHubRichClient:

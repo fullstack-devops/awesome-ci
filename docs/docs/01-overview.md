@@ -41,8 +41,8 @@ The tailing `/` behind the alias is **always** requiered!
 see also [override specialties](#override-specialties)
 :::
 
-![awesome-ci release process](/img-awesome-ci/release-process.drawio.svg "awesome-ci release process")
-![awesome-ci workflow](/img-awesome-ci/aci-workflow.drawio.png "awesome-ci workflow")
+![awesome-ci release process](/img/release-process.drawio.svg "awesome-ci release process")
+![awesome-ci workflow](/img/aci-workflow.drawio.png "awesome-ci workflow")
 
 :::tip
 Awesoce CI automatically detects your environment. Supported are **Jenkins**, **GitHub Actions** and ~~GitLab CI~~
