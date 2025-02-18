@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
+	"github.com/fullstack-devops/awesome-ci/internal/pkg/uploadasset"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v67/github"
@@ -68,7 +69,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 	releaseBranch string,
 	body string,
 	releaseID int64,
-	uploadArtifacts []tools.UploadAsset) (releaseAssets []*github.ReleaseAsset, err error) {
+	uploadArtifacts []uploadasset.UploadAsset) (releaseAssets []*github.ReleaseAsset, err error) {
 
 	if releaseID == 0 {
 		logrus.Infoln("no release found, creating one...")
@@ -106,7 +107,7 @@ func (ghrc *GitHubRichClient) PublishRelease(
 				},
 				&fileAndInfo.File)
 			if err != nil {
-				logrus.Println("error at uploading asset to release: ", err)
+				logrus.Warnln("error at uploading asset to release: ", err)
 			} else {
 				// add asset to release body
 				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, fileAndInfo.Name, *relAsset.BrowserDownloadURL, fileAndInfo.Infos.ModTime().Format(time.RFC3339), fileAndInfo.Hash)

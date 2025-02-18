@@ -3,7 +3,6 @@ package scmportal
 import (
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/ces"
 	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/github"
-	"github.com/fullstack-devops/awesome-ci/internal/app/awesome-ci/scm-portal/gitlab"
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/rcpersist"
 )
 
@@ -24,16 +23,6 @@ func LoadSCMPortalLayer() (scmLayer *SCMLayer, err error) {
 		return &SCMLayer{
 			CES: ces,
 			Grc: ghrc,
-		}, err
-
-	case rcpersist.SCMPortalTypeGitLab:
-		glrc, err := gitlab.NewGitLabClient(&connCreds.ServerURL, &connCreds.Repository, &connCreds.Token)
-		if err != nil {
-			return nil, err
-		}
-		return &SCMLayer{
-			CES: ces,
-			Grc: glrc,
 		}, err
 	}
 
