@@ -4,7 +4,7 @@ title: Overview
 
 # Welcome to the Awesome CI!
 
-This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of SemVer. The required version number is created with the correct naming of the branch prefix.
+This project is the smart connection between your pipeline for continuous integration and your version management like GitHub. The focus is on the release process, followed by the version management of SemVer. The required version number is created with the correct naming of the branch prefix.
 
 You can use this tool in your CI pipeline or locally on your command line. Just download the most recently released version and get started. You can find out how to integrate this into your respective pipeline in the following document. There are also several examples in the examples section of the documentation. If an example is not included, please feel free to inquire about a related issue.
 
@@ -23,7 +23,7 @@ If you need an example for your pipeline you can find it in the sidebar under th
 
 :::
 
-### Supported naming rules and effects on the version
+## Supported naming rules and effects on the version
 
 The patching of the version only takes effect if the merged branch begins with the following aliases, for example: `feature/my-awesome-feature`
 
@@ -45,18 +45,23 @@ see also [override specialties](#override-specialties)
 ![awesome-ci workflow](/img/aci-workflow.drawio.png "awesome-ci workflow")
 
 :::tip
-Awesoce CI automatically detects your environment. Supported are **Jenkins**, **GitHub Actions** and ~~GitLab CI~~
+Awesoce CI automatically detects your environment. Supported are **Jenkins Pipelines** and **GitHub Actions**
 :::
 
-### Override specialties
+## Override specialties
 
 To set some attributes during developement you can comment a pullrequest.
 
-### Requiered and optional environment variables
+| command                       | description                                                   |
+| ----------------------------- | ------------------------------------------------------------- |
+| `aci_patch_level: major`      | create a major version bump                                   |
+| `aci_version_override: 2.1.0` | set the version to 2.1.0 using only semver compatible syntax! |
+
+## Requiered and optional environment variables
 
 List of all environmental variables used per CES (code execution service).
 
-#### GitHub Actions
+### GitHub Actions
 
 | Environment variable | Description                                        | Status        | Requiered |
 | -------------------- | -------------------------------------------------- | ------------- | :-------: |
@@ -65,16 +70,7 @@ List of all environmental variables used per CES (code execution service).
 | `GITHUB_REPOSITORY`  | The owner and repository name.                     | set by runner |   true    |
 | `GITHUB_TOKEN`       | Must provided in workflow as `env:` (see examples) | set by runner |   true    |
 
-#### GitLab Workflows
-
-| Environment variable | Description                                                    | Status        | requiered |
-| -------------------- | -------------------------------------------------------------- | ------------- | :-------: |
-| `CI`                 | Is set by GitLab Workflows and returns `true`                  | set by runner |   true    |
-| `CI_SERVER_URL`      | Will only be set by using the GitHub Plugin.                   | set by runner |   true    |
-| `CI_PROJECT_URL`     | The owner and repository name.                                 | set by runner |   true    |
-| `CI_JOB_TOKEN`       | Must provided in pipeline as `env.GITHUB_TOKEN` (see examples) | set by runner |   true    |
-
-#### Jenkins Pipeline
+### Jenkins Pipeline
 
 | Environment variable | Description                                                    | Status                       | requiered |
 | -------------------- | -------------------------------------------------------------- | ---------------------------- | :-------: |

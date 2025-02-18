@@ -8,7 +8,7 @@
 
 # Awesome CI
 
-**Description**: This project is the smart connection between your pipeline for continuous integration and your version management like GitLab or GitHub. The focus is on the release process, followed by the version management of [SemVer](https://semver.org/). The required version number is created with the correct naming of the branch prefix.
+**Description**: Awesome CI is the smart connection between your pipeline for continuous integration and GitHub. The focus is on the release process, followed by the version management of [SemVer](https://semver.org/). The required version number is created with the correct naming of the branch prefix.
 
 - **Technology stack**: This tool is written in golang
 - **Status**: Stable.
@@ -19,43 +19,41 @@
   - Jenkins Pipelines
 - **Sweet Spot**: If you use GitHub or GitHub Enterprise and GitHub Actions, you can use awesome-ci to its full potential!
 
-**ToDos**:
+## Getting Started
 
-- more documentation
-- more tests (at least 80% coverage)
-- implement GitLab Api
-
-> Info: GitLab is currently not supported
+You can use this tool in your CI pipeline or locally on your command line. Just [download](https://github.com/fullstack-devops/awesome-ci/releases/latest/download/awesome-ci) the most recently released version and get started.
 
 ## Usage
 
-You can use this tool in your CI pipeline or locally on your command line. Just [download](https://github.com/fullstack-devops/awesome-ci/releases/latest/download/awesome-ci) the most recently released version and get started. You can find out how to integrate this into your respective pipeline in the following document. There are also several examples in the [examples section](https://fullstack-devops.github.io/awesome-ci/docs/examples) of the documentation. If an example is not included, please feel free to inquire about a related [issue](https://github.com/fullstack-devops/awesome-ci/issues/new/choose).
+To integrate Awesome CI into your pipeline, follow these steps:
 
-If more functionality is needed you can just open a problem in this project and of course bugs can be fixed in the same way by filing a [bug report](https://github.com/fullstack-devops/awesome-ci/issues/new/choose).
+1. Utilize the github action [fullstack-devops/awesome-ci-action](https://github.com/fullstack-devops/awesome-ci-action) to install Awesome CI.
+2. Configure your pipeline to use Awesome CI.
+3. Use the any command to interact with Awesome CI.
 
-If you have any questions, you can find a form on the issue board. First, make sure your question is already in the [Questions and Answers](https://fullstack-devops.github.io/awesome-ci/docs/questions_and_answers) section before asking a question. You can find frequently asked questions there too.
+You can find more information on how to integrate Awesome CI into your pipeline in the [manual](https://fullstack-devops.github.io/awesome-ci/).
 
-## Documentation
+## Examples
 
-[See the manual](https://fullstack-devops.github.io/awesome-ci/) for setup, usage instructions and a lot more. (the documentation is still rising)
+You can find several examples of how to use Awesome CI in the [examples section](https://fullstack-devops.github.io/awesome-ci/docs/examples) of the documentation.
 
-## Getting help
+## Frequently Asked Questions
 
-If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
-You can find frequently asked questions directly in the "Questions and Answers" section.
+You can find frequently asked questions in the [Questions and Answers](https://fullstack-devops.github.io/awesome-ci/docs/questions_and_answers) section of the documentation.
 
-## Getting involved
+## Getting Help
 
-- [CONTRIBUTING](docs/CONTRIBUTING.md)
+If you have questions, concerns, or bug reports, please file an issue in this repository's Issue Tracker.
 
----
+## Contributing
 
-## Open source licensing info
+If you want to contribute to Awesome CI, please read the [CONTRIBUTING](docs/CONTRIBUTING.md) guide.
 
-1. [LICENSE](LICENSE)
+## License
 
----
+Awesome CI is licensed under the Apache License, Version 2.0. You can find the license file [here](LICENSE).
 
-## Credits and references
+## Credits
 
 - [SemVer](https://semver.org/)
+- [Cobra CLI](https://github.com/spf13/cobra)
