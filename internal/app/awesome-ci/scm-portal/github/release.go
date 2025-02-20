@@ -3,6 +3,7 @@ package github
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
@@ -94,8 +95,12 @@ func (ghrc *GitHubRichClient) PublishRelease(
 	if len(uploadArtifacts) > 0 {
 		releaseBodyAssets = "### Assets\n"
 
-		for _, fileAndInfo := range uploadArtifacts {
-			logrus.Infof("uploading %s as asset to release\n", fileAndInfo.Name)
+		for _, asset := range uploadArtifacts {
+			logrus.Infof("uploading %s as asset to release\n", asset.Name)
+			file, err := os.Open(asset.FilePath)
+			if err != nil {
+				return releaseAssets, err
+			}
 			// Upload assets to GitHub Release
 			relAsset, _, err := ghrc.Client.Repositories.UploadReleaseAsset(
 				ctx,
@@ -103,15 +108,14 @@ func (ghrc *GitHubRichClient) PublishRelease(
 				ghrc.Repository,
 				releaseID,
 				&github.UploadOptions{
-					Name: fileAndInfo.Name,
+					Name: asset.Name,
 				},
-				&fileAndInfo.File)
+				file)
 			if err != nil {
 				logrus.Warnln("error at uploading asset to release: ", err)
 			} else {
 				// add asset to release body
-				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, fileAndInfo.Name, *relAsset.BrowserDownloadURL, fileAndInfo.Infos.ModTime().Format(time.RFC3339), fileAndInfo.Hash)
-
+				releaseBodyAssets = fmt.Sprintf("%s\n- [%s](%s) `%s`\n  Sha256: `%x`", releaseBodyAssets, asset.Name, *relAsset.BrowserDownloadURL, asset.ModTime.Format(time.RFC3339), asset.Hash)
 				releaseAssets = append(releaseAssets, relAsset)
 			}
 		}
