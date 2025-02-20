@@ -1,7 +1,3 @@
 {
-    "recommendations": [
-        "golang.go",
-        "esbenp.prettier-vscode",
-        "asciidoctor.asciidoctor-vscode"
-    ]
+  "recommendations": ["golang.go", "esbenp.prettier-vscode"]
 }

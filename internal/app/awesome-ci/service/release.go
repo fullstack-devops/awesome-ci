@@ -65,7 +65,7 @@ func ReleaseCreate(args *ReleaseArgs) {
 	}
 }
 
-func ReleasePublish(args *ReleaseArgs, releaseID int64, assets []string) {
+func ReleasePublish(args *ReleaseArgs, releaseID int64, assetsStr []string) {
 	scmLayer, err := scmportal.LoadSCMPortalLayer()
 	if err != nil {
 		log.Fatalln(err)
@@ -80,17 +80,17 @@ func ReleasePublish(args *ReleaseArgs, releaseID int64, assets []string) {
 		}
 	}
 
-	var assetsEncoded []uploadasset.UploadAsset
-	if len(assets) > 0 {
-		for _, asset := range assets {
-			assetInfo, err := uploadasset.GetAsset(asset)
+	var assets []uploadasset.UploadAsset
+	if len(assetsStr) > 0 {
+		for _, asset := range assetsStr {
+			newAsset, err := uploadasset.GetAsset(asset)
 			if err != nil {
 				log.Fatalln("not all specified assets available, please check", err)
 			}
-			assetsEncoded = append(assetsEncoded, *assetInfo)
+			assets = append(assets, newAsset)
 		}
 	}
-	log.Infof("will upload %d assets", len(assets))
+	log.Infof("will upload %d assets", len(assetsStr))
 
 	body, err := tools.ReadFileToString(args.Body)
 	if err != nil {
@@ -101,7 +101,7 @@ func ReleasePublish(args *ReleaseArgs, releaseID int64, assets []string) {
 		log.Infof("Would publishing release: %s", version)
 	} else {
 		log.Infof("Publishing release: %s - %d", version, releaseID)
-		_, err := scmLayer.PublishRelease(version, releasePrefix, args.ReleaseBranch, body, releaseID, assetsEncoded)
+		_, err := scmLayer.PublishRelease(version, releasePrefix, args.ReleaseBranch, body, releaseID, assets)
 		if err != nil {
 			log.Fatalln(err)
 		}

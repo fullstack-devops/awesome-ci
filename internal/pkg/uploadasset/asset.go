@@ -7,17 +7,17 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type UploadAsset struct {
-	File  os.File
-	Name  string
-	Infos fs.FileInfo
-	Hash  []byte
+	Name     string
+	ModTime  time.Time
+	FilePath string
+	Hash     []byte
 }
 
 // GetAsset takes a string as argument which must be in the format `<assetformat>=<filename>`.
@@ -34,18 +34,17 @@ type UploadAsset struct {
 //
 // An error will be returned if the asset format is not supported or if an
 // error occurs while creating the asset.
-func GetAsset(assetLocation string) (asset *UploadAsset, err error) {
+func GetAsset(assetLocation string) (asset UploadAsset, err error) {
 	assetName := strings.Split(assetLocation, "=")
 
 	switch assetName[0] {
-
 	case "file":
 		file, err := os.OpenFile(assetName[1], os.O_RDWR, 0644)
 		if err != nil {
-			return nil, err
+			return UploadAsset{}, err
 		}
 		if err := asset.New(assetName[1], file); err != nil {
-			return nil, err
+			return UploadAsset{}, err
 		}
 		return asset, nil
 	case "zip":
@@ -53,14 +52,14 @@ func GetAsset(assetLocation string) (asset *UploadAsset, err error) {
 	case "tgz":
 		return createTgzFile(assetName[1])
 	default:
-		return nil, fmt.Errorf("not an valid asset format")
+		return UploadAsset{}, fmt.Errorf("not an valid asset format")
 	}
 }
 
-func createZipFile(name string) (asset *UploadAsset, err error) {
-	tmpFile, err := os.CreateTemp("awesome-ci", "upload-asset-")
+func createZipFile(name string) (asset UploadAsset, err error) {
+	tmpFile, err := os.CreateTemp("awesome-ci", "upload-asset-*")
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 	defer tmpFile.Close()
 	zipWriter := zip.NewWriter(tmpFile)
@@ -88,24 +87,24 @@ func createZipFile(name string) (asset *UploadAsset, err error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 	err = zipWriter.Close()
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 
-	if err := asset.New(fmt.Sprintf("%s.zip", filepath.Base(name)), tmpFile); err != nil {
-		return nil, err
+	if err := asset.New(fmt.Sprintf("%s.zip", name), tmpFile); err != nil {
+		return UploadAsset{}, err
 	}
 
 	return
 }
 
-func createTgzFile(name string) (asset *UploadAsset, err error) {
-	tmpFile, err := os.CreateTemp("awesome-ci", "upload-asset-")
+func createTgzFile(name string) (asset UploadAsset, err error) {
+	tmpFile, err := os.CreateTemp("awesome-ci", "upload-asset-*")
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 	defer tmpFile.Close()
 	gzipWriter := gzip.NewWriter(tmpFile)
@@ -138,19 +137,19 @@ func createTgzFile(name string) (asset *UploadAsset, err error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 	err = tarWriter.Close()
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 	err = gzipWriter.Close()
 	if err != nil {
-		return nil, err
+		return UploadAsset{}, err
 	}
 
-	if err := asset.New(fmt.Sprintf("%s.tgz", filepath.Base(name)), tmpFile); err != nil {
-		return nil, err
+	if err := asset.New(fmt.Sprintf("%s.tgz", name), tmpFile); err != nil {
+		return UploadAsset{}, err
 	}
 
 	return
@@ -169,9 +168,9 @@ func (ua *UploadAsset) New(name string, file *os.File) (err error) {
 	}
 
 	// set values
-	ua.Name = name
-	ua.File = *file
-	ua.Infos = info
+	ua.Name = info.Name()
+	ua.FilePath = name
+	ua.ModTime = info.ModTime()
 	ua.Hash = h.Sum(nil)
 	return nil
 }
