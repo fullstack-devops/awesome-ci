@@ -36,6 +36,45 @@ var createCmd = &cobra.Command{
 var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish a recently created GitHub release",
+	Long: `Publish a recently created GitHub release
+
+Publish will publish a previously created release to GitHub. The release body
+can be written in markdown and will be rendered as such on GitHub. Additionally,
+any number of assets can be uploaded, including but not limited to zip and tgz
+files. The assets will be uploaded to GitHub and linked to the release.
+
+The assets can be specified as a list of local file paths.
+
+The zip and tgz mechanisms can be used by specifying the path to a directory
+containing the files to be uploaded. The directory will be zipped or tarred and
+gzipped and uploaded to GitHub as a single asset. The name of the asset will be
+the name of the directory with the appropriate extension appended. For example,
+if the directory is named "myfiles", the asset will be named "myfiles.zip" or "myfiles.tgz".
+
+Example of using the release publish command
+
+To publish a release with a specific release ID and assets, use the following command:
+
+    awesome-ci release publish --release-id 12345 \
+        --asset "file=out/awesome-ci_v1.0.0_amd64" \
+        --asset "file=out/awesome-ci_v1.0.0_arm64"
+	awesome-ci release publish --release-id 12345 --asset "file=out/awesome-ci_v1.0.0_amd64" --asset "file=out/awesome-ci_v1.0.0_arm64"
+
+If the release ID is not provided, the command will look for the 'ACI_RELEASE_ID' environment variable:
+
+    export ACI_RELEASE_ID=12345
+    awesome-ci release publish \
+        --asset "file=out/awesome-ci_v1.0.0_amd64" \
+        --asset "file=out/awesome-ci_v1.0.0_arm64"
+	export ACI_RELEASE_ID=12345
+	awesome-ci release publish --asset "file=out/awesome-ci_v1.0.0_amd64" --asset "file=out/awesome-ci_v1.0.0_arm64"
+
+You can also publish a release with a directory as a zip asset:
+
+    awesome-ci release publish --release-id 12345 \
+        --asset "zip=out/myfiles"
+
+The assets should be specified as local file paths to be uploaded to the GitHub release.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if releaseID == 0 {
@@ -48,6 +87,8 @@ var publishCmd = &cobra.Command{
 				} else {
 					releaseID = releaseIDTmp
 				}
+			} else {
+				log.Fatalln("no release ID provided")
 			}
 		}
 
@@ -73,5 +114,5 @@ func init() {
 
 	// exclusive Flags
 	publishCmd.Flags().Int64VarP(&releaseID, "release-id", "", 0, "publish an early defined release (also looking for env ACI_RELEASE_ID)")
-	publishCmd.Flags().StringArrayVarP(&assets, "asset", "a", []string{}, "define output by get")
+	publishCmd.Flags().StringArrayVarP(&assets, "asset", "a", []string{}, "add an asset to the release, can be specified multiple times.")
 }
