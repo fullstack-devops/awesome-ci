@@ -7,7 +7,7 @@ import (
 
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v70/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )

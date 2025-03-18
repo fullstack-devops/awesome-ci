@@ -8,7 +8,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
 	"github.com/sirupsen/logrus"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v70/github"
 )
 
 var (

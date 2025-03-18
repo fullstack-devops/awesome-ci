@@ -10,7 +10,7 @@ import (
 	"github.com/fullstack-devops/awesome-ci/internal/pkg/uploadasset"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v70/github"
 	"github.com/sirupsen/logrus"
 )
 
