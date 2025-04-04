@@ -2,11 +2,13 @@ PROJECT_PKG = github.com/fullstack-devops/awesome-ci
 PKG_LIST = "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
 BUILD_DIR = ./build
 
+LIST_TARGET_ARCH ?= linux/amd64 linux/arm64 windows/amd64 windows/arm64 darwin/amd64 darwin/arm64
+LIST_TARGET_ARCH_COMP ?= linux/amd64 linux/arm64 windows/amd64
+
 LATEST_VERSION ?= "1.0.0"
 VERSION ?=$(shell git describe --tags --exact-match 2>/dev/null || echo "dev-pr")
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date +%FT%T%z)
-
 
 # remove debug info from the binary & make it smaller
 LDFLAGS += -s -w
@@ -58,18 +60,34 @@ test/cover:
 ## build: build the application
 .PHONY: build
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_linux-amd64 ./cmd/awesome-ci
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_linux-arm64 ./cmd/awesome-ci
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_windows-amd64.exe ./cmd/awesome-ci
-	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_windows-arm64.exe ./cmd/awesome-ci
+	@echo "[" > ${BUILD_DIR}/package/manifest.json
+	@for TARGET in ${LIST_TARGET_ARCH}; do \
+		GOOS=$$(echo $$TARGET | cut -d'/' -f1); \
+		GOARCH=$$(echo $$TARGET | cut -d'/' -f2); \
+		EXT=""; \
+		if [ "$$GOOS" = "windows" ]; then EXT=".exe"; fi; \
+		echo "Building for GOOS=$$GOOS GOARCH=$$GOARCH"; \
+		FILENAME="awesome-ci_${VERSION}_$$GOOS-$$GOARCH$$EXT"; \
+		CGO_ENABLED=0 GOOS=$$GOOS GOARCH=$$GOARCH go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/$$FILENAME ./cmd/awesome-ci; \
+		if [ "$$TARGET" = "$$(echo ${LIST_TARGET_ARCH} | awk '{print $$NF}')" ]; then \
+			echo "{\"filename\":\"$$FILENAME\", \"path\":\"${BUILD_DIR}/package/$$FILENAME\",\"goos\":\"$$GOOS\",\"goarch\":\"$$GOARCH\"}" >> ${BUILD_DIR}/package/manifest.json; \
+		else \
+			echo "{\"filename\":\"$$FILENAME\", \"path\":\"${BUILD_DIR}/package/$$FILENAME\",\"goos\":\"$$GOOS\",\"goarch\":\"$$GOARCH\"}," >> ${BUILD_DIR}/package/manifest.json; \
+		fi; \
+	done
+	@echo "]" >> ${BUILD_DIR}/package/manifest.json
 
 ## upx: compress binaries
 .PHONY: upx
 upx:
-	upx -5 ./build/package/awesome-ci_${VERSION}_linux-amd64
-	upx -5 ./build/package/awesome-ci_${VERSION}_linux-arm64
-	upx -5 ./build/package/awesome-ci_${VERSION}_windows-amd64.exe
-# upx --best ./build/package/awesome-ci_${VERSION}_windows-arm64.exe
+	@for TARGET in ${LIST_TARGET_ARCH_COMP}; do \
+		GOOS=$$(echo $$TARGET | cut -d'/' -f1); \
+		GOARCH=$$(echo $$TARGET | cut -d'/' -f2); \
+		EXT=""; \
+		if [ "$$GOOS" = "windows" ]; then EXT=".exe"; fi; \
+		echo "Compressing binary for GOOS=$$GOOS GOARCH=$$GOARCH"; \
+		upx -5 ./build/package/awesome-ci_${VERSION}_$$GOOS-$$GOARCH$$EXT; \
+	done
 
 chglog:
 	go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest

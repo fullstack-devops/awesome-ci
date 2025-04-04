@@ -51,6 +51,12 @@ jobs:
         env:
           VERSION: "${{ needs.generate-infos.outputs.version }}"
 
+      - name: extracht manifest infos
+        id: manifest-infos
+        run: |
+          echo "filenames=$(cat ./build/package/manifest.json| jq -c '[.[].filename]')" >> "$GITHUB_OUTPUT"
+          echo "paths=$(cat ./build/package/manifest.json| jq -c '[.[].path]')" >> "$GITHUB_OUTPUT"
+
       - name: Setup UPX
         uses: crazy-max/ghaction-upx@v3
         with:
@@ -61,11 +67,11 @@ jobs:
           VERSION: "${{ needs.generate-infos.outputs.version }}"
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@BToersche:upload-multiple-artifacts
         with:
-          name: awesome-ci-binaries
-          path: |
-            build/package/awesome-ci_*
+          name: ${{ steps.manifest-infos.outputs.filenames }}
+          path: ${{ steps.manifest-infos.outputs.paths }}
+          compression-level: 0
 
       - name: (integration testing) test build Infos
         run: build/package/awesome-ci_${{ needs.generate-infos.outputs.version }}_linux-amd64 pr info -n ${{ github.event.pull_request.number }} -v > $GITHUB_STEP_SUMMARY
