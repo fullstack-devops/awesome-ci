@@ -2,7 +2,7 @@ style: github
 template: CHANGELOG.tpl.md
 info:
   title: CHANGELOG
-  repository_url: https://github.com/fullstack-devops/awesome-ci
+  repository_url: https://github.com/layer87-labs/relctl
 options:
   sort: "semver"
 

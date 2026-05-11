@@ -3,7 +3,7 @@ package semver_test
 import (
 	"testing"
 
-	"github.com/fullstack-devops/awesome-ci/internal/pkg/semver"
+	"github.com/layer87-labs/relctl/internal/pkg/semver"
 	"github.com/stretchr/testify/require"
 )
 

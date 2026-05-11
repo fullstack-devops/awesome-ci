@@ -30,8 +30,6 @@ var (
 // - incresedVersion: the increased version string.
 // - err: an error if the patch level is invalid or if there is an error increasing the version.
 func IncreaseVersion(patchLevel PatchLevel, version string) (incresedVersion string, err error) {
-	incresedVersion = version
-
 	semVer, err := semver.NewVersion(version)
 	if err != nil {
 		return "", err
@@ -51,8 +49,6 @@ func IncreaseVersion(patchLevel PatchLevel, version string) (incresedVersion str
 }
 
 func ParsePatchLevelFormBranch(branchName string) (patchLevel PatchLevel, err error) {
-	patchLevel = "bugfix" // default patch level
-
 	if strings.Index(branchName, "/") > 0 {
 		return ParsePatchLevel(branchName[:strings.Index(branchName, "/")])
 	} else {

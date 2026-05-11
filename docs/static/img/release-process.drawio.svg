@@ -321,13 +321,13 @@
                                 <b>
                                     *
                                 </b>
-                                continuous integration which is extended by the tool awesome-ci
+                                continuous integration which is extended by the tool relctl
                             </div>
                         </div>
                     </div>
                 </foreignObject>
                 <text x="216" y="564" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
-                    *continuous integration which is extended by the tool awesome-ci
+                    *continuous integration which is extended by the tool relctl
                 </text>
             </switch>
         </g>

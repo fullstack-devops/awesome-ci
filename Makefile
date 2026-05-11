@@ -1,5 +1,5 @@
-PROJECT_PKG = github.com/fullstack-devops/awesome-ci
-PKG_LIST = "github.com/fullstack-devops/awesome-ci/cmd/awesome-ci"
+PROJECT_PKG = github.com/layer87-labs/relctl
+PKG_LIST = "github.com/layer87-labs/relctl/cmd/relctl"
 BUILD_DIR = ./build
 
 LATEST_VERSION ?= "1.0.0"
@@ -33,6 +33,7 @@ audit:
 	go vet ./...
 	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run ./...
 	go test -race -buildvcs -vet=off ./...
 
 # ==================================================================================== #
@@ -55,21 +56,36 @@ test/cover:
 	go test -v -race -buildvcs -coverprofile=${BUILD_DIR}/coverage/coverage.out ./...
 	go tool cover -html=${BUILD_DIR}/coverage/coverage.out -o ${BUILD_DIR}/coverage/coverage.html
 
+## ci/build: cross-compile check for CI matrix (reads GOOS, GOARCH from env)
+.PHONY: ci/build
+ci/build:
+	CGO_ENABLED=0 go build -ldflags "-s -w" -o /dev/null ./cmd/relctl
+
+## build/single: build a single release binary (reads GOOS, GOARCH, VERSION, COMMIT_HASH, BUILD_DATE from env; pass SUFFIX and EXT as args)
+SUFFIX ?=
+EXT ?=
+.PHONY: build/single
+build/single:
+	mkdir -p $(BUILD_DIR)/package
+	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" \
+	  -o "$(BUILD_DIR)/package/relctl_$(VERSION)_$(SUFFIX)$(EXT)" \
+	  ./cmd/relctl
+
 ## build: build the application
 .PHONY: build
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_linux-amd64 ./cmd/awesome-ci
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_linux-arm64 ./cmd/awesome-ci
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_windows-amd64.exe ./cmd/awesome-ci
-	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/awesome-ci_${VERSION}_windows-arm64.exe ./cmd/awesome-ci
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/relctl_${VERSION}_linux-amd64 ./cmd/relctl
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/relctl_${VERSION}_linux-arm64 ./cmd/relctl
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/relctl_${VERSION}_windows-amd64.exe ./cmd/relctl
+	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/package/relctl_${VERSION}_windows-arm64.exe ./cmd/relctl
 
 ## upx: compress binaries
 .PHONY: upx
 upx:
-	upx -5 ./build/package/awesome-ci_${VERSION}_linux-amd64
-	upx -5 ./build/package/awesome-ci_${VERSION}_linux-arm64
-	upx -5 ./build/package/awesome-ci_${VERSION}_windows-amd64.exe
-# upx --best ./build/package/awesome-ci_${VERSION}_windows-arm64.exe
+	upx -5 ./build/package/relctl_${VERSION}_linux-amd64
+	upx -5 ./build/package/relctl_${VERSION}_linux-arm64
+	upx -5 ./build/package/relctl_${VERSION}_windows-amd64.exe
+# upx --best ./build/package/relctl_${VERSION}_windows-arm64.exe
 
 chglog:
 	go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest

@@ -7,7 +7,7 @@ Manage GitHub pull requests
 The pull request command is used to manage GitHub pull requests. It provides subcommands to get pull request info, allowing you to get all infos about a pull request in GitHub.
 
 ```
-awesome-ci pr [flags]
+relctl pr [flags]
 ```
 
 ## Options
@@ -24,7 +24,7 @@ awesome-ci pr [flags]
 
 ## SEE ALSO
 
-* **awesome-ci**	 - Awesome CI make your release tagging easy
-* **awesome-ci pr info**	 - Get pull request info
+* **relctl**	 - relctl make your release tagging easy
+* **relctl pr info**	 - Get pull request info
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

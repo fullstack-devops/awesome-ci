@@ -7,7 +7,7 @@ Manage GitHub releases with ease
 The release command is used to manage GitHub releases. It provides subcommands to create and publish releases, allowing you to automate the release process and integrate it into CI/CD workflows. Use this command to streamline the release tagging and deployment of your software projects.
 
 ```
-awesome-ci release [flags]
+relctl release [flags]
 ```
 
 ## Options
@@ -33,8 +33,8 @@ awesome-ci release [flags]
 
 ## SEE ALSO
 
-* **awesome-ci**	 - Awesome CI make your release tagging easy
-* **awesome-ci release create**	 - Create a new GitHub release
-* **awesome-ci release publish**	 - Publish a recently created GitHub release
+* **relctl**	 - relctl make your release tagging easy
+* **relctl release create**	 - Create a new GitHub release
+* **relctl release publish**	 - Publish a recently created GitHub release
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

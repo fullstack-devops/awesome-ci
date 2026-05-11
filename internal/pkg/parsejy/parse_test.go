@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/fullstack-devops/awesome-ci/internal/pkg/parsejy"
+	"github.com/layer87-labs/relctl/internal/pkg/parsejy"
 )
 
 func TestParse(t *testing.T) {

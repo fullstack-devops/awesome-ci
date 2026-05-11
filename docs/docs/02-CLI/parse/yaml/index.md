@@ -3,7 +3,7 @@
 parse a yaml string or file
 
 ```
-awesome-ci parse yaml [flags]
+relctl parse yaml [flags]
 ```
 
 ## Options
@@ -23,6 +23,6 @@ awesome-ci parse yaml [flags]
 
 ## SEE ALSO
 
-* **awesome-ci parse**	 - inspect and parse JSON and YAML files to retrieve values, similar to jq with additional features
+* **relctl parse**	 - inspect and parse JSON and YAML files to retrieve values, similar to jq with additional features
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

@@ -23,29 +23,29 @@ Example of using the release publish command
 
 To publish a release with a specific release ID and assets, use the following command:
 
-    awesome-ci release publish --release-id 12345 \
-        --asset "file=out/awesome-ci_v1.0.0_amd64" \
-        --asset "file=out/awesome-ci_v1.0.0_arm64"
-	awesome-ci release publish --release-id 12345 --asset "file=out/awesome-ci_v1.0.0_amd64" --asset "file=out/awesome-ci_v1.0.0_arm64"
+    relctl release publish --release-id 12345 \
+        --asset "file=out/relctl_v1.0.0_amd64" \
+        --asset "file=out/relctl_v1.0.0_arm64"
+	relctl release publish --release-id 12345 --asset "file=out/relctl_v1.0.0_amd64" --asset "file=out/relctl_v1.0.0_arm64"
 
-If the release ID is not provided, the command will look for the 'ACI_RELEASE_ID' environment variable:
+If the release ID is not provided, the command will look for the 'RELCTL_RELEASE_ID' environment variable:
 
-    export ACI_RELEASE_ID=12345
-    awesome-ci release publish \
-        --asset "file=out/awesome-ci_v1.0.0_amd64" \
-        --asset "file=out/awesome-ci_v1.0.0_arm64"
-	export ACI_RELEASE_ID=12345
-	awesome-ci release publish --asset "file=out/awesome-ci_v1.0.0_amd64" --asset "file=out/awesome-ci_v1.0.0_arm64"
+    export RELCTL_RELEASE_ID=12345
+    relctl release publish \
+        --asset "file=out/relctl_v1.0.0_amd64" \
+        --asset "file=out/relctl_v1.0.0_arm64"
+	export RELCTL_RELEASE_ID=12345
+	relctl release publish --asset "file=out/relctl_v1.0.0_amd64" --asset "file=out/relctl_v1.0.0_arm64"
 
 You can also publish a release with a directory as a zip asset:
 
-    awesome-ci release publish --release-id 12345 \
+    relctl release publish --release-id 12345 \
         --asset "zip=out/myfiles"
 
 The assets should be specified as local file paths to be uploaded to the GitHub release.
 
 ```
-awesome-ci release publish [flags]
+relctl release publish [flags]
 ```
 
 ## Options
@@ -53,7 +53,7 @@ awesome-ci release publish [flags]
 ```
   -a, --asset stringArray   add an asset to the release, can be specified multiple times.
   -h, --help                help for publish
-      --release-id int      publish an early defined release (also looking for env ACI_RELEASE_ID)
+      --release-id int      publish an early defined release (also looking for env RELCTL_RELEASE_ID)
 ```
 
 ## Options inherited from parent commands
@@ -73,6 +73,6 @@ awesome-ci release publish [flags]
 
 ## SEE ALSO
 
-* **awesome-ci release**	 - Manage GitHub releases with ease
+* **relctl release**	 - Manage GitHub releases with ease
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

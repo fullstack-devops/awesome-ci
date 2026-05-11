@@ -3,7 +3,7 @@
 Get pull request info
 
 ```
-awesome-ci pr info [flags]
+relctl pr info [flags]
 ```
 
 ## Options
@@ -22,6 +22,6 @@ awesome-ci pr info [flags]
 
 ## SEE ALSO
 
-* **awesome-ci pr**	 - Manage GitHub pull requests
+* **relctl pr**	 - Manage GitHub pull requests
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

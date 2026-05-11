@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
+	"github.com/layer87-labs/relctl/internal/pkg/tools"
 )
 
 func checkGitIgnore() (err error) {

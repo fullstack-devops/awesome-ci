@@ -3,13 +3,13 @@
 group string array by prefix to json
 
 ```
-awesome-ci transform group-by [flags]
+relctl transform group-by [flags]
 ```
 
 ## Examples
 
 ```
-awesome-ci tf group-by -p 3 --sub-prefix 4 st1_infrastructure-base  st2_ubi9-openjdk-11  st2_ubi9-openjdk-17 
+relctl tf group-by -p 3 --sub-prefix 4 st1_infrastructure-base  st2_ubi9-openjdk-11  st2_ubi9-openjdk-17 
    produces: {"st1":["infrastructure-base"],"st2":["ubi9-openjdk-11","ubi9-openjdk-17"]}
 ```
 
@@ -29,6 +29,6 @@ awesome-ci tf group-by -p 3 --sub-prefix 4 st1_infrastructure-base  st2_ubi9-ope
 
 ## SEE ALSO
 
-* **awesome-ci transform**	 - transform given input to json
+* **relctl transform**	 - transform given input to json
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Build – multi-arch compile check
+  # ──────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    needs: [generate-infos]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: make ci/build
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Audit (vet, staticcheck, govulncheck, lint, tests)
+  # ──────────────────────────────────────────────────────────────────────────────
+  audit:
+    name: Audit
+    runs-on: ubuntu-latest
+    needs: [generate-infos]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run audit
+        run: make audit
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: build/coverage/coverage.html
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Generate Build Infos – runs first, all other jobs depend on this
+  # TODO: switch to layer87-labs/relctl-action + relctl once stable
+  # ──────────────────────────────────────────────────────────────────────────────
+  generate-infos:
+    name: Generate Build Infos
+    runs-on: ubuntu-latest
+    outputs:
+      pr: ${{ steps.tag.outputs.ACI_PR }}
+      sha: ${{ steps.tag.outputs.ACI_PR_SHA }}
+      sha-short: ${{ steps.tag.outputs.ACI_PR_SHA_SHORT }}
+      owner: ${{ steps.tag.outputs.ACI_OWNER }}
+      repo: ${{ steps.tag.outputs.ACI_REPO }}
+      version: ${{ steps.tag.outputs.ACI_LATEST_VERSION }}-pr-${{ steps.tag.outputs.ACI_PR }}
+      latest-version: ${{ steps.tag.outputs.ACI_LATEST_VERSION }}
+      next-version: ${{ steps.tag.outputs.ACI_NEXT_VERSION }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup awesome-ci
+        if: github.event_name == 'pull_request'
+        uses: fullstack-devops/awesome-ci-action@main
+
+      - name: Collect PR infos
+        id: tag
+        if: github.event_name == 'pull_request'
+        run: awesome-ci pr info -n ${{ github.event.pull_request.number }} > "$GITHUB_STEP_SUMMARY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # CodeQL – static security analysis
+  # ──────────────────────────────────────────────────────────────────────────────
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    needs: [generate-infos]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trivy – filesystem vulnerability scan
+  # ──────────────────────────────────────────────────────────────────────────────
+  trivy:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    needs: [generate-infos]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+
+      - name: Upload Trivy SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Dependency Review – only on PRs
+  # ──────────────────────────────────────────────────────────────────────────────
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    needs: [generate-infos]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v5

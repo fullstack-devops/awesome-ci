@@ -14,7 +14,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/pablo-arroyo-_SEbdtH4ZLM-unsplash.svg').default,
     description: (
       <>
-        Awesome-CI was designed from the ground up to be easily installed and
+        relctl was designed from the ground up to be easily installed and
         used to get your versioning up and running quickly.
       </>
     ),

@@ -3,7 +3,7 @@
 Create a new GitHub release
 
 ```
-awesome-ci release create [flags]
+relctl release create [flags]
 ```
 
 ## Options
@@ -29,6 +29,6 @@ awesome-ci release create [flags]
 
 ## SEE ALSO
 
-* **awesome-ci release**	 - Manage GitHub releases with ease
+* **relctl release**	 - Manage GitHub releases with ease
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

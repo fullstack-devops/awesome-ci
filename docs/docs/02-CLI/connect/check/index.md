@@ -3,7 +3,7 @@
 verify current connection is working
 
 ```
-awesome-ci connect check [flags]
+relctl connect check [flags]
 ```
 
 ## Options
@@ -20,6 +20,6 @@ awesome-ci connect check [flags]
 
 ## SEE ALSO
 
-* **awesome-ci connect**	 - Create an encrypted .rc file to persistently connect to GitHub or GitHub Enterprise
+* **relctl connect**	 - Create an encrypted .rc file to persistently connect to GitHub or GitHub Enterprise
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

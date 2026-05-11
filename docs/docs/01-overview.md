@@ -2,7 +2,7 @@
 title: Overview
 ---
 
-# Welcome to the Awesome CI!
+# Welcome to the relctl!
 
 This project is the smart connection between your pipeline for continuous integration and your version management like GitHub. The focus is on the release process, followed by the version management of SemVer. The required version number is created with the correct naming of the branch prefix.
 
@@ -14,7 +14,7 @@ If you have any questions, you can find a form on the issue board. First, make s
 
 :::info
 
-Every command that you can use is in the sidebar at cli. All options are listed there or use the `awesome-ci help` command.
+Every command that you can use is in the sidebar at cli. All options are listed there or use the `relctl help` command.
 
 :::
 :::tip
@@ -41,8 +41,8 @@ The tailing `/` behind the alias is **always** requiered!
 see also [override specialties](#override-specialties)
 :::
 
-![awesome-ci release process](/img/release-process.drawio.svg "awesome-ci release process")
-![awesome-ci workflow](/img/aci-workflow.drawio.png "awesome-ci workflow")
+![relctl release process](/img/release-process.drawio.svg "relctl release process")
+![relctl workflow](/img/aci-workflow.drawio.png "relctl workflow")
 
 :::tip
 Awesoce CI automatically detects your environment. Supported are **Jenkins Pipelines** and **GitHub Actions**
@@ -52,10 +52,10 @@ Awesoce CI automatically detects your environment. Supported are **Jenkins Pipel
 
 To set some attributes during developement you can comment a pullrequest.
 
-| command                       | description                                                   |
-| ----------------------------- | ------------------------------------------------------------- |
-| `aci_patch_level: major`      | create a major version bump                                   |
-| `aci_version_override: 2.1.0` | set the version to 2.1.0 using only semver compatible syntax! |
+| command                          | description                                                   |
+| -------------------------------- | ------------------------------------------------------------- |
+| `relctl_patch_level: major`      | create a major version bump                                   |
+| `relctl_version_override: 2.1.0` | set the version to 2.1.0 using only semver compatible syntax! |
 
 ## Requiered and optional environment variables
 

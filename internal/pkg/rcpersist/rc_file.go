@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fullstack-devops/awesome-ci/internal/pkg/tools"
+	"github.com/layer87-labs/relctl/internal/pkg/tools"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -91,7 +91,7 @@ func (rc *RcFile) UpdateCreds(server string, repo string, token string) error {
 
 func (rc *RcFile) Save() (err error) {
 	rc.ConnectCreds.TokenPlain = nil
-	os.Truncate(rcFileName, 0)
+	_ = os.Truncate(rcFileName, 0)
 
 	yamlData, err := yaml.Marshal(rc)
 	if err != nil {

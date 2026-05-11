@@ -1,0 +1,212 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]*"
+
+permissions:
+  contents: write # create GitHub releases & upload assets
+  id-token: write # cosign keyless OIDC signing
+  packages: write # future: container registry (placeholder)
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Create Release – runs first, all other jobs depend on this
+  # TODO: switch to layer87-labs/relctl-action + relctl once stable
+  # ──────────────────────────────────────────────────────────────────────────────
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.ACI_NEXT_VERSION }}
+      release-id: ${{ steps.tag.outputs.ACI_RELEASE_ID }}
+      sha: ${{ steps.tag.outputs.ACI_PR_SHA }}
+      sha-short: ${{ steps.tag.outputs.ACI_PR_SHA_SHORT }}
+      owner: ${{ steps.tag.outputs.ACI_OWNER }}
+      repo: ${{ steps.tag.outputs.ACI_REPO }}
+      latest-version: ${{ steps.tag.outputs.ACI_LATEST_VERSION }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action@main
+
+      - name: Create Release
+        id: tag
+        run: |
+          awesome-ci release create \
+            --version "${GITHUB_REF_NAME}" \
+            --body "scripts/release-template.md" \
+            > "$GITHUB_STEP_SUMMARY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Phase A – Build, sign, SBOM
+  # ──────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build & Sign (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    needs: [create-release]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: linux-amd64
+          - goos: linux
+            goarch: arm64
+            suffix: linux-arm64
+          - goos: darwin
+            goarch: amd64
+            suffix: darwin-amd64
+          - goos: darwin
+            goarch: arm64
+            suffix: darwin-arm64
+          - goos: windows
+            goarch: amd64
+            suffix: windows-amd64
+            ext: .exe
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+          COMMIT_HASH: ${{ github.sha }}
+          BUILD_DATE: ${{ github.event.head_commit.timestamp }}
+        run: make build/single SUFFIX=${{ matrix.suffix }} EXT=${{ matrix.ext }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v4
+
+      - name: Sign binary (keyless via OIDC)
+        run: |
+          VERSION=${{ needs.create-release.outputs.version }}
+          BINARY="build/package/relctl_${VERSION}_${{ matrix.suffix }}${{ matrix.ext }}"
+          cosign sign-blob \
+            --yes \
+            --output-signature "${BINARY}.sig" \
+            --output-certificate "${BINARY}.pem" \
+            "${BINARY}"
+
+      - name: Install syft (SBOM generator)
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate SBOM (SPDX)
+        run: |
+          VERSION=${{ needs.create-release.outputs.version }}
+          BINARY="build/package/relctl_${VERSION}_${{ matrix.suffix }}${{ matrix.ext }}"
+          syft "${BINARY}" \
+            -o spdx-json \
+            --file "build/package/relctl_${VERSION}_${{ matrix.suffix }}.sbom.spdx.json"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: relctl-${{ matrix.suffix }}
+          path: build/package/
+          retention-days: 1
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Phase A (continued) – Checksums
+  # ──────────────────────────────────────────────────────────────────────────────
+  checksums:
+    name: Generate Checksums
+    runs-on: ubuntu-latest
+    needs: [create-release, build]
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: relctl-*
+          path: dist/
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd dist
+          sha256sum relctl_* > sha256sum.txt
+          cat sha256sum.txt
+
+      - name: Upload checksum artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: relctl-checksums
+          path: dist/sha256sum.txt
+          retention-days: 1
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Phase B – Publish Release
+  # ──────────────────────────────────────────────────────────────────────────────
+  publish-release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs: [create-release, build, checksums]
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: relctl-*
+          path: dist/
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -lh dist/
+
+      # TODO: switch to layer87-labs/relctl-action + relctl once stable
+      - name: Setup awesome-ci
+        uses: fullstack-devops/awesome-ci-action@main
+
+      - name: Publish Release assets
+        run: |
+          ASSETS=()
+          while IFS= read -r f; do
+            ASSETS+=("--asset" "file=${f}")
+          done < <(find dist/ -type f | sort)
+          awesome-ci release publish \
+            --release-id "${{ needs.create-release.outputs.release-id }}" \
+            "${ASSETS[@]}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Phase C – Post-Release (placeholders, not yet active)
+  # ──────────────────────────────────────────────────────────────────────────────
+
+  # TODO: Homebrew Formula Update
+  # homebrew-update:
+  #   name: Update Homebrew Formula
+  #   runs-on: ubuntu-latest
+  #   needs: release
+  #   steps:
+  #     - name: Bump formula
+  #       # TODO: use peter-evans/create-pull-request or a tap-bump action
+  #       run: echo "Homebrew formula update not yet implemented"
+
+  # TODO: Docker Hub Push
+  # docker-publish:
+  #   name: Push Docker Image
+  #   runs-on: ubuntu-latest
+  #   needs: release
+  #   steps:
+  #     - name: Build and push
+  #       # TODO: use docker/build-push-action
+  #       run: echo "Docker image push not yet implemented"

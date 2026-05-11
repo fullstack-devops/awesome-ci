@@ -10,7 +10,7 @@ soon you can also connect to GitLab (not yet implemented)
 useful without a runner or in an jenkins pipeline
 
 ```
-awesome-ci connect [flags]
+relctl connect [flags]
 ```
 
 ## Options
@@ -27,9 +27,9 @@ awesome-ci connect [flags]
 
 ## SEE ALSO
 
-* **awesome-ci**	 - Awesome CI make your release tagging easy
-* **awesome-ci connect check**	 - verify current connection is working
-* **awesome-ci connect github**	 - connect initial to a GitHub or GitHub Enterprise
-* **awesome-ci connect remove**	 - remove all persisted connection files and secrets
+* **relctl**	 - relctl make your release tagging easy
+* **relctl connect check**	 - verify current connection is working
+* **relctl connect github**	 - connect initial to a GitHub or GitHub Enterprise
+* **relctl connect remove**	 - remove all persisted connection files and secrets
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

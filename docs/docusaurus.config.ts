@@ -9,10 +9,10 @@ const config: Config = {
   },
   tagline: "Fullstack applications and DevOps solutions",
   favicon: "https://avatars.githubusercontent.com/u/97617148?s=200&v=4",
-  url: "https://fullstack-devops.github.io",
-  baseUrl: "/awesome-ci",
-  organizationName: "fullstack-devops",
-  projectName: "awesome-ci",
+  url: "https://layer87-labs.github.io",
+  baseUrl: "/relctl",
+  organizationName: "layer87-labs",
+  projectName: "relctl",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   i18n: {
@@ -26,7 +26,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: "https://github.com/fullstack-devops/awesome-ci/tree/main/",
+          editUrl: "https://github.com/layer87-labs/relctl/tree/main/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -38,12 +38,12 @@ const config: Config = {
   plugins: [require.resolve("docusaurus-lunr-search")],
 
   themeConfig: {
-    image: "https://fullstack-devops.github.io/img/full-logo.png",
+    image: "https://layer87-labs.github.io/img/full-logo.png",
     navbar: {
       title: "Awesome CI",
       logo: {
         alt: "Awesome CI Logo",
-        src: "https://fullstack-devops.github.io/img/logo.png",
+        src: "https://layer87-labs.github.io/img/logo.png",
       },
       items: [
         {
@@ -57,7 +57,7 @@ const config: Config = {
           position: "right",
         },
         {
-          href: "https://github.com/fullstack-devops/awesome-ci",
+          href: "https://github.com/layer87-labs/relctl",
           label: "GitHub",
           position: "right",
         },
@@ -89,7 +89,7 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/fullstack-devops/awesome-ci",
+              href: "https://github.com/layer87-labs/relctl",
             },
           ],
         },

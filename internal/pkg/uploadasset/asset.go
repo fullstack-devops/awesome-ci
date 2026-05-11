@@ -57,7 +57,7 @@ func GetAsset(assetLocation string) (asset UploadAsset, err error) {
 }
 
 func createZipFile(name string) (asset UploadAsset, err error) {
-	tmpFile, err := os.CreateTemp("awesome-ci", "upload-asset-*")
+	tmpFile, err := os.CreateTemp("relctl", "upload-asset-*")
 	if err != nil {
 		return UploadAsset{}, err
 	}
@@ -102,7 +102,7 @@ func createZipFile(name string) (asset UploadAsset, err error) {
 }
 
 func createTgzFile(name string) (asset UploadAsset, err error) {
-	tmpFile, err := os.CreateTemp("awesome-ci", "upload-asset-*")
+	tmpFile, err := os.CreateTemp("relctl", "upload-asset-*")
 	if err != nil {
 		return UploadAsset{}, err
 	}

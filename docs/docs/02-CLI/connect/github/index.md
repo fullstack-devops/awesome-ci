@@ -3,7 +3,7 @@
 connect initial to a GitHub or GitHub Enterprise
 
 ```
-awesome-ci connect github [flags]
+relctl connect github [flags]
 ```
 
 ## Options
@@ -23,6 +23,6 @@ awesome-ci connect github [flags]
 
 ## SEE ALSO
 
-* **awesome-ci connect**	 - Create an encrypted .rc file to persistently connect to GitHub or GitHub Enterprise
+* **relctl connect**	 - Create an encrypted .rc file to persistently connect to GitHub or GitHub Enterprise
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

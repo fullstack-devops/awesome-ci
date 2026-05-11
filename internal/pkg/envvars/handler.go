@@ -36,7 +36,7 @@ func (envVars *EnvVariables) CloseEnvFile(file string) (err error) {
 
 	defer envFile.Close()
 
-	envFile.Truncate(0)
+	_ = envFile.Truncate(0)
 	wirteEnvs := ""
 	for _, env := range envVars.Envs {
 		wirteEnvs = wirteEnvs + fmt.Sprintf("%s\n", env.ToString())
@@ -50,17 +50,13 @@ func (envVars *EnvVariables) CloseEnvFile(file string) (err error) {
 }
 
 func (envVars *EnvVariables) Set(name string, value string) {
-	var envFound = false
 	for _, env := range envVars.Envs {
 		if *env.Name == name {
 			*env.Value = value
-			envFound = true
 			return
 		}
 	}
-	if !envFound {
-		envVars.Envs = append(envVars.Envs, EnvVariable{Name: &name, Value: &value})
-	}
+	envVars.Envs = append(envVars.Envs, EnvVariable{Name: &name, Value: &value})
 }
 
 func (envVars *EnvVariables) Get(name string) (envVariable *EnvVariable) {

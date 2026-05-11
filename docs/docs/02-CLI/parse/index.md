@@ -3,7 +3,7 @@
 inspect and parse JSON and YAML files to retrieve values, similar to jq with additional features
 
 ```
-awesome-ci parse [flags]
+relctl parse [flags]
 ```
 
 ## Options
@@ -20,9 +20,9 @@ awesome-ci parse [flags]
 
 ## SEE ALSO
 
-* **awesome-ci**	 - Awesome CI make your release tagging easy
-* **awesome-ci parse json**	 - parse a json string or file
-* **awesome-ci parse version**	 - Validate the given version string against semver syntax
-* **awesome-ci parse yaml**	 - parse a yaml string or file
+* **relctl**	 - relctl make your release tagging easy
+* **relctl parse json**	 - parse a json string or file
+* **relctl parse version**	 - Validate the given version string against semver syntax
+* **relctl parse yaml**	 - parse a yaml string or file
 
-##### Auto generated on 18-Mar-2025
+##### Auto generated on 11-May-2026

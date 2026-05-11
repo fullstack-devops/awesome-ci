@@ -54,7 +54,7 @@ func GetGitTagsUpToHead(gitRepo *git.Repository) (tags []*semver.Version, err er
 		Order: git.LogOrderCommitterTime,
 	})
 
-	tagIter.ForEach(func(r *object.Commit) error {
+	_ = tagIter.ForEach(func(r *object.Commit) error {
 
 		if tagNames, exists := commitToTag[r.Hash.String()]; exists {
 
@@ -83,7 +83,7 @@ func GetGitTagMaps(gitRepo *git.Repository) (commitToTagMap map[string][]string,
 		return nil, nil, err
 	}
 
-	tags.ForEach(func(r *plumbing.Reference) error {
+	_ = tags.ForEach(func(r *plumbing.Reference) error {
 
 		tagList, exists := commitToTagMap[r.Hash().String()]
 
